@@ -164,10 +164,10 @@ direct buffer: {"a":10,"d":10}
 spike: PASS (webaudio 9/10, direct 10/10; acoustic path NOT tested here)
 ```
 
-The standalone run minutes earlier scored WebAudio loopback 10/10 and direct
-10/10. The one miss in the suite run was attempt 2 (a timeout, not a wrong
-decode) while four other browser suites had just finished on the same
-machine; see section 6 for what that implies.
+Three runs on the same machine: standalone 10/10, then 9/10 and 8/10 when
+run last in the full suite (`npm test`). Every miss was a timeout, never a
+wrong decode, and direct buffer was 10/10 every time; see section 6 for what
+the misses under load imply.
 
 ### 2e. Repository committed — PASS
 
@@ -191,8 +191,8 @@ Proven in the browser (headless Chromium 156, Linux, AudioContext at 48 kHz):
 - WebAudio MediaStream loopback (waveform played through an
   `AudioBufferSourceNode` into a `MediaStreamDestination`, captured through a
   `MediaStreamSource` and the same `ScriptProcessorNode` pipeline the
-  microphone path uses, no microphone involved): 10/10 standalone, 9/10 under
-  full-suite load.
+  microphone path uses, no microphone involved): 10/10 standalone, 9/10 and
+  8/10 under full-suite load (timeouts, never a wrong decode).
 - `getUserMedia` with `echoCancellation`, `noiseSuppression` and
   `autoGainControl` all `false` is accepted and the track settings read back
   `false/false/false`.
@@ -280,9 +280,9 @@ node tools/serve.js 8080 --bind 0.0.0.0
    app CSP (still `'self'` only, nothing leaves the device) or rebuilds
    ggwave with `-sDYNAMIC_EXECUTION=0`. Not a Tuesday blocker, but it
    decides whether Tuesday's shell CSP stays as is.
-5. **ScriptProcessorNode is a main-thread risk.** The one missed loopback
-   under suite load points at the deprecated `ScriptProcessorNode` capture
-   path; an `AudioWorklet` (needs the decoder in the worklet or a ring buffer
+5. **ScriptProcessorNode is a main-thread risk.** The missed loopbacks
+   under suite load (10/10 → 9/10 → 8/10 as the machine got busier) point at
+   the deprecated `ScriptProcessorNode` capture path; an `AudioWorklet` (needs the decoder in the worklet or a ring buffer
    to the main thread) is the robust Wednesday choice. On phones the Salute
    animation and the chirp decoder will share the main thread.
 6. **BarcodeDetector is untested.** Headless Chromium lacks it, so only the
