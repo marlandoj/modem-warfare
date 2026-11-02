@@ -6,6 +6,7 @@ import {
   encodeFrame, decodeFrame, frameToText, textToFrame,
   base32Encode, base32Decode, crc8, packFleet, unpackFleet,
   cellLabel, parseCellLabel, FrameGate, FrameError, describeFrame,
+  normaliseWager, packWager, unpackWager, WAGER_MAX_CHARS, fleetIsValid,
 } from '../app/js/frame.js';
 
 const SESSION = 0xa1b2c3d4;
@@ -219,4 +220,54 @@ test('cell labels', () => {
   assert.equal(cellLabel(NO_CELL), '--');
   assert.equal(parseCellLabel('d5'), 3 + 4 * 7);
   assert.throws(() => parseCellLabel('H1'), (e) => e.code === 'BAD_CELL');
+});
+
+// ------------------------------------------------------------ Tuesday ---
+
+test('wager: 6-bit text round-trips, caps at 34 chars / 61 base32 chars (QR v3-M), odd chars become ?', () => {
+  const note = 'Loser does the dishes';
+  const text = frameToText({ type: TYPE.WAGER, session: SESSION, round: 0, wager: note });
+  const back = textToFrame(text);
+  assert.equal(back.typeName, 'WAGER');
+  assert.equal(back.wager, 'LOSER DOES THE DISHES');
+  assert.equal(describeFrame(back), 'WAGER s=a1b2c3d4 r=0 · wager "LOSER DOES THE DISHES"');
+  assert.equal(normaliseWager('  winner   picks\tdinner! $5 ok? '), 'WINNER PICKS DINNER! $5 OK?');
+  assert.equal(normaliseWager('café ~ ok'), 'CAF? ? OK');
+  assert.equal(unpackWager(packWager('')), '');
+  assert.equal(unpackWager(packWager('A')), 'A');
+  const max = 'X'.repeat(WAGER_MAX_CHARS);
+  assert.equal(WAGER_MAX_CHARS, 34);
+  const maxText = frameToText({ type: TYPE.WAGER, session: SESSION, round: 0, wager: max });
+  assert.equal(maxText.length, 61, 'longest wager frame is exactly the v3-M alphanumeric capacity');
+  assert.equal(textToFrame(maxText).wager, max);
+  assert.equal(normaliseWager('Y'.repeat(50)).length, 34, 'longer input is cut, never rejected');
+  for (const w of ['DISHES', 'A B', 'LOSER DOES THE DISHES, WINNER PICKS!', '1 2 3 4 5 6 7 8 9 0']) {
+    assert.equal(textToFrame(frameToText({ type: TYPE.WAGER, session: 1, round: 0, wager: w })).wager, normaliseWager(w));
+  }
+});
+
+test('gate: any previously accepted frame is a no-op on re-scan, not just the last one', () => {
+  const gate = new FrameGate();
+  const hs = frameToText(HANDSHAKE);
+  const wager = frameToText({ type: TYPE.WAGER, session: SESSION, round: 0, wager: 'DISHES' });
+  assert.equal(gate.accept(hs).status, 'accepted');
+  assert.equal(gate.accept(wager).status, 'accepted');
+  // The host's handshake QR is still up on the table; the camera reads it again.
+  const again = gate.accept(hs);
+  assert.equal(again.status, 'duplicate');
+  assert.equal(again.reason, 'IDENTICAL_FRAME');
+  assert.equal(gate.lastAccepted.typeName, 'WAGER', 'duplicate did not disturb state');
+  assert.equal(gate.accept(frameToText({ type: TYPE.WAGER, session: SESSION, round: 1, wager: 'X' })).reason, 'BAD_ROUND');
+  gate.expectRound(1);
+  assert.equal(gate.accept(wager).status, 'duplicate', 'the very last accepted frame stays a plain no-op');
+  assert.equal(gate.accept(hs).reason, 'STALE_ROUND', 'an older accepted frame reads as stale once the round advances (the other phone is behind)');
+  assert.equal(gate.accept(frameToText({ type: TYPE.WAGER, session: SESSION, round: 0, wager: 'OTHER' })).reason, 'STALE_ROUND');
+  assert.equal(gate.lastAccepted.typeName, 'WAGER', 'stale frames never touch state');
+});
+
+test('fleetIsValid: inside the board, no overlap', () => {
+  assert.equal(fleetIsValid(fleet), true);
+  assert.equal(fleetIsValid(fleet.map((s, i) => (i === 0 ? { ...s, col: 4 } : s))), false, '4-ship horizontal from E runs off the board');
+  assert.equal(fleetIsValid(fleet.map((s, i) => (i === 3 ? { col: 1, row: 1, horizontal: false } : s))), false, 'overlaps the 4-ship');
+  assert.equal(fleetIsValid(fleet.slice(0, 3)), false);
 });

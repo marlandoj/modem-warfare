@@ -1,7 +1,8 @@
 // Fleet helpers: random valid placement on the 7×7 board, rotation, cell
-// expansion, and the Tuesday-ready commitment digest (SHA-256 of packed
-// fleet + 128-bit salt, truncated to the 16 bytes the HANDSHAKE frame carries).
+// expansion, and the commitment digest (first 16 bytes of SHA-256 of the
+// packed fleet ‖ 128-bit salt, the 16 bytes the HANDSHAKE frame carries).
 import { BOARD, SHIP_SIZES, packFleet, cellIndex, randomBytes, SALT_LEN, COMMIT_LEN } from './frame.js';
+import { sha256 } from './sha256.js';
 
 export function shipCells(ship) {
   const cells = [];
@@ -70,17 +71,16 @@ export function newSalt() {
   return randomBytes(SALT_LEN);
 }
 
-export async function commitment(fleet, salt) {
+/**
+ * commitment = SHA-256(packFleet(fleet) ‖ salt)[0..16). Synchronous and
+ * independent of SubtleCrypto, so it is identical on a plain-http LAN origin,
+ * on localhost, in an installed PWA with the radios off, and under Node.
+ */
+export function commitment(fleet, salt) {
+  if (!salt || salt.length !== SALT_LEN) throw new Error('salt must be 16 bytes');
   const packed = packFleet(fleet);
   const msg = new Uint8Array(packed.length + salt.length);
   msg.set(packed, 0);
   msg.set(salt, packed.length);
-  if (globalThis.crypto && globalThis.crypto.subtle) {
-    const digest = new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', msg));
-    return digest.slice(0, COMMIT_LEN);
-  }
-  // Insecure contexts (plain http on a LAN) have no SubtleCrypto; Tuesday
-  // decides whether to vendor a SHA-256 or require https/localhost. Monday
-  // returns an all-zero placeholder so the frame still round-trips.
-  return new Uint8Array(COMMIT_LEN);
+  return sha256(msg).slice(0, COMMIT_LEN);
 }
