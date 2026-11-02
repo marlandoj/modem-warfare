@@ -261,8 +261,12 @@ test('gate: any previously accepted frame is a no-op on re-scan, not just the la
   gate.expectRound(1);
   assert.equal(gate.accept(wager).status, 'duplicate', 'the very last accepted frame stays a plain no-op');
   assert.equal(gate.accept(hs).reason, 'STALE_ROUND', 'an older accepted frame reads as stale once the round advances (the other phone is behind)');
-  assert.equal(gate.accept(frameToText({ type: TYPE.WAGER, session: SESSION, round: 0, wager: 'OTHER' })).reason, 'STALE_ROUND');
   assert.equal(gate.lastAccepted.typeName, 'WAGER', 'stale frames never touch state');
+  const corrected = gate.accept(frameToText({ type: TYPE.WAGER, session: SESSION, round: 0, wager: 'OTHER' }));
+  assert.equal(corrected.status, 'accepted', 'a corrected wager lands at any point after the handshake');
+  assert.equal(corrected.frame.wager, 'OTHER');
+  const early = new FrameGate();
+  assert.equal(early.accept(wager).reason, 'WRONG_TYPE', 'a wager before any handshake is refused');
 });
 
 test('fleetIsValid: inside the board, no overlap', () => {

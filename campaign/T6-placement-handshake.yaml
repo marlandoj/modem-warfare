@@ -1,0 +1,19 @@
+id: T6
+title: Placement wired for real; commitment handshake with a vendored SHA-256; wager over the channel
+persona: Protocol engineer (commit-reveal schemes, wire formats, idempotent receive semantics)
+day: Tue 2026-11-03 (executed in the Tuesday dispatch of 2026-11-02)
+verify: npm test   # trusted check for the factory Verity gate; run from the repo root
+depends_on: [T1, T2]
+scope:
+  - vendor a self-contained SHA-256 (app/js/sha256.js); commitment = first 16 bytes of SHA-256(packed fleet || 128-bit salt), synchronous, no SubtleCrypto
+  - commitment fixed at LOCK, before any handshake frame renders; guest flow is place -> LOCK -> scan host (ruled table choreography)
+  - WAGER frame type (4): stake note at 6 bits/char, <= 34 chars = 61 base32 chars = QR v3-M exactly; host sends after contact, guest echoes, both display all match
+  - FrameGate remembers every accepted frame (re-scan of any earlier frame is a no-op; stale once the round moves on); WAGER never moves the round machine
+done_when:
+  - sha256 matches FIPS vectors and node:crypto on every padding boundary
+  - commitment differs on a one-bit salt change and on a moved ship
+  - wager frame round-trips at the maximum length and fits v3-M
+  - gate treats the host handshake re-scan after a wager as a duplicate, not WRONG_TYPE
+evidence:
+  - app/js/sha256.js, app/js/fleet.js, app/js/frame.js
+  - tests/sha256.test.js, tests/frame.test.js (wager, seen-set, fleetIsValid)

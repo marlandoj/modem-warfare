@@ -1,0 +1,17 @@
+id: T9
+title: Dev harness plays whole matches: camera-like replay, tamper hook, two automated players
+persona: Developer-tooling engineer (test harnesses, deterministic simulations, fault injection)
+day: Tue 2026-11-03 (executed in the Tuesday dispatch of 2026-11-02)
+verify: npm test   # trusted check for the factory Verity gate; run from the repo root
+depends_on: [T3, T7, T8]
+scope:
+  - dev/channel.js behaves like a camera, not a queue: every render also asks the peer to re-post its current frame, so a frame rejected as FUTURE_ROUND a moment ago arrives again once this phone catches up; the gate turns true repeats into no-ops
+  - MW.devTamper rewrites this instance's outgoing frames only; cheats live in the dev transport, never in app/
+  - runMatch({ cheat }): fixed fleets, host sets the wager, A fires 2 ship cells + 1 water per round, B fires 1 + 2, both REVEAL only after both converge, NEXT ROUND until an outcome, TO THE AUDIT, reveal both ways; cheats: result (round 2), fleet (2-ship moved in the reveal), salt (one bit)
+  - harness page buttons: scripted exchange, full match, match where B lies
+done_when:
+  - a duplicate never causes a re-render: the channel is silent while both instances idle on the handshake screen
+  - a full match converges every round with zero rejected frames and zero page errors
+evidence:
+  - dev/channel.js, dev/harness.js, dev/harness.html
+  - tests/browser/harness.js (idle-traffic check), tests/browser/match.js

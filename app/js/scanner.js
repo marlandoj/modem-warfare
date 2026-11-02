@@ -3,13 +3,19 @@
 // re-scan means (a duplicate is a no-op by spec).
 import { decodeImage, prepareDecoder, activeDecoder } from './qr.js';
 
+// Camera choice: the Salute is screen-to-screen (both phones raised face to
+// face, ~20 cm), so the FRONT camera is the one that sees the other screen.
+// Default 'user'; flip() switches to the rear camera for the alternate
+// geometry (phones side by side, each turned in turn). Unproven on hardware
+// until the Tuesday phone session: see the Tuesday report.
 export class Scanner {
-  constructor(video, onText, { onStatus = () => {}, interval = 150, maxEdge = 640 } = {}) {
+  constructor(video, onText, { onStatus = () => {}, interval = 150, maxEdge = 640, facing = 'user' } = {}) {
     this.video = video;
     this.onText = onText;
     this.onStatus = onStatus;
     this.interval = interval;
     this.maxEdge = maxEdge;
+    this.facing = facing;
     this.stream = null;
     this.timer = null;
     this.busy = false;
@@ -32,14 +38,22 @@ export class Scanner {
     this.onStatus('STARTING CAMERA…');
     const decoder = await prepareDecoder();
     this.stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+      video: { facingMode: { ideal: this.facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
       audio: false,
     });
     this.video.srcObject = this.stream;
     this.video.hidden = false;
+    this.video.classList.toggle('scan__video--mirror', this.facing === 'user');
     await this.video.play();
-    this.onStatus(`SCANNING · ${decoder}`);
+    this.onStatus(`SCANNING · ${decoder} · ${this.facing === 'user' ? 'FRONT' : 'REAR'} CAM`);
     this.timer = setInterval(() => this.tick(), this.interval);
+  }
+
+  /** Switch front/rear; restarts the stream if running. */
+  async flip() {
+    this.facing = this.facing === 'user' ? 'environment' : 'user';
+    if (this.running) { this.stop(); await this.start(); }
+    return this.facing;
   }
 
   stop() {

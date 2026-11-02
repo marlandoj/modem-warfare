@@ -29,6 +29,7 @@ export async function run() {
     assert(aAccepted[0] === 'HANDSHAKE' && aAccepted.includes('SALVO'), 'A accepted handshake then salvo: ' + aAccepted);
     assert(bAccepted[0] === 'HANDSHAKE' && bAccepted.includes('SALVO'), 'B accepted handshake then salvo: ' + bAccepted);
     assert(!summary.aGate.some((l) => l.status === 'rejected') && !summary.bGate.some((l) => l.status === 'rejected'), 'no rejected frames during a clean exchange');
+    assert(summary.idleTraffic === 0, `channel quiet while both sit on the handshake screen (saw ${summary.idleTraffic} gate events in 600 ms)`);
     await page.setViewportSize({ width: 1400, height: 900 });
     await page.screenshot({ path: path.join(OUT, 'harness.png') });
     assert(cap.errors.length === 0, 'no console/page errors: ' + cap.errors.join(' | '));

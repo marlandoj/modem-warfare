@@ -433,7 +433,13 @@ export class FrameGate {
       this.session = frame.session;
       return this._accept(frame, key, 'HANDSHAKE');
     }
-    if (frame.type === TYPE.WAGER && frame.round !== 0) return this._result('rejected', 'BAD_ROUND', frame, 'wager must be round 0');
+    if (frame.type === TYPE.WAGER) {
+      // The stake note is informational and may land (or be corrected) at any
+      // point after the handshake; it never moves the round state machine.
+      if (frame.round !== 0) return this._result('rejected', 'BAD_ROUND', frame, 'wager must be round 0');
+      if (this.session === null) return this._result('rejected', 'WRONG_TYPE', frame, 'wager before handshake');
+      return this._accept(frame, key, 'WAGER');
+    }
     if (frame.round < this.expectedRound) return this._result('rejected', 'STALE_ROUND', frame);
     if (frame.round > this.expectedRound) return this._result('rejected', 'FUTURE_ROUND', frame);
     if (this.session === null) this.session = frame.session;

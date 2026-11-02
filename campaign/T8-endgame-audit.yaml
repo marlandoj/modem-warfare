@@ -1,0 +1,18 @@
+id: T8
+title: Endgame reveal exchange, audit, stamp, forfeit, REMATCH / NEXT CHALLENGER
+persona: Security engineer (the spec's dissenting voice; commit-reveal audits, honest failure modes)
+day: Tue 2026-11-03 (executed in the Tuesday dispatch of 2026-11-02)
+verify: npm test   # trusted check for the factory Verity gate; run from the repo root
+depends_on: [T6, T7]
+scope:
+  - REVEAL frame (fleet + salt) at round N+1; the gate expects it the moment the outcome is known, so an early reveal from the other phone is audited before the screen is even reached
+  - app/js/audit.js: fleet validity, commitment recomputed and compared, every reported HIT/miss replayed against the revealed fleet, every sunk flag checked against cumulative hits; first finding names the stamp
+  - stamp: VERIFIED — NO SHIP MOVED / LIAR · <finding> / FORFEIT (two-tap claim when no reveal ever comes; forfeit = win for the claimant)
+  - game-over screen: outcome, wager, both boards (own with damage, enemy as revealed with my shots), tally, audit detail lines, reveal lamp + scanner
+  - REMATCH keeps roles (host mints a new session, guest waits to scan), NEXT CHALLENGER resets to Home
+done_when:
+  - unit: clean VERIFIED; wrong salt, moved fleet, false result, early sunk, invalid fleet, missing results each LIAR
+  - browser: both phones stamp VERIFIED after a clean match; false result -> LIAR naming the round; moved fleet and wrong salt -> LIAR / COMMIT MISMATCH; the honest side still verifies
+evidence:
+  - app/js/audit.js, app/js/app.js (renderGameOver, runAudit, claimForfeit)
+  - tests/audit.test.js, tests/browser/match.js, test-output/match-verified.png, test-output/match-liar.png

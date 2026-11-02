@@ -30,6 +30,7 @@ const suites = [
   ['qr-roundtrip', () => import('./qr-roundtrip.js')],
   ['offline', () => import('./offline.js')],
   ['harness', () => import('./harness.js')],
+  ['match', () => import('./match.js')],
   ['spike', () => import('./spike.js')],
 ];
 
