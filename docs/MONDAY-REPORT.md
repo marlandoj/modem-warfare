@@ -228,7 +228,8 @@ playback and says so on the page.
   commit; `git log --oneline` lists the full sequence.
 
 Commits, oldest first: frame codec → PWA shell → dev harness → ggwave spike
-page → browser gates and campaign manifests → docs and evidence.
+page → browser gates and campaign manifests → docs and evidence → third
+spike run recorded → Verity trusted check (`abb4020`, see item 8 in §6).
 
 ## 5. How the operator runs it
 
