@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- ggwave 0.4.0's Emscripten glue evaluates a string at init (embind), so
+       this dev page needs 'unsafe-eval' on top of 'wasm-unsafe-eval'. The app
+       shell's CSP does not allow it; Wednesday's integration must either
+       accept that relaxation or rebuild ggwave with -sDYNAMIC_EXECUTION=0.
+       Still 'self' only: nothing leaves the device. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self' data:; worker-src 'self'">
+  <meta name="theme-color" content="#061a2e">
+  <title>Modem Warfare — ggwave spike (Monday)</title>
+  <link rel="stylesheet" href="./spike.css">
+</head>
+<body>
+  <header class="head">
+    <h1>SONAR SPIKE · GGWAVE</h1>
+    <p class="muted">Monday pass/fail for the sound channel. Encodes a real SALVO frame (the same 20-char base32 text the QR carries) as an audible ggwave chirp and decodes it back. Dev page, not in the app precache.</p>
+    <p class="muted" id="env">loading ggwave…</p>
+  </header>
+
+  <section class="card">
+    <h2>FRAME</h2>
+    <div class="grid2">
+      <label>SESSION (hex) <input id="f-session" value="a1b2c3d4" maxlength="8"></label>
+      <label>ROUND <input id="f-round" type="number" min="1" max="255" value="4"></label>
+      <label>CELL 1 <input id="f-c0" value="C4" maxlength="2"></label>
+      <label>CELL 2 <input id="f-c1" value="E2" maxlength="2"></label>
+      <label>CELL 3 <input id="f-c2" value="G7" maxlength="2"></label>
+      <label>RESULTS <select id="f-results"><option value="">none</option><option value="101" selected>HIT miss HIT</option><option value="111">HIT HIT HIT</option><option value="000">miss miss miss</option></select></label>
+    </div>
+    <div class="mono" id="f-text">—</div>
+    <div class="mono muted" id="f-desc">—</div>
+  </section>
+
+  <section class="card">
+    <h2>CHIRP</h2>
+    <div class="grid2">
+      <label>PROTOCOL (audible only — ultrasound is cut by spec)
+        <select id="protocol">
+          <option value="GGWAVE_PROTOCOL_AUDIBLE_NORMAL">AUDIBLE NORMAL</option>
+          <option value="GGWAVE_PROTOCOL_AUDIBLE_FAST" selected>AUDIBLE FAST</option>
+          <option value="GGWAVE_PROTOCOL_AUDIBLE_FASTEST">AUDIBLE FASTEST</option>
+        </select>
+      </label>
+      <label>VOLUME (ggwave 1–100) <input id="volume" type="range" min="1" max="100" value="50"> <span id="volume-v">50</span></label>
+    </div>
+    <div class="mono muted" id="airtime">airtime: —</div>
+  </section>
+
+  <section class="card">
+    <h2>TWO-PHONE TEST (the real spike)</h2>
+    <p class="muted">Phone A: LISTEN. Phone B: TRANSMIT ×1 repeatedly at 30 cm then 1 m. Count attempts on B, decodes on A. The mic is closed before every transmit and reopened after.</p>
+    <div class="row">
+      <button id="btn-listen" class="big">LISTEN (MIC)</button>
+      <button id="btn-tx" class="big amber">TRANSMIT ×1</button>
+    </div>
+    <div class="mono" id="mic-status">mic: closed</div>
+    <div class="heard" id="heard">HEARD: —</div>
+  </section>
+
+  <section class="card">
+    <h2>LOOPBACK MODES (one device)</h2>
+    <div class="row wrap">
+      <label>N <input id="n" type="number" min="1" max="50" value="10"></label>
+      <button id="btn-self">SPEAKER→MIC ×N</button>
+      <button id="btn-webaudio">WEBAUDIO LOOPBACK ×N</button>
+      <button id="btn-direct">DIRECT BUFFER ×N</button>
+      <button id="btn-stop" class="ghost">STOP</button>
+    </div>
+    <p class="muted small">SPEAKER→MIC keeps the mic open during playback on purpose (it is the only way one device can hear itself) — that mode alone deviates from the close-mic-before-transmit rule and says so. WEBAUDIO LOOPBACK routes the played buffer through a MediaStream into the same capture pipeline the mic uses, with no microphone. DIRECT BUFFER feeds encoder output straight into the decoder in 1024-sample chunks.</p>
+  </section>
+
+  <section class="card">
+    <h2>COUNTERS</h2>
+    <table id="counts">
+      <thead><tr><th>mode</th><th>attempts</th><th>decodes</th><th>last latency</th></tr></thead>
+      <tbody>
+        <tr data-mode="tx"><td>transmit (speaker)</td><td class="a">0</td><td class="d">—</td><td class="l">—</td></tr>
+        <tr data-mode="mic"><td>mic decodes (any source)</td><td class="a">—</td><td class="d">0</td><td class="l">—</td></tr>
+        <tr data-mode="self"><td>speaker→mic loopback</td><td class="a">0</td><td class="d">0</td><td class="l">—</td></tr>
+        <tr data-mode="webaudio"><td>WebAudio MediaStream loopback</td><td class="a">0</td><td class="d">0</td><td class="l">—</td></tr>
+        <tr data-mode="direct"><td>direct buffer</td><td class="a">0</td><td class="d">0</td><td class="l">—</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>LOG</h2>
+    <pre id="log"></pre>
+  </section>
+
+  <script src="../app/vendor/ggwave/ggwave.js"></script>
+  <script type="module" src="./spike.js"></script>
+</body>
+</html>

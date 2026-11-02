@@ -1,0 +1,28 @@
+:root { color-scheme: dark; }
+body { margin: 0; padding: 12px; background: #061a2e; color: #e6f2f5; font: 15px/1.45 system-ui, sans-serif; max-width: 760px; margin-inline: auto; }
+h1 { margin: 0; font-size: 22px; letter-spacing: 0.14em; color: #3dff8f; }
+h2 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.2em; color: #ffb100; }
+.head { margin-bottom: 12px; }
+.muted { color: #8fb0bf; }
+.small { font-size: 13px; }
+.card { background: rgba(3, 16, 28, 0.7); border: 1px solid rgba(61, 255, 143, 0.25); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; letter-spacing: 0.1em; color: #8fb0bf; text-transform: uppercase; }
+input, select { min-height: 44px; padding: 6px 10px; font: 15px ui-monospace, Menlo, Consolas, monospace; color: #e6f2f5; background: #03101c; border: 1px solid rgba(61, 255, 143, 0.3); border-radius: 6px; text-transform: uppercase; }
+input[type="range"] { padding: 0; }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; margin-top: 8px; word-break: break-all; }
+.row { display: flex; gap: 10px; align-items: center; }
+.row.wrap { flex-wrap: wrap; }
+button { min-height: 48px; padding: 8px 14px; font: 600 15px system-ui, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: #3dff8f; background: #0a2540; border: 2px solid #3dff8f; border-radius: 8px; cursor: pointer; }
+button.big { flex: 1; min-height: 64px; font-size: 18px; }
+button.amber { color: #03101c; background: #ffb100; border-color: #ffd56a; }
+button.ghost { color: #8fb0bf; border-color: rgba(143, 176, 191, 0.4); background: transparent; }
+button[aria-pressed="true"] { background: #3dff8f; color: #03101c; }
+button:disabled { opacity: 0.4; }
+.heard { margin-top: 10px; padding: 12px; font: 700 20px ui-monospace, Menlo, monospace; color: #ffb100; border: 1px dashed rgba(255, 177, 0, 0.5); border-radius: 8px; min-height: 48px; }
+.heard.ok { background: rgba(61, 255, 143, 0.12); color: #3dff8f; border-style: solid; border-color: #3dff8f; }
+table { width: 100%; border-collapse: collapse; font-family: ui-monospace, Menlo, monospace; font-size: 14px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid rgba(61, 255, 143, 0.15); }
+th { color: #8fb0bf; font-weight: normal; font-size: 12px; letter-spacing: 0.1em; }
+td.d { color: #3dff8f; font-weight: bold; }
+pre { margin: 0; max-height: 260px; overflow: auto; font-size: 12px; white-space: pre-wrap; word-break: break-all; color: #cfe0e8; }
