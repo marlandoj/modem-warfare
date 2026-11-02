@@ -1,0 +1,116 @@
+
+=== shell: six screens, offline badge, QR versions ===
+badge: OFFLINE READY ✓ 16/16 CACHED
+handshake QR: version 3 text CGQVNMHAAD777QAACAJT6BQF7K26A7GHLOJMAGJYHSYCI
+salvo QR: version 2 text CKQVNMHAAFOLYAAAAA6Q
+shell: PASS (screenshots in test-output/)
+
+=== qr: encode -> pixels -> decode round-trip ===
+decoder in this browser: zxing-wasm
+  handshake: QR v3-M (29x29) text=CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME
+    decoded in 43 ms -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME | skewed copy -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME
+    frame: HANDSHAKE s=a1b2c3d4 r=0 · commit 0b30557a…
+  salvo: QR v2-M (25x25) text=CKQ3FQ6UAROLYLACABKA
+    decoded in 3 ms -> CKQ3FQ6UAROLYLACABKA | skewed copy -> CKQ3FQ6UAROLYLACABKA
+    frame: SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT · sunk 3
+  reveal: QR v3-M (29x29) text=COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ
+    decoded in 5 ms -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ | skewed copy -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ
+    frame: REVEAL s=a1b2c3d4 r=11 · sunk 4,3,2 · fleet A2h G3v C6h E1v
+qr: PASS
+
+=== offline: cold launch from precache with the network gone ===
+phase 1 (online install): OFFLINE READY ✓ 16/16 CACHED version mw-mon-v3 missing []
+phase 2: server stopped (connection refused), relaunching the same profile with offline emulation
+cold launch: navigator.onLine = false | title = Modem Warfare — Radio Silence | badge = OFFLINE READY ✓ 16/16 CACHED
+offline decoder warm-up: zxing-wasm
+responses: 10, from service worker: 10
+  SW  200 /app/
+  SW  200 /app/css/app.css
+  SW  200 /app/vendor/qrcode-generator.js
+  SW  200 /app/js/app.js
+  SW  200 /app/js/fleet.js
+  SW  200 /app/js/qr.js
+  SW  200 /app/js/frame.js
+  SW  200 /app/js/scanner.js
+  SW  200 /app/vendor/zxing/zxing-reader.js
+  SW  200 /app/vendor/zxing/zxing_reader.wasm
+offline: PASS
+
+=== harness: handshake + salvo over BroadcastChannel ===
+session: a20a7bbd
+A received: SALVO s=a20a7bbd r=1 · salvo A1 B2 C3 · results miss/miss/miss
+B received: SALVO s=a20a7bbd r=1 · salvo C4 E2 G7 · results miss/miss/miss
+A gate log: [{"status":"accepted","reason":"HANDSHAKE","round":0,"type":"HANDSHAKE"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"}]
+B gate log: [{"status":"accepted","reason":"HANDSHAKE","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"}]
+channel log:
+  18:44:13.523 A online
+  18:44:13.527 B online
+  18:44:13.591 script: A NEW MATCH, B JOIN MATCH, both LOCK
+  18:44:13.707 A → HANDSHAKE · ROUND 0 CGRAU655AD777QAACAIT62G6FA62PNPZ6RC5UR3YBAEOK
+  18:44:13.736 B ← ACCEPTED HANDSHAKE HANDSHAKE s=a20a7bbd r=0 · commit 113f68de…
+  18:44:13.737 B → HANDSHAKE · ROUND 0 CGRAU655AD777QAACBYT7CMH57MWY6FVD3SWIYJX73JZS
+  18:44:13.774 A ← ACCEPTED HANDSHAKE HANDSHAKE s=a20a7bbd r=0 · commit 713f8987…
+  18:44:13.774 A → HANDSHAKE · ROUND 0 CGRAU655AD777QAACAIT62G6FA62PNPZ6RC5UR3YBAEOK
+  18:44:13.778 B ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=a20a7bbd r=0 · commit 113f68de…
+  18:44:13.786 handshake converged: session a20a7bbd
+  18:44:13.869 A → SALVO · ROUND 1 CKRAU655AFOLYAAAAAQA
+  18:44:13.876 B → SALVO · ROUND 1 CKRAU655AEAIIAAAABKQ
+  18:44:13.888 B ← ACCEPTED SALVO SALVO s=a20a7bbd r=1 · salvo C4 E2 G7
+  18:44:13.889 B → SALVO · ROUND 1 CKRAU655AEAIIBAAAD7A
+  18:44:13.895 A ← ACCEPTED SALVO SALVO s=a20a7bbd r=1 · salvo A1 B2 C3
+  18:44:13.896 A → SALVO · ROUND 1 CKRAU655AFOLYBAAACFQ
+  18:44:13.904 A ← ACCEPTED SALVO SALVO s=a20a7bbd r=1 · salvo A1 B2 C3 · results miss/miss/miss
+  18:44:13.905 A → SALVO · ROUND 1 CKRAU655AFOLYBAAACFQ
+  18:44:13.906 B ← ACCEPTED SALVO SALVO s=a20a7bbd r=1 · salvo C4 E2 G7 · results miss/miss/miss
+  18:44:13.907 B → SALVO · ROUND 1 CKRAU655AEAIIBAAAD7A
+  18:44:13.911 B ← DUPLICATE IDENTICAL_FRAME SALVO s=a20a7bbd r=1 · salvo C4 E2 G7 · results miss/miss/miss
+  18:44:13.912 A ← DUPLICATE IDENTICAL_FRAME SALVO s=a20a7bbd r=1 · salvo A1 B2 C3 · results miss/miss/miss
+  18:44:13.913 salvo converged: A got "SALVO s=a20a7bbd r=1 · salvo A1 B2 C3 · results miss/miss/miss", B got "SALVO s=a20a7bbd r=1 · salvo C4 E2 G7 · results miss/miss/miss"
+harness: PASS
+
+=== spike: ggwave loopback ×10 ===
+env: ggwave ready · AudioContext 48000 Hz · Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36
+frame text: CKQ3FQ6UAROLYLAAAB7A | airtime: 2.09 s at 48000 Hz (AUDIBLE_FAST)
+mic settings: {"autoGainControl":false,"channelCount":2,"deviceId":"default","echoCancellation":false,"groupId":"c4e30853f9c5a673bf4eee439b70b8078d4d9fb4b71c739e9b94ea7e7471e4bb","latency":0.01,"noiseSuppression":false,"sampleRate":44100,"sampleSize":16,"voiceIsolation":false}
+mic log:
+  18:44:15.687 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  18:44:15.690 mic closed
+  18:44:15.704 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
+  18:44:17.800 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+WebAudio MediaStream loopback: {"a":10,"d":9}
+direct buffer: {"a":10,"d":10}
+spike log:
+  18:44:15.687 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  18:44:15.690 mic closed
+  18:44:15.704 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
+  18:44:17.800 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  18:44:17.802 mic closed
+  18:44:17.809 WebAudio MediaStream loopback ×10 (no microphone)
+  18:44:19.392 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:26.288 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:28.406 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:30.503 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:32.611 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:34.713 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:36.825 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:38.917 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:41.032 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:41.237 direct buffer ×10
+  18:44:41.275 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:41.311 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:41.348 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:41.390 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:41.440 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:41.495 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:41.545 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:41.587 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:41.626 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:44:41.678 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+spike: PASS (webaudio 9/10, direct 10/10; acoustic path NOT tested here)
+
+=== summary ===
+shell: PASS (4.7 s)
+qr-roundtrip: PASS (0.7 s)
+offline: PASS (2.3 s)
+harness: PASS (1.9 s)
+spike: PASS (27.3 s)
