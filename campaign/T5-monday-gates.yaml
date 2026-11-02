@@ -1,0 +1,15 @@
+id: T5
+title: End-of-Monday gates and report
+persona: QA engineer (release gates, evidence capture, honest reporting)
+depends_on: [T1, T2, T3, T4]
+scope:
+  - staged-input integrity check (md5 of SPEC.md and two mockups)
+  - run unit + browser suites, capture output verbatim
+  - write docs/MONDAY-REPORT.md in the order the brief demands
+  - name repo location, branch, latest commit; how to run shell and spike
+  - list what Monday exposed for Tuesday (salvo loop, commitment handshake)
+done_when:
+  - every end-of-Monday bar item has quoted evidence or a plain statement of failure
+  - ggwave verdict separates browser-proven from phone-pending
+evidence:
+  - docs/MONDAY-REPORT.md, test-output/

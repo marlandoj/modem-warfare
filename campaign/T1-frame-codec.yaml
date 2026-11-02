@@ -1,0 +1,19 @@
+id: T1
+title: Frame codec, QR encode/decode, round-trip tests
+persona: Protocol engineer (binary wire formats, error detection, idempotent receive semantics)
+depends_on: []
+scope:
+  - 12-byte frame per SPEC.md: version/type, session, round, 3 salvo cells, results bitmask, sunk flags, check byte
+  - base32 (RFC 4648, unpadded) so the QR uses alphanumeric mode
+  - QR version 2-3 at EC level M via vendored qrcode-generator
+  - decode via BarcodeDetector when present, vendored zxing-wasm otherwise
+  - receive gate: identical frame no-op, stale/future round rejected, session bound by handshake
+done_when:
+  - node --test passes for handshake, salvo-with-results and reveal round-trips
+  - duplicate frame returns 'duplicate' and leaves state untouched
+  - stale round returns 'rejected' / STALE_ROUND
+  - browser test decodes rendered QR pixels back to the identical bytes
+evidence:
+  - app/js/frame.js, app/js/qr.js
+  - tests/frame.test.js (node --test)
+  - tests/browser/qr-roundtrip.js

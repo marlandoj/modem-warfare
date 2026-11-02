@@ -1,0 +1,15 @@
+id: T3
+title: Desktop two-window dev harness over BroadcastChannel
+persona: Developer-tooling engineer (test harnesses, developer ergonomics, browser APIs)
+depends_on: [T1, T2]
+scope:
+  - dev/harness.html hosts two app instances (?dev=A host, ?dev=B guest)
+  - dev/channel.js mirrors every rendered frame's base32 text onto BroadcastChannel and feeds received text into the app's single decode entry point
+  - scripted exchange button: handshake both ways, round-1 salvo both ways
+  - nothing under dev/ appears in the precache list
+done_when:
+  - scripted exchange converges with zero rejected frames and zero console errors in either instance
+  - gate logs show HANDSHAKE accepted then SALVO accepted on both sides, duplicates reported as no-ops
+evidence:
+  - dev/harness.html, dev/harness.js, dev/channel.js
+  - tests/browser/harness.js, test-output/harness.png

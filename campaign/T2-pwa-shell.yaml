@@ -1,0 +1,17 @@
+id: T2
+title: PWA shell with hand-written precache service worker and manifest
+persona: PWA frontend lead (service workers, installability, offline-first UX, mobile CSS)
+depends_on: [T1]
+scope:
+  - six navigable screens (Home, Placement, Handshake, Round loop, Game over, Sealed Orders)
+  - art direction from the mockups rebuilt in CSS/SVG; concept images not bundled
+  - Home badge driven by the service worker's real per-URL cache report
+  - Content-Security-Policy 'self' only; no fonts, analytics or telemetry
+  - later-day features present as honest shells (Sonar, audit stamp, Sealed Orders)
+done_when:
+  - cold launch from a fresh profile with the server stopped and offline emulation on serves every response from the service worker
+  - all six screens render without console errors
+  - no user-visible copy says "secure" or "encrypted"
+evidence:
+  - app/index.html, app/css/app.css, app/js/app.js, app/sw.js, app/manifest.webmanifest
+  - tests/browser/offline.js, tests/browser/shell.js, test-output/screen-*.png

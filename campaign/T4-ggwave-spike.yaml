@@ -1,0 +1,17 @@
+id: T4
+title: Android ggwave spike (sound channel pass/fail)
+persona: DSP / audio engineer (WebAudio capture graphs, FSK modems, mobile audio routing)
+depends_on: [T1]
+scope:
+  - vendor ggwave 0.4.0 Emscripten Wasm build (app/vendor/ggwave/ggwave.js)
+  - spike page encodes the real SALVO frame text as an audible chirp and decodes it back to a frame
+  - microphone constraints: echoCancellation, noiseSuppression, autoGainControl all false
+  - microphone closed before transmit, reopened after
+  - on-page counters per mode: transmit attempts, mic decodes, speaker->mic loopback, WebAudio MediaStream loopback, direct buffer
+done_when:
+  - headless browser proves WebAudio loopback and direct-buffer decode with counts quoted
+  - mic constraint settings read back as false/false/false
+  - report states exactly which paths remain unproven until the two Android phones run it
+evidence:
+  - spike/index.html, spike/spike.js
+  - tests/browser/spike.js, test-output/spike.png
