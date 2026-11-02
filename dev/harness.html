@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; frame-src 'self'; worker-src 'self'">
+  <title>Modem Warfare — two-window dev harness</title>
+  <link rel="stylesheet" href="./harness.css">
+</head>
+<body>
+  <header class="bar">
+    <strong>MODEM WARFARE · DEV HARNESS</strong>
+    <span class="muted">Two app instances. Frames cross over BroadcastChannel as the exact base32 text the QR carries. Dev tool only — not in the precache.</span>
+    <span class="spacer"></span>
+    <button id="btn-reload" type="button">Reload both</button>
+    <button id="btn-clear" type="button">Clear log</button>
+  </header>
+  <main class="panes">
+    <section class="pane">
+      <h2>A · host <span class="muted">?dev=A</span></h2>
+      <iframe id="frame-a" src="../app/index.html?dev=A" title="Instance A" allow="camera"></iframe>
+    </section>
+    <section class="pane">
+      <h2>B · guest <span class="muted">?dev=B</span></h2>
+      <iframe id="frame-b" src="../app/index.html?dev=B" title="Instance B" allow="camera"></iframe>
+    </section>
+    <section class="pane pane--log">
+      <h2>Channel log <span class="muted" id="counts">0 frames</span></h2>
+      <div class="script">
+        <button id="btn-script" type="button">Run scripted exchange</button>
+        <span class="muted">host NEW MATCH → both place → handshake both ways → round 1 salvo both ways</span>
+      </div>
+      <pre id="log"></pre>
+    </section>
+  </main>
+  <script type="module" src="./harness.js"></script>
+</body>
+</html>
