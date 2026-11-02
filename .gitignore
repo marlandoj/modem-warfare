@@ -1,0 +1,8 @@
+node_modules/
+package-lock.json
+.tmp/
+test-output/
+*.log
+.DS_Store
+.env
+.env.*
