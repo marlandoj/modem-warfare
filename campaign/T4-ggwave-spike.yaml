@@ -1,6 +1,7 @@
 id: T4
 title: Android ggwave spike (sound channel pass/fail)
 persona: DSP / audio engineer (WebAudio capture graphs, FSK modems, mobile audio routing)
+verify: npm test   # trusted check for the factory Verity gate; run from the repo root
 depends_on: [T1]
 scope:
   - vendor ggwave 0.4.0 Emscripten Wasm build (app/vendor/ggwave/ggwave.js)

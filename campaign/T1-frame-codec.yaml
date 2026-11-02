@@ -1,6 +1,7 @@
 id: T1
 title: Frame codec, QR encode/decode, round-trip tests
 persona: Protocol engineer (binary wire formats, error detection, idempotent receive semantics)
+verify: npm test   # trusted check for the factory Verity gate; run from the repo root
 depends_on: []
 scope:
   - 12-byte frame per SPEC.md: version/type, session, round, 3 salvo cells, results bitmask, sunk flags, check byte

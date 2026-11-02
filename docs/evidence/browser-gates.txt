@@ -1,20 +1,20 @@
 
 === shell: six screens, offline badge, QR versions ===
 badge: OFFLINE READY ✓ 16/16 CACHED
-handshake QR: version 3 text CEQXJH4VAD777QAACAZ2PGMP2ZOQ6ML76TZRIAWM4LQHI
-salvo QR: version 2 text CIQXJH4VAFOLYAAAABOA
+handshake QR: version 3 text CHYOMCCYAD777QAACDUPRUTKPQQQQUWOP3RPB6WX3RN5M
+salvo QR: version 2 text CLYOMCCYAFOLYAAAABIQ
 shell: PASS (screenshots in test-output/)
 
 === qr: encode -> pixels -> decode round-trip ===
 decoder in this browser: zxing-wasm
   handshake: QR v3-M (29x29) text=CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME
-    decoded in 42 ms -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME | skewed copy -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME
+    decoded in 43 ms -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME | skewed copy -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME
     frame: HANDSHAKE s=a1b2c3d4 r=0 · commit 0b30557a…
   salvo: QR v2-M (25x25) text=CKQ3FQ6UAROLYLACABKA
-    decoded in 4 ms -> CKQ3FQ6UAROLYLACABKA | skewed copy -> CKQ3FQ6UAROLYLACABKA
+    decoded in 3 ms -> CKQ3FQ6UAROLYLACABKA | skewed copy -> CKQ3FQ6UAROLYLACABKA
     frame: SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT · sunk 3
   reveal: QR v3-M (29x29) text=COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ
-    decoded in 7 ms -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ | skewed copy -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ
+    decoded in 10 ms -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ | skewed copy -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ
     frame: REVEAL s=a1b2c3d4 r=11 · sunk 4,3,2 · fleet A2h G3v C6h E1v
 qr: PASS
 
@@ -28,87 +28,89 @@ responses: 10, from service worker: 10
   SW  200 /app/css/app.css
   SW  200 /app/vendor/qrcode-generator.js
   SW  200 /app/js/app.js
-  SW  200 /app/js/qr.js
   SW  200 /app/js/frame.js
-  SW  200 /app/js/scanner.js
   SW  200 /app/js/fleet.js
+  SW  200 /app/js/qr.js
+  SW  200 /app/js/scanner.js
   SW  200 /app/vendor/zxing/zxing-reader.js
   SW  200 /app/vendor/zxing/zxing_reader.wasm
 offline: PASS
 
 === harness: handshake + salvo over BroadcastChannel ===
-session: 7695599b
-A received: SALVO s=7695599b r=1 · salvo A1 B2 C3 · results miss/miss/miss
-B received: SALVO s=7695599b r=1 · salvo C4 E2 G7 · results miss/miss/HIT
+session: b9169296
+A received: SALVO s=b9169296 r=1 · salvo A1 B2 C3 · results HIT/miss/miss
+B received: SALVO s=b9169296 r=1 · salvo C4 E2 G7 · results HIT/miss/HIT
 A gate log: [{"status":"accepted","reason":"HANDSHAKE","round":0,"type":"HANDSHAKE"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"}]
 B gate log: [{"status":"accepted","reason":"HANDSHAKE","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"}]
 channel log:
-  18:48:13.400 B online
-  18:48:13.439 A online
-  18:48:13.463 script: A NEW MATCH, B JOIN MATCH, both LOCK
-  18:48:13.576 A → HANDSHAKE · ROUND 0 CF3JKWM3AD777QAACCASFJEHS64VBZIDMESGH6NZIX47M
-  18:48:13.606 B ← ACCEPTED HANDSHAKE HANDSHAKE s=7695599b r=0 · commit 8122a487…
-  18:48:13.606 B → HANDSHAKE · ROUND 0 CF3JKWM3AD777QAACDMMHDOBDVOS2QFRDWA7RUJLEUUNW
-  18:48:13.644 A ← ACCEPTED HANDSHAKE HANDSHAKE s=7695599b r=0 · commit d8c38dc1…
-  18:48:13.645 A → HANDSHAKE · ROUND 0 CF3JKWM3AD777QAACCASFJEHS64VBZIDMESGH6NZIX47M
-  18:48:13.655 B ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=7695599b r=0 · commit 8122a487…
-  18:48:13.656 handshake converged: session 7695599b
-  18:48:13.725 A → SALVO · ROUND 1 CJ3JKWM3AFOLYAAAADRA
-  18:48:13.744 B → SALVO · ROUND 1 CJ3JKWM3AEAIIAAAACLQ
-  18:48:13.752 B ← ACCEPTED SALVO SALVO s=7695599b r=1 · salvo C4 E2 G7
-  18:48:13.753 B → SALVO · ROUND 1 CJ3JKWM3AEAIIBAAAA6A
-  18:48:13.763 A ← ACCEPTED SALVO SALVO s=7695599b r=1 · salvo A1 B2 C3
-  18:48:13.768 A → SALVO · ROUND 1 CJ3JKWM3AFOLYJAAAAFA
-  18:48:13.776 A ← ACCEPTED SALVO SALVO s=7695599b r=1 · salvo A1 B2 C3 · results miss/miss/miss
-  18:48:13.777 A → SALVO · ROUND 1 CJ3JKWM3AFOLYJAAAAFA
-  18:48:13.780 B ← ACCEPTED SALVO SALVO s=7695599b r=1 · salvo C4 E2 G7 · results miss/miss/HIT
-  18:48:13.781 salvo converged: A got "SALVO s=7695599b r=1 · salvo A1 B2 C3 · results miss/miss/miss", B got "SALVO s=7695599b r=1 · salvo C4 E2 G7 · results miss/miss/HIT"
-  18:48:13.783 B → SALVO · ROUND 1 CJ3JKWM3AEAIIBAAAA6A
-  18:48:13.784 B ← DUPLICATE IDENTICAL_FRAME SALVO s=7695599b r=1 · salvo C4 E2 G7 · results miss/miss/HIT
+  18:54:59.791 A online
+  18:54:59.795 B online
+  18:54:59.861 script: A NEW MATCH, B JOIN MATCH, both LOCK
+  18:54:59.973 A → HANDSHAKE · ROUND 0 CG4RNEUWAD777QAACADHL3DMRSGPTTDXVPGDI7ALLJ55O
+  18:54:59.998 B ← ACCEPTED HANDSHAKE HANDSHAKE s=b9169296 r=0 · commit 0675ec6c…
+  18:55:00.000 B → HANDSHAKE · ROUND 0 CG4RNEUWAD777QAACDV455LFS3QRVYE2KPZIEJ5MSQHVI
+  18:55:00.046 A ← ACCEPTED HANDSHAKE HANDSHAKE s=b9169296 r=0 · commit ebcef565…
+  18:55:00.047 A → HANDSHAKE · ROUND 0 CG4RNEUWAD777QAACADHL3DMRSGPTTDXVPGDI7ALLJ55O
+  18:55:00.050 handshake converged: session b9169296
+  18:55:00.058 B ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=b9169296 r=0 · commit 0675ec6c…
+  18:55:00.138 A → SALVO · ROUND 1 CK4RNEUWAFOLYAAAABHQ
+  18:55:00.151 B → SALVO · ROUND 1 CK4RNEUWAEAIIAAAAA5A
+  18:55:00.164 B ← ACCEPTED SALVO SALVO s=b9169296 r=1 · salvo C4 E2 G7
+  18:55:00.165 B → SALVO · ROUND 1 CK4RNEUWAEAIIDAAADAA
+  18:55:00.174 A ← ACCEPTED SALVO SALVO s=b9169296 r=1 · salvo A1 B2 C3
+  18:55:00.175 A → SALVO · ROUND 1 CK4RNEUWAFOLYLAAAD3A
+  18:55:00.184 A ← ACCEPTED SALVO SALVO s=b9169296 r=1 · salvo A1 B2 C3 · results HIT/miss/miss
+  18:55:00.185 A → SALVO · ROUND 1 CK4RNEUWAFOLYLAAAD3A
+  18:55:00.186 B ← ACCEPTED SALVO SALVO s=b9169296 r=1 · salvo C4 E2 G7 · results HIT/miss/HIT
+  18:55:00.188 salvo converged: A got "SALVO s=b9169296 r=1 · salvo A1 B2 C3 · results HIT/miss/miss", B got "SALVO s=b9169296 r=1 · salvo C4 E2 G7 · results HIT/miss/HIT"
+  18:55:00.191 B → SALVO · ROUND 1 CK4RNEUWAEAIIDAAADAA
+  18:55:00.193 B ← DUPLICATE IDENTICAL_FRAME SALVO s=b9169296 r=1 · salvo C4 E2 G7 · results HIT/miss/HIT
+  18:55:00.200 A ← DUPLICATE IDENTICAL_FRAME SALVO s=b9169296 r=1 · salvo A1 B2 C3 · results HIT/miss/miss
 harness: PASS
 
 === spike: ggwave loopback ×10 ===
 env: ggwave ready · AudioContext 48000 Hz · Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36
 frame text: CKQ3FQ6UAROLYLAAAB7A | airtime: 2.09 s at 48000 Hz (AUDIBLE_FAST)
-mic settings: {"autoGainControl":false,"channelCount":2,"deviceId":"default","echoCancellation":false,"groupId":"5b177a32800558518ca5078c2e23c62612e49caf9a298db89b299e1077c17359","latency":0.01,"noiseSuppression":false,"sampleRate":44100,"sampleSize":16,"voiceIsolation":false}
+mic settings: {"autoGainControl":false,"channelCount":2,"deviceId":"default","echoCancellation":false,"groupId":"b4aa75ca66b869a7ea7ab51b556b0049a4f49f0e1b6f330e4164689b29c94943","latency":0.01,"noiseSuppression":false,"sampleRate":44100,"sampleSize":16,"voiceIsolation":false}
 mic log:
-  18:48:15.781 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
-  18:48:15.783 mic closed
-  18:48:15.802 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
-  18:48:17.898 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
-WebAudio MediaStream loopback: {"a":10,"d":8}
+  18:55:02.960 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  18:55:02.968 mic closed
+  18:55:02.990 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
+  18:55:05.101 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+WebAudio MediaStream loopback: {"a":10,"d":9}
 direct buffer: {"a":10,"d":10}
 spike log:
-  18:48:15.781 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
-  18:48:15.783 mic closed
-  18:48:15.802 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
-  18:48:17.898 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
-  18:48:17.900 mic closed
-  18:48:17.906 WebAudio MediaStream loopback ×10 (no microphone)
-  18:48:24.596 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:26.703 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:28.794 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:35.716 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:37.807 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:39.924 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:42.035 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:44.152 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:44.358 direct buffer ×10
-  18:48:44.391 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:44.426 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:44.465 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:44.508 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:44.553 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:44.598 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:44.643 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:44.693 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:44.737 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  18:48:44.803 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-spike: PASS (webaudio 8/10, direct 10/10; acoustic path NOT tested here)
+  18:55:02.960 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  18:55:02.968 mic closed
+  18:55:02.990 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
+  18:55:05.101 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  18:55:05.103 mic closed
+  18:55:05.115 WebAudio MediaStream loopback ×10 (no microphone)
+  18:55:07.046 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:13.957 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:16.065 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:18.177 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:20.288 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:22.334 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:24.446 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:26.557 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:28.642 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:28.858 direct buffer ×10
+  18:55:28.917 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:28.975 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:29.029 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:29.089 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:29.143 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:29.208 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:29.260 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:29.317 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:29.376 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  18:55:29.429 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+spike: PASS (webaudio 9/10, direct 10/10; acoustic path NOT tested here)
 
 === summary ===
 shell: PASS (4.7 s)
 qr-roundtrip: PASS (0.6 s)
-offline: PASS (2.4 s)
+offline: PASS (2.3 s)
 harness: PASS (2.0 s)
-spike: PASS (30.5 s)
+spike: PASS (28.7 s)

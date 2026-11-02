@@ -1,6 +1,7 @@
 id: T2
 title: PWA shell with hand-written precache service worker and manifest
 persona: PWA frontend lead (service workers, installability, offline-first UX, mobile CSS)
+verify: npm test   # trusted check for the factory Verity gate; run from the repo root
 depends_on: [T1]
 scope:
   - six navigable screens (Home, Placement, Handshake, Round loop, Game over, Sealed Orders)

@@ -1,6 +1,7 @@
 id: T3
 title: Desktop two-window dev harness over BroadcastChannel
 persona: Developer-tooling engineer (test harnesses, developer ergonomics, browser APIs)
+verify: npm test   # trusted check for the factory Verity gate; run from the repo root
 depends_on: [T1, T2]
 scope:
   - dev/harness.html hosts two app instances (?dev=A host, ?dev=B guest)

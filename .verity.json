@@ -1,0 +1,7 @@
+{
+  "check": {
+    "command": "npm test",
+    "timeoutS": 600
+  },
+  "ignore": ["test-output/**", "docs/evidence/**"]
+}

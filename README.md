@@ -66,7 +66,17 @@ TLS proxy. The QR codec and the offline shell do not need either.
 npm run test:unit                     # node --test, no dependencies
 npm install && npx playwright install chromium
 npm run test:browser                  # shell, QR pixels, cold offline launch, harness, spike
+npm test                              # both; this is the trusted check in .verity.json
 ```
+
+The browser runner finds Chromium in `$PLAYWRIGHT_BROWSERS_PATH`, else a
+repo-local `.browsers/`, else `../_tools/browsers/` (the factory workspace
+layout), else Playwright's default cache. To keep the browsers inside the
+repo: `PLAYWRIGHT_BROWSERS_PATH=.browsers npx playwright install chromium`.
+
+`.verity.json` names `npm test` as the trusted check for the factory's
+Verity gate. The gate only honours it at the base revision of a dispatch, so
+it takes effect from the first dispatch that starts on top of this commit.
 
 ## Claims discipline
 

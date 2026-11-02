@@ -1,6 +1,7 @@
 id: T5
 title: End-of-Monday gates and report
 persona: QA engineer (release gates, evidence capture, honest reporting)
+verify: npm test   # trusted check for the factory Verity gate; run from the repo root
 depends_on: [T1, T2, T3, T4]
 scope:
   - staged-input integrity check (md5 of SPEC.md and two mockups)

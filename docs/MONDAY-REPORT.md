@@ -296,3 +296,16 @@ node tools/serve.js 8080 --bind 0.0.0.0
    Tuesday should confirm the table choreography (place first, or scan first)
    before wiring the commitment, since the commitment must be fixed before the
    handshake frame renders.
+8. **The factory's Verity gate needs a dispatcher-written `verify:` line.**
+   Monday's dispatch carried no `verify:` field, the operator policy keys
+   checks by git remote (this repo has none), and the gate reads
+   `.verity.json` only at the base snapshot, which was taken before the
+   repository existed. So the gate reported every code file as "changed, but
+   no trusted check is configured" even though `npm test` passes. Nothing an
+   executor writes inside the workspace can fix that by design. Tuesday's
+   dispatch body must include `verify: npm test` with the repo as cwd (or
+   `verify: none` as an explicit waiver). `.verity.json` now names `npm test`
+   and every campaign manifest carries the same `verify:` line, so dispatches
+   that start on top of this commit resolve the check automatically. The
+   browser runner also locates Chromium itself now (`.browsers/`, then
+   `../_tools/browsers/`), so the check runs from a bare shell.

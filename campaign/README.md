@@ -17,3 +17,16 @@ re-dispatched to parallel executors on later days.
 
 Order executed: T1 → T2 → T3 → T4 → T5. See the YAML manifests for scope,
 done-when and evidence pointers.
+
+## Trusted check
+
+Every manifest carries `verify: npm test` (unit codec tests plus the five
+Playwright browser gates). The factory's Verity gate only honours a check it
+did not get from the executor: the dispatcher's `verify:` field, an operator
+policy entry, or `.verity.json` at the dispatch's base revision. Monday's
+dispatch carried none of these and the repository was created during the
+run, so its gate reported the work as unverifiable regardless of the test
+results. Any re-dispatch of these manifests must copy `verify:` into the
+task body (or the operator sets `verify: none` as an explicit waiver).
+`.verity.json` at the repo root now names the same check for dispatches that
+start on top of this commit.
