@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Hard constraint: nothing in this app may contact a network at runtime.
+       'self' only; wasm-unsafe-eval is for the vendored zxing decoder. -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; font-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'">
+  <meta name="theme-color" content="#061a2e">
+  <meta name="color-scheme" content="dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Modem Warfare">
+  <meta name="description" content="Modem Warfare — Radio Silence. Two phones in airplane mode fight a naval war by QR code and modem chirp. No internet, no Wi-Fi, no Bluetooth, no server, no account.">
+  <title>Modem Warfare — Radio Silence</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+<body data-screen="home">
+  <div class="sea" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <button class="topbar__back" id="nav-back" type="button" aria-label="Back to home" data-go="home" hidden>◀ HOME</button>
+    <div class="topbar__title" id="topbar-title">MODEM WARFARE</div>
+    <div class="topbar__session" id="topbar-session" title="Session"></div>
+  </header>
+
+  <main id="screens">
+
+    <!-- 1 · HOME -->
+    <section class="screen screen--home" id="screen-home" data-route="home">
+      <div class="hero">
+        <h1 class="stencil title">MODEM<br>WARFARE</h1>
+        <p class="tagline">RADIO SILENCE</p>
+        <svg class="sonar" viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="96" class="sonar__ring"/>
+          <circle cx="100" cy="100" r="64" class="sonar__ring"/>
+          <circle cx="100" cy="100" r="32" class="sonar__ring"/>
+          <line x1="4" y1="100" x2="196" y2="100" class="sonar__ring"/>
+          <line x1="100" y1="4" x2="100" y2="196" class="sonar__ring"/>
+          <path class="sonar__sweep" d="M100 100 L100 4 A96 96 0 0 1 183 52 Z"/>
+          <circle cx="138" cy="72" r="4" class="sonar__blip"/>
+          <circle cx="100" cy="100" r="3" class="sonar__dot"/>
+        </svg>
+      </div>
+      <nav class="stack">
+        <button class="btn btn--primary" type="button" data-action="new-match">NEW MATCH</button>
+        <button class="btn" type="button" data-action="join-match">JOIN MATCH <span class="btn__sub">SCAN</span></button>
+        <button class="btn btn--ghost" type="button" data-go="sealed">SEALED ORDERS</button>
+      </nav>
+      <div class="badge-row">
+        <div class="badge" id="offline-badge" data-state="checking">
+          <span class="badge__dot"></span>
+          <span class="badge__text" id="offline-badge-text">CHECKING CACHE…</span>
+        </div>
+        <p class="firstrun" id="firstrun-note">Install once while online. Never need the network again.</p>
+      </div>
+    </section>
+
+    <!-- 2 · PLACEMENT -->
+    <section class="screen" id="screen-placement" data-route="placement" hidden>
+      <h2 class="stencil h2">PLACE YOUR FLEET</h2>
+      <p class="hint">TAP A SHIP TO ROTATE · 4 · 3 · 2 · 2</p>
+      <div class="board-wrap">
+        <div class="board board--mine" id="board-placement" role="grid" aria-label="Your fleet, 7 by 7"></div>
+      </div>
+      <div class="row">
+        <button class="btn btn--half" type="button" data-action="reroll">REROLL</button>
+        <button class="btn btn--half btn--amber" type="button" data-action="lock">LOCK</button>
+      </div>
+    </section>
+
+    <!-- 3 · HANDSHAKE -->
+    <section class="screen" id="screen-handshake" data-route="handshake" hidden>
+      <h2 class="stencil h2">THE SALUTE</h2>
+      <p class="hint" id="handshake-hint">RAISE PHONES FACE TO FACE · 20 CM</p>
+      <div class="lamp" id="lamp-handshake">
+        <div class="lamp__qr" id="qr-handshake" aria-label="Your handshake frame"></div>
+        <div class="lamp__caption" id="caption-handshake">HANDSHAKE · ROUND 0</div>
+      </div>
+      <div class="scan" data-scan="handshake">
+        <video class="scan__video" playsinline muted hidden></video>
+        <div class="scan__status" data-scan-status>SCANNER IDLE</div>
+        <div class="row">
+          <button class="btn btn--half" type="button" data-action="scan-toggle">SCAN</button>
+          <button class="btn btn--half btn--ghost" type="button" data-action="manual-toggle">TYPE</button>
+        </div>
+        <form class="manual" data-manual hidden>
+          <input class="manual__input" type="text" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PASTE A FRAME" aria-label="Frame text">
+          <button class="btn btn--small" type="submit">DECODE</button>
+        </form>
+      </div>
+      <div class="wager">
+        <label class="wager__label" for="wager-input">WAGER <span class="muted">· shown on both phones from Tuesday</span></label>
+        <input class="wager__input" id="wager-input" type="text" maxlength="40" placeholder="LOSER DOES THE DISHES" autocomplete="off">
+      </div>
+      <div class="contact" id="contact-handshake" data-state="waiting">WAITING FOR CONTACT…</div>
+      <button class="btn btn--amber" type="button" data-action="begin-round" id="btn-begin-round" disabled>BEGIN ROUND 1</button>
+    </section>
+
+    <!-- 4 · ROUND LOOP -->
+    <section class="screen" id="screen-round" data-route="round" hidden>
+      <div class="round-head">
+        <h2 class="stencil h2" id="round-title">SALVO 1</h2>
+        <div class="tabs" role="tablist">
+          <button class="tab" type="button" role="tab" data-phase="target" aria-selected="true">TARGET</button>
+          <button class="tab" type="button" role="tab" data-phase="exchange">EXCHANGE</button>
+          <button class="tab" type="button" role="tab" data-phase="reveal">REVEAL</button>
+        </div>
+      </div>
+
+      <div class="phase" data-phase-panel="target">
+        <p class="hint">PICK 3 TARGETS</p>
+        <div class="board-wrap">
+          <div class="board board--enemy" id="board-enemy" role="grid" aria-label="Enemy waters, 7 by 7"></div>
+        </div>
+        <div class="picks" id="picks">— — —</div>
+        <button class="btn btn--amber" type="button" data-action="fire" id="btn-fire" disabled>FIRE → EXCHANGE</button>
+      </div>
+
+      <div class="phase" data-phase-panel="exchange" hidden>
+        <div class="mode-toggle" role="group" aria-label="Channel">
+          <button class="mode" type="button" data-mode="lamp" aria-pressed="true">LAMP · QR</button>
+          <button class="mode" type="button" data-mode="sonar" aria-pressed="false">SONAR · CHIRP</button>
+        </div>
+        <div class="lamp" id="lamp-round">
+          <div class="lamp__qr" id="qr-round" aria-label="Your salvo frame"></div>
+          <div class="lamp__caption" id="caption-round">SALVO · ROUND 1</div>
+          <div class="lamp__hint">BRIGHTNESS UP · HOLD STEADY</div>
+        </div>
+        <div class="sonar-shell" id="sonar-shell" hidden>
+          <div class="sonar-shell__bar"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <p class="hint">SONAR ARRIVES WEDNESDAY. MONDAY'S CHIRP SPIKE LIVES AT <code>/spike/</code>.</p>
+        </div>
+        <div class="scan" data-scan="round">
+          <video class="scan__video" playsinline muted hidden></video>
+          <div class="scan__status" data-scan-status>SCANNER IDLE</div>
+          <div class="row">
+            <button class="btn btn--half" type="button" data-action="scan-toggle">SCAN</button>
+            <button class="btn btn--half btn--ghost" type="button" data-action="manual-toggle">TYPE</button>
+          </div>
+          <form class="manual" data-manual hidden>
+            <input class="manual__input" type="text" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PASTE A FRAME" aria-label="Frame text">
+            <button class="btn btn--small" type="submit">DECODE</button>
+          </form>
+        </div>
+        <div class="contact" id="contact-round" data-state="waiting">WAITING FOR CONTACT…</div>
+      </div>
+
+      <div class="phase" data-phase-panel="reveal" hidden>
+        <p class="hint">INCOMING · STAGGERED REVEAL LANDS TUESDAY</p>
+        <div class="reveal" id="reveal-log">
+          <div class="reveal__line muted">No frame received this round.</div>
+        </div>
+        <div class="row">
+          <button class="btn btn--half btn--ghost" type="button" data-action="next-round" id="btn-next-round">NEXT ROUND</button>
+          <button class="btn btn--half" type="button" data-go="gameover">GAME OVER</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 · GAME OVER -->
+    <section class="screen" id="screen-gameover" data-route="gameover" hidden>
+      <h2 class="stencil h2">GAME OVER</h2>
+      <div class="stamp-wrap">
+        <div class="board-wrap board-wrap--small">
+          <div class="board board--mine" id="board-reveal" role="grid" aria-label="Revealed fleet"></div>
+        </div>
+        <div class="stamp stamp--pending" id="stamp">
+          <div class="stamp__word">AUDIT</div>
+          <div class="stamp__sub">PENDING · TUESDAY</div>
+        </div>
+      </div>
+      <div class="tally" id="tally">FLEET SUNK — 0 HITS</div>
+      <div class="row">
+        <button class="btn btn--half btn--amber" type="button" data-action="rematch">REMATCH</button>
+        <button class="btn btn--half" type="button" data-action="next-challenger">NEXT CHALLENGER</button>
+      </div>
+    </section>
+
+    <!-- 6 · SEALED ORDERS -->
+    <section class="screen" id="screen-sealed" data-route="sealed" hidden>
+      <h2 class="stencil h2">SEALED ORDERS</h2>
+      <p class="hint">ONE QR · PHONE TO PHONE · ARRIVES WEDNESDAY</p>
+      <div class="notice">LOCAL, NOT SECRET — ANYONE WHO CAN SEE THE SCREEN CAN READ IT.</div>
+      <form class="orders" id="orders-form">
+        <label>WI-FI NAME <input type="text" disabled placeholder="SSID"></label>
+        <label>WI-FI KEY <input type="text" disabled placeholder="KEY"></label>
+        <label>GATE / DOOR CODE <input type="text" disabled placeholder="CODE"></label>
+        <label>EMERGENCY CONTACT 1 <input type="text" disabled placeholder="NAME · NUMBER"></label>
+        <label>EMERGENCY CONTACT 2 <input type="text" disabled placeholder="NAME · NUMBER"></label>
+        <label>NOTE <input type="text" disabled placeholder="ONE FREE LINE"></label>
+      </form>
+      <div class="row">
+        <button class="btn btn--half" type="button" disabled>SHOW CARD</button>
+        <button class="btn btn--half btn--ghost" type="button" disabled>SCAN CARD</button>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="./vendor/qrcode-generator.js"></script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
