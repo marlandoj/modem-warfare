@@ -18,6 +18,23 @@ re-dispatched to parallel executors on later days.
 Order executed: T1 → T2 → T3 → T4 → T5. See the YAML manifests for scope,
 done-when and evidence pointers.
 
+## Tuesday campaign (day 2, dispatched 2026-11-02 evening)
+
+Same shape, same leaf-executor policy (the dispatch stated that the write
+scopes overlap in `app/js/app.js`, so no delegation). The swarm gate scored
+the scoped plan SWARM (0.90); the policy ruled, and the five manifests were
+executed sequentially by one executor in dependency order.
+
+| id | task | persona | depends on |
+|---|---|---|---|
+| T6 | Placement for real, vendored SHA-256 commitment, WAGER frame, gate seen-set | Protocol engineer | T1, T2 |
+| T7 | Salvo round loop over the Lamp, staggered reveal, sunk detection, feel | PWA frontend lead | T6 |
+| T8 | Endgame reveal, audit, stamp, forfeit, rematch | Security engineer | T6, T7 |
+| T9 | Harness plays whole matches: replay, tamper hook, automated players | Developer-tooling engineer | T3, T7, T8 |
+| T10 | End-of-Tuesday gates and report | QA engineer | T6–T9 |
+
+Order executed: T6 → T7 → T8 → T9 → T10.
+
 ## Trusted check
 
 Every manifest carries `verify: npm test` (unit codec tests plus the five

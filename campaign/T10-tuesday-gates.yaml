@@ -1,0 +1,16 @@
+id: T10
+title: End-of-Tuesday gates and report
+persona: QA engineer (release gates, evidence capture, honest reporting)
+day: Tue 2026-11-03 (executed in the Tuesday dispatch of 2026-11-02)
+verify: npm test   # trusted check for the factory Verity gate; run from the repo root
+depends_on: [T6, T7, T8, T9]
+scope:
+  - make the trusted check run from a bare shell at the new repo location (browser runner follows the node_modules symlink to the shared Playwright browsers)
+  - run unit + browser suites, capture output verbatim into docs/evidence/
+  - write docs/TUESDAY-REPORT.md: repo state, test evidence, what remains unproven on physical phones (two-phone Lamp match, BarcodeDetector path, airplane-mode smoke), and what Wednesday's Sonar integration and Sealed Orders must know
+  - update README status and run instructions
+done_when:
+  - npm test exits 0 from the workspace root with 28 unit tests and 6 browser gates green
+  - every end-of-Tuesday bar item has quoted evidence or a plain statement of what is not proven
+evidence:
+  - docs/TUESDAY-REPORT.md, docs/evidence/, README.md, RESULT.md

@@ -1,0 +1,18 @@
+id: T7
+title: Salvo round loop over the Lamp, staggered reveal, sunk detection, own-fleet damage
+persona: PWA frontend lead (state machines in vanilla JS, mobile interaction, motion design)
+day: Tue 2026-11-03 (executed in the Tuesday dispatch of 2026-11-02)
+verify: npm test   # trusted check for the factory Verity gate; run from the repo root
+depends_on: [T6]
+scope:
+  - TARGET: pick 3, FIRE freezes the picks; EXCHANGE: salvo frame on the lamp, re-rendered with results once the opponent's salvo decodes (Monday's ruled semantics, two scans per phone per round)
+  - contact line driven by game state (waiting / their salvo in / CONTACT), REVEAL held until both results are in; RESEND LAST for a phone that is a step behind; stale/future frames explained in character
+  - REVEAL: my shells on enemy waters then theirs on my fleet, 250 ms apart, splash / HIT / SUNK banner; damage carried on the own-fleet board on every screen
+  - WebAudio feel (app/js/audio.js): lamp clack, contact bell 880->1320, whump, splash, 60 Hz thud + crackle, three-tone horn, stamp thud; vibration patterns; prefers-reduced-motion drops shake/burn, keeps sound
+  - game ends when either fleet's four sunk flags are all set; both phones agree on the final round
+done_when:
+  - shell gate plays one round through the TYPE path: frame re-renders on their salvo, REVEAL held until convergence, identical re-scan is a duplicate, reveal takes >= 6 x 250 ms
+  - full match gate (T9) plays to the last sinking with mixed hits and misses and sinkings before the end
+evidence:
+  - app/js/app.js, app/js/audio.js, app/index.html, app/css/app.css
+  - tests/browser/shell.js, test-output/screen-4*.png

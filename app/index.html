@@ -68,6 +68,7 @@
       <div class="board-wrap">
         <div class="board board--mine" id="board-placement" role="grid" aria-label="Your fleet, 7 by 7"></div>
       </div>
+      <p class="hint hint--small" id="placement-hint">LOCK SEALS YOUR FLEET · THE COMMITMENT IS FIXED HERE, BEFORE ANY SALUTE</p>
       <div class="row">
         <button class="btn btn--half" type="button" data-action="reroll">REROLL</button>
         <button class="btn btn--half btn--amber" type="button" data-action="lock">LOCK</button>
@@ -82,11 +83,13 @@
         <div class="lamp__qr" id="qr-handshake" aria-label="Your handshake frame"></div>
         <div class="lamp__caption" id="caption-handshake">HANDSHAKE · ROUND 0</div>
       </div>
+      <div class="commitline" id="commit-line">COMMITMENT — LOCKED</div>
       <div class="scan" data-scan="handshake">
         <video class="scan__video" playsinline muted hidden></video>
         <div class="scan__status" data-scan-status>SCANNER IDLE</div>
         <div class="row">
           <button class="btn btn--half" type="button" data-action="scan-toggle">SCAN</button>
+          <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
           <button class="btn btn--half btn--ghost" type="button" data-action="manual-toggle">TYPE</button>
         </div>
         <form class="manual" data-manual hidden>
@@ -94,11 +97,15 @@
           <button class="btn btn--small" type="submit">DECODE</button>
         </form>
       </div>
-      <div class="wager">
-        <label class="wager__label" for="wager-input">WAGER <span class="muted">· shown on both phones from Tuesday</span></label>
-        <input class="wager__input" id="wager-input" type="text" maxlength="40" placeholder="LOSER DOES THE DISHES" autocomplete="off">
-      </div>
       <div class="contact" id="contact-handshake" data-state="waiting">WAITING FOR CONTACT…</div>
+      <div class="wager">
+        <label class="wager__label" for="wager-input">WAGER <span class="muted" id="wager-role-hint">· THE HOST SENDS IT · SHOWN ON BOTH PHONES ALL MATCH</span></label>
+        <form class="wager__form" id="wager-form">
+          <input class="wager__input" id="wager-input" type="text" maxlength="34" placeholder="LOSER DOES THE DISHES" autocomplete="off" autocapitalize="characters">
+          <button class="btn btn--small" type="submit" id="btn-wager" disabled>SEND</button>
+        </form>
+        <div class="wager__shown" id="wager-shown" data-state="none">NO WAGER YET</div>
+      </div>
       <button class="btn btn--amber" type="button" data-action="begin-round" id="btn-begin-round" disabled>BEGIN ROUND 1</button>
     </section>
 
@@ -106,6 +113,7 @@
     <section class="screen" id="screen-round" data-route="round" hidden>
       <div class="round-head">
         <h2 class="stencil h2" id="round-title">SALVO 1</h2>
+        <div class="wager-strip" id="wager-round">NO WAGER</div>
         <div class="tabs" role="tablist">
           <button class="tab" type="button" role="tab" data-phase="target" aria-selected="true">TARGET</button>
           <button class="tab" type="button" role="tab" data-phase="exchange">EXCHANGE</button>
@@ -114,12 +122,16 @@
       </div>
 
       <div class="phase" data-phase-panel="target">
-        <p class="hint">PICK 3 TARGETS</p>
+        <p class="hint" id="target-hint">PICK 3 TARGETS</p>
         <div class="board-wrap">
           <div class="board board--enemy" id="board-enemy" role="grid" aria-label="Enemy waters, 7 by 7"></div>
         </div>
         <div class="picks" id="picks">— — —</div>
         <button class="btn btn--amber" type="button" data-action="fire" id="btn-fire" disabled>FIRE → EXCHANGE</button>
+        <p class="hint hint--small">YOUR FLEET · DAMAGE</p>
+        <div class="board-wrap board-wrap--small">
+          <div class="board board--mine" id="board-own-target" role="grid" aria-label="Your fleet with damage"></div>
+        </div>
       </div>
 
       <div class="phase" data-phase-panel="exchange" hidden>
@@ -130,7 +142,7 @@
         <div class="lamp" id="lamp-round">
           <div class="lamp__qr" id="qr-round" aria-label="Your salvo frame"></div>
           <div class="lamp__caption" id="caption-round">SALVO · ROUND 1</div>
-          <div class="lamp__hint">BRIGHTNESS UP · HOLD STEADY</div>
+          <div class="lamp__hint">BRIGHTNESS UP · HOLD STEADY · HOLD UNTIL BOTH PHONES CHIME</div>
         </div>
         <div class="sonar-shell" id="sonar-shell" hidden>
           <div class="sonar-shell__bar"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
@@ -141,6 +153,7 @@
           <div class="scan__status" data-scan-status>SCANNER IDLE</div>
           <div class="row">
             <button class="btn btn--half" type="button" data-action="scan-toggle">SCAN</button>
+            <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
             <button class="btn btn--half btn--ghost" type="button" data-action="manual-toggle">TYPE</button>
           </div>
           <form class="manual" data-manual hidden>
@@ -149,33 +162,75 @@
           </form>
         </div>
         <div class="contact" id="contact-round" data-state="waiting">WAITING FOR CONTACT…</div>
+        <div class="row">
+          <button class="btn btn--half btn--ghost" type="button" data-action="resend-last" id="btn-resend" title="Show the previous step's frame again for a phone that is behind">RESEND LAST</button>
+          <button class="btn btn--half btn--amber" type="button" data-action="reveal" id="btn-reveal" disabled>REVEAL →</button>
+        </div>
       </div>
 
       <div class="phase" data-phase-panel="reveal" hidden>
-        <p class="hint">INCOMING · STAGGERED REVEAL LANDS TUESDAY</p>
+        <div class="banner" id="banner" hidden></div>
+        <p class="hint hint--small">YOUR SHELLS · ENEMY WATERS</p>
+        <div class="board-wrap board-wrap--small">
+          <div class="board board--enemy" id="board-reveal-enemy" role="grid" aria-label="Your shots on the enemy"></div>
+        </div>
+        <p class="hint hint--small">INCOMING · YOUR FLEET</p>
+        <div class="board-wrap board-wrap--small">
+          <div class="board board--mine" id="board-reveal-own" role="grid" aria-label="Enemy shots on your fleet"></div>
+        </div>
         <div class="reveal" id="reveal-log">
           <div class="reveal__line muted">No frame received this round.</div>
         </div>
         <div class="row">
-          <button class="btn btn--half btn--ghost" type="button" data-action="next-round" id="btn-next-round">NEXT ROUND</button>
-          <button class="btn btn--half" type="button" data-go="gameover">GAME OVER</button>
+          <button class="btn btn--half btn--amber" type="button" data-action="next-round" id="btn-next-round" disabled>NEXT ROUND</button>
+          <button class="btn btn--half btn--amber" type="button" data-action="to-audit" id="btn-to-audit" hidden>TO THE AUDIT →</button>
         </div>
       </div>
     </section>
 
     <!-- 5 · GAME OVER -->
     <section class="screen" id="screen-gameover" data-route="gameover" hidden>
-      <h2 class="stencil h2">GAME OVER</h2>
+      <h2 class="stencil h2" id="gameover-title">GAME OVER</h2>
+      <div class="wager-strip" id="wager-gameover">NO WAGER</div>
+      <div class="outcome" id="outcome"></div>
       <div class="stamp-wrap">
-        <div class="board-wrap board-wrap--small">
-          <div class="board board--mine" id="board-reveal" role="grid" aria-label="Revealed fleet"></div>
+        <div class="boards-2">
+          <div class="boards-2__col">
+            <p class="hint hint--small">YOUR FLEET</p>
+            <div class="board board--mine" id="board-final-own" role="grid" aria-label="Your fleet, final"></div>
+          </div>
+          <div class="boards-2__col">
+            <p class="hint hint--small" id="final-enemy-hint">ENEMY FLEET · AWAITING REVEAL</p>
+            <div class="board board--enemy" id="board-final-enemy" role="grid" aria-label="Enemy fleet, revealed"></div>
+          </div>
         </div>
-        <div class="stamp stamp--pending" id="stamp">
-          <div class="stamp__word">AUDIT</div>
-          <div class="stamp__sub">PENDING · TUESDAY</div>
+        <div class="stamp stamp--pending" id="stamp" data-verdict="pending">
+          <div class="stamp__word" id="stamp-word">AUDIT</div>
+          <div class="stamp__sub" id="stamp-sub">AWAITING REVEAL</div>
         </div>
       </div>
-      <div class="tally" id="tally">FLEET SUNK — 0 HITS</div>
+      <div class="tally" id="tally"></div>
+      <div class="audit-detail" id="audit-detail" hidden></div>
+      <p class="hint" id="reveal-exchange-hint">THE REVEAL · RAISE PHONES ONCE MORE</p>
+      <div class="lamp lamp--small" id="lamp-reveal">
+        <div class="lamp__qr" id="qr-reveal" aria-label="Your reveal frame"></div>
+        <div class="lamp__caption" id="caption-reveal">REVEAL</div>
+      </div>
+      <div class="scan" data-scan="gameover">
+        <video class="scan__video" playsinline muted hidden></video>
+        <div class="scan__status" data-scan-status>SCANNER IDLE</div>
+        <div class="row">
+          <button class="btn btn--half" type="button" data-action="scan-toggle">SCAN</button>
+          <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
+          <button class="btn btn--half btn--ghost" type="button" data-action="manual-toggle">TYPE</button>
+        </div>
+        <form class="manual" data-manual hidden>
+          <input class="manual__input" type="text" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PASTE A FRAME" aria-label="Frame text">
+          <button class="btn btn--small" type="submit">DECODE</button>
+        </form>
+      </div>
+      <div class="contact" id="contact-gameover" data-state="waiting">WAITING FOR THEIR REVEAL…</div>
+      <button class="btn btn--ghost" type="button" data-action="claim-forfeit" id="btn-forfeit">NO REVEAL? CLAIM FORFEIT</button>
       <div class="row">
         <button class="btn btn--half btn--amber" type="button" data-action="rematch">REMATCH</button>
         <button class="btn btn--half" type="button" data-action="next-challenger">NEXT CHALLENGER</button>

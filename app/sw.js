@@ -12,7 +12,7 @@
  * Bump VERSION whenever any precached file changes, so old caches are dropped.
  */
 
-const VERSION = 'mw-mon-v3';
+const VERSION = 'mw-tue-v1';
 const CACHE = `modem-warfare-${VERSION}`;
 
 const PRECACHE = [
@@ -23,6 +23,9 @@ const PRECACHE = [
   './js/app.js',
   './js/frame.js',
   './js/fleet.js',
+  './js/sha256.js',
+  './js/audit.js',
+  './js/audio.js',
   './js/qr.js',
   './js/scanner.js',
   './vendor/qrcode-generator.js',
