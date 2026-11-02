@@ -7,12 +7,19 @@ import { fileURLToPath } from 'node:url';
 
 // Locate the Playwright browser cache before any suite imports playwright.
 // Honour an explicit PLAYWRIGHT_BROWSERS_PATH; otherwise use a repo-local
-// `.browsers/` or the factory workspace's sibling `_tools/browsers/`; else
-// Playwright's default (~/.cache/ms-playwright). Lets the suite run from a
-// bare shell (the orchestrator's trusted check) without per-shell setup.
+// `.browsers/`, the factory workspace's sibling `_tools/browsers/`, or a
+// `browsers/` directory next to the node_modules that actually holds the
+// playwright package (node_modules may be a symlink into a shared tool dir,
+// as it is in the factory workspace layout); else Playwright's default
+// (~/.cache/ms-playwright). Lets the suite run from a bare shell (the
+// orchestrator's trusted check) without per-shell setup.
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
   const candidates = [path.join(repoRoot, '.browsers'), path.join(repoRoot, '..', '_tools', 'browsers')];
+  try {
+    const pwDir = fs.realpathSync(path.join(repoRoot, 'node_modules', 'playwright'));
+    candidates.push(path.resolve(pwDir, '..', '..', 'browsers'));
+  } catch { /* playwright not installed: the suites will say so */ }
   const found = candidates.find((p) => fs.existsSync(p));
   if (found) process.env.PLAYWRIGHT_BROWSERS_PATH = found;
 }
