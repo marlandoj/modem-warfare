@@ -30,11 +30,23 @@ const MIME = {
   '.txt': 'text/plain; charset=utf-8',
 };
 
-export function createServer(root = ROOT) {
+/**
+ * createServer(root, { overrides })
+ *   overrides: { '/app/js/config.js': 'export const SOUND = false;\n' } serves
+ *   that body in place of the file. Test-only: the sound-flag gate runs the
+ *   app with the kill switch flipped without editing the repository.
+ */
+export function createServer(root = ROOT, { overrides = {} } = {}) {
   return http.createServer((req, res) => {
     const url = new URL(req.url, 'http://x');
     let rel = decodeURIComponent(url.pathname);
     if (rel.endsWith('/')) rel += 'index.html';
+    if (Object.prototype.hasOwnProperty.call(overrides, rel)) {
+      const body = Buffer.from(overrides[rel], 'utf8');
+      res.writeHead(200, { 'Content-Type': MIME[path.extname(rel).toLowerCase()] || 'application/octet-stream', 'Content-Length': body.length, 'Cache-Control': 'no-cache' });
+      res.end(body);
+      return;
+    }
     const file = path.normalize(path.join(root, rel));
     if (!file.startsWith(root)) { res.writeHead(403); res.end(); return; }
     fs.stat(file, (err, st) => {

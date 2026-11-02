@@ -7,9 +7,16 @@
 //   fleet is fully sunk → Game over (reveal exchange, audit, stamp).
 //
 // One decode entry point (injectText) feeds the FrameGate, whatever carried
-// the text: camera, typed, or the dev harness's BroadcastChannel. The gate
-// decides accepted / duplicate / rejected; only an accepted frame touches
-// state, so a failed decode or a re-scan can never fork the match.
+// the text: camera, typed, the Sonar's chirp decoder, or the dev harness's
+// BroadcastChannel. The gate decides accepted / duplicate / rejected; only an
+// accepted frame touches state, so a failed decode, a misheard chirp or a
+// re-scan can never fork the match. routeText() sits in front of it and
+// sends Sealed Orders card text (prefix MWO1) to that screen instead.
+//
+// Wednesday: the Sonar row (CHIRP / LISTEN) is a companion to the lamp on the
+// three Salute screens; Sealed Orders is a full feature (orders-ui.js); and
+// everything that makes sound hangs off config.SOUND (see config.js).
+import { SOUND } from './config.js';
 import {
   TYPE, SALVO_SIZE, SHIP_SIZES, BOARD, cellIndex, cellLabel, frameToText, textToFrame,
   randomSession, FrameGate, describeFrame, hex, normaliseWager, fleetIsValid,
@@ -19,6 +26,9 @@ import { auditReveal, stampFor, VERDICT } from './audit.js';
 import { qrSvg } from './qr.js';
 import { Scanner } from './scanner.js';
 import * as sfx from './audio.js';
+import { sonar } from './sonar.js';
+import { isCardText } from './orders.js';
+import { initOrders } from './orders-ui.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -59,7 +69,6 @@ function freshState() {
     lastRejection: null,
     gate: new FrameGate(),
     phase: 'target',
-    mode: 'lamp',
     events: [],
     cacheStatus: null,
   };
@@ -69,6 +78,7 @@ const state = freshState();
 const scanners = new Map();
 let wakeLock = null;
 let forfeitArmedAt = 0;
+let orders = null; // Sealed Orders controller (initOrders), set at boot
 
 // ------------------------------------------------------------ router ---
 
@@ -92,10 +102,12 @@ function showRoute(route) {
   $('#topbar-title').textContent = TITLES[route];
   $('#nav-back').hidden = route === 'home';
   for (const [key, sc] of scanners) if (!key.startsWith(route)) sc.stop();
+  if (SOUND && sonar.listening) { sonar.stop(); syncSonarUI(); } // the mic never stays open across screens
   if (route === 'handshake') renderHandshake();
   if (route === 'round') renderRound();
   if (route === 'placement') renderPlacement();
   if (route === 'gameover') renderGameOver();
+  if (route === 'sealed' && orders) orders.show();
   if (route === 'handshake' || route === 'round' || route === 'gameover') requestWakeLock(); else releaseWakeLock();
   window.scrollTo(0, 0);
   dispatch('mw:route', { route });
@@ -416,14 +428,12 @@ function renderTarget() {
 function fire() {
   if (state.picks.length !== SALVO_SIZE) return;
   state.fired = true;
+  sfx.fire();
   dispatch('mw:fire', { round: state.round, picks: state.picks.slice() });
   setPhase('exchange');
 }
 
 function renderExchange() {
-  $('#lamp-round').hidden = state.mode !== 'lamp';
-  $('#sonar-shell').hidden = state.mode !== 'sonar';
-  for (const m of $$('.mode')) m.setAttribute('aria-pressed', String(m.dataset.mode === state.mode));
   const qrEl = $('#qr-round');
   const cap = $('#caption-round');
   if (state.fired) {
@@ -611,7 +621,7 @@ async function playReveal() {
     if (!still()) return;
     sfx.whump();
     await sleep(90);
-    if (rec.theirHits[i]) { sfx.hit(); vibrate([40, 30, 80]); markCell(ownBoard, idx, 'hit', 'cell--burn'); shakeBoard(ownBoard); }
+    if (rec.theirHits[i]) { sfx.damage(); vibrate([40, 30, 80]); markCell(ownBoard, idx, 'hit', 'cell--burn'); shakeBoard(ownBoard); }
     else { sfx.splash(); markCell(ownBoard, idx, 'miss', 'cell--splash'); }
     logLine(`Incoming shell ${i + 1} → ${cellLabel(idx)} … ${rec.theirHits[i] ? 'HIT on my fleet' : 'splash'}`, rec.theirHits[i] ? 'reveal__line--hit' : '');
     await sleep(REVEAL_STEP_MS - 90);
@@ -643,6 +653,7 @@ function finishRound(rec) {
     // one from the other phone is accepted and audited before we even arrive.
     state.gate.expectRound(state.round + 1);
     logLine(state.outcome.result === 'win' ? 'ENEMY FLEET DESTROYED — TO THE AUDIT' : state.outcome.result === 'loss' ? 'ALL HANDS LOST — TO THE AUDIT' : 'BOTH FLEETS LOST — TO THE AUDIT', 'reveal__line--sunk');
+    if (state.outcome.result === 'win') sfx.victory(); else sfx.defeat();
     $('#btn-next-round').hidden = true;
     $('#btn-to-audit').hidden = false;
     dispatch('mw:gameover', { outcome: state.outcome });
@@ -841,9 +852,8 @@ function claimForfeit() {
 }
 
 function resetMatch({ keepRole = false } = {}) {
-  const keep = { role: state.role, mode: state.mode, events: state.events, cacheStatus: state.cacheStatus, wagerDraft: state.wager };
+  const keep = { role: state.role, events: state.events, cacheStatus: state.cacheStatus, wagerDraft: state.wager };
   Object.assign(state, freshState());
-  state.mode = keep.mode;
   state.events = keep.events;
   state.cacheStatus = keep.cacheStatus;
   if (keepRole) {
@@ -884,6 +894,126 @@ async function offlineStatus() {
   }
 }
 
+// ------------------------------------------------------------ routing ---
+
+/**
+ * Every carrier lands here: camera, typed text, the Sonar decoder and the
+ * dev channel. Sealed Orders card text (prefix MWO1) goes to that screen;
+ * everything else is a match frame for injectText and the gate. A card seen
+ * by a match scanner, or a frame seen by the card scanner, is refused aloud.
+ */
+function routeText(text, meta = {}) {
+  if (isCardText(text)) {
+    if (orders && (meta.block === 'sealed' || routeFromHash() === 'sealed')) return orders.receive(text, meta);
+    toast('THAT IS A SEALED ORDERS CARD · OPEN SEALED ORDERS → SCAN CARD TO KEEP IT', 2800);
+    return { status: 'ignored', reason: 'CARD_IN_MATCH' };
+  }
+  if (meta.block === 'sealed') {
+    toast('THAT IS A MATCH FRAME, NOT A CARD', 2200);
+    return { status: 'ignored', reason: 'FRAME_IN_SEALED' };
+  }
+  return injectText(text.toUpperCase(), meta);
+}
+
+// ------------------------------------------------------------- sonar ---
+// The Sonar row: CHIRP sends the frame on the lamp as sound; LISTEN opens
+// the microphone. A decoded chirp is routed like any scan; the row shows the
+// gate's verdict in character (HEARD ✓ / HEARD AGAIN / NEAR MISS).
+
+function activeSonarBlock() {
+  const route = routeFromHash();
+  return $$('[data-sonar]').find((b) => b.dataset.sonar === route) || null;
+}
+
+function syncSonarUI() {
+  for (const b of $$('[data-sonar]')) {
+    $('[data-action="listen"]', b).textContent = sonar.listening ? 'STOP' : 'LISTEN';
+    b.classList.toggle('sonar-row--listening', sonar.listening);
+  }
+}
+
+function blip(block, kind) {
+  if (!block || reducedMotion()) return;
+  const sweep = $('.sweep', block);
+  sweep.classList.remove('sweep--hit', 'sweep--again', 'sweep--miss');
+  void sweep.offsetWidth;
+  sweep.classList.add('sweep--' + kind);
+}
+
+async function chirpCurrent(block) {
+  const text = state.outgoing.text;
+  if (!text) { toast('NOTHING ON THE LAMP TO CHIRP YET'); return null; }
+  try {
+    block.classList.add('sonar-row--chirping');
+    const r = await sonar.transmit(text);
+    dispatch('mw:chirped', { text, seconds: r ? r.seconds : null, sampleRate: r ? r.sampleRate : null });
+    return r;
+  } catch (err) {
+    toast('CHIRP FAILED · ' + err.message.toUpperCase().slice(0, 36), 3000);
+    return null;
+  } finally {
+    block.classList.remove('sonar-row--chirping');
+    syncSonarUI();
+  }
+}
+
+async function toggleListen() {
+  if (sonar.listening) { sonar.stop(); syncSonarUI(); return; }
+  try {
+    const mode = await sonar.listen();
+    sfx.ping();
+    dispatch('mw:listen', { capture: mode, mic: sonar.micSettings });
+  } catch (err) {
+    toast(err.message.toUpperCase().slice(0, 44), 3200);
+  }
+  syncSonarUI();
+}
+
+/** The gate's verdict on a chirp, shown on the row: spectacle, never state. */
+function sonarHeard(text, res, meta) {
+  const block = activeSonarBlock();
+  const heard = block ? $('[data-sonar-heard]', block) : null;
+  let desc = text.length > 48 ? text.slice(0, 48) + '…' : text;
+  try { desc = describeFrame(textToFrame(text)); } catch { /* not a frame: say what was heard */ }
+  if (res.status === 'accepted') {
+    if (heard) { heard.dataset.state = 'heard'; heard.textContent = `HEARD ✓ ${desc}`; }
+    sfx.ping();
+    blip(block, 'hit');
+  } else if (res.status === 'duplicate') {
+    if (heard) { heard.dataset.state = 'again'; heard.textContent = `HEARD AGAIN · ALREADY HAVE IT · ${desc}`; }
+    blip(block, 'again');
+  } else {
+    // Near miss: the chirp decoded to something the gate will not take.
+    // Nothing moved; the lamp still rules; say again.
+    const why = (res.reason || 'SAY AGAIN').replace(/_/g, ' ');
+    if (heard) { heard.dataset.state = 'miss'; heard.textContent = `NEAR MISS · ${why} · ${desc} · THE QR STILL RULES`; }
+    sfx.nearMiss();
+    vibrate([30, 40, 30]);
+    blip(block, 'miss');
+  }
+  dispatch('mw:sonar', { text, status: res.status, reason: res.reason, capture: meta.capture, loopback: !!meta.loopback });
+}
+
+function wireSonarBlocks() {
+  if (!SOUND) return;
+  sonar.onText = (text, meta) => {
+    const res = routeText(text, { source: 'sonar', ...meta });
+    sonarHeard(text, res, meta);
+  };
+  sonar.onLevel = (rms) => {
+    const b = activeSonarBlock();
+    if (b) b.style.setProperty('--level', Math.min(1, rms * 6).toFixed(3));
+  };
+  sonar.onStatus = (msg) => {
+    const b = activeSonarBlock();
+    if (b) $('[data-sonar-status]', b).textContent = msg;
+  };
+  for (const block of $$('[data-sonar]')) {
+    $('[data-action="chirp"]', block).addEventListener('click', () => chirpCurrent(block));
+    $('[data-action="listen"]', block).addEventListener('click', () => toggleListen());
+  }
+}
+
 // ---------------------------------------------------------- scanners ---
 
 function scannerFor(block) {
@@ -891,8 +1021,9 @@ function scannerFor(block) {
   if (scanners.has(key)) return scanners.get(key);
   const video = $('.scan__video', block);
   const status = $('[data-scan-status]', block);
-  const sc = new Scanner(video, (text, meta) => injectText(text, { source: 'camera', ...meta }), {
+  const sc = new Scanner(video, (text, meta) => routeText(text, { source: 'camera', block: key, ...meta }), {
     onStatus: (msg) => { status.textContent = msg; },
+    maxEdge: key === 'sealed' ? 1280 : 640, // a card is a dense QR: keep more pixels
   });
   scanners.set(key, sc);
   return sc;
@@ -913,9 +1044,9 @@ function wireScanBlocks() {
     manual.addEventListener('submit', (e) => {
       e.preventDefault();
       const input = $('input', manual);
-      const text = input.value.trim().toUpperCase();
+      const text = input.value.trim();
       if (!text) return;
-      injectText(text, { source: 'manual' });
+      routeText(text, { source: 'manual', block: block.dataset.scan });
       input.value = '';
     });
   }
@@ -984,8 +1115,8 @@ function wire() {
   });
   $('#wager-form').addEventListener('submit', (e) => { e.preventDefault(); sendWager(); });
   for (const t of $$('.tab')) t.addEventListener('click', () => setPhase(t.dataset.phase));
-  for (const m of $$('.mode')) m.addEventListener('click', () => { state.mode = m.dataset.mode; renderExchange(); });
   wireScanBlocks();
+  wireSonarBlocks();
 }
 
 // Public surface for the dev harness, tests and the spike page.
@@ -1014,7 +1145,13 @@ window.MW = {
   setWager: (text) => { $('#wager-input').value = text; sendWager(); return state.wager; },
   converged,
   auditRounds,
+  routeText,
+  sound: SOUND,
+  sonar: SOUND ? sonar : null,
+  orders: null, // set at boot
+  chirp: () => { const b = activeSonarBlock(); return b ? chirpCurrent(b) : Promise.resolve(null); },
   devTamper: null, // dev channel hook: (text) => text, applied to outgoing frames only
+  devMuteFrames: false, // dev channel hook: true = frames do not cross the text transport (chirp gate)
   devInstance: DEV_INSTANCE,
 };
 
@@ -1024,6 +1161,14 @@ function parseLabel(l) {
   return cellIndex(col, row);
 }
 
+// The kill switch, applied before anything is wired: with SOUND off every
+// sound affordance leaves the document, so there is nothing to grey out.
+if (!SOUND) for (const el of $$('[data-needs-sound]')) el.remove();
+
+// Two dev instances share one origin, so they would share one localStorage;
+// each keeps its cards under its own key, as two phones would.
+orders = initOrders({ $, $$, toast, dispatch, vibrate, storeKey: DEV_INSTANCE ? `mw.orders.v1.dev-${DEV_INSTANCE}` : undefined });
+window.MW.orders = orders;
 wire();
 updateTopbar();
 showRoute(routeFromHash());

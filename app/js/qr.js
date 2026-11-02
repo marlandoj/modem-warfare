@@ -4,6 +4,11 @@
 // SPEC.md: base32 payload into a QR version 2–3 at error-correction M. The
 // encoder tries version 2 first and falls back to 3; anything that does not
 // fit version 3 is a bug in the caller, not something to silently upgrade.
+//
+// Wednesday: the Sealed Orders card is the one exception, by design. It is a
+// UTF-8 JSON payload in Byte mode, up to orders.js's CARD_QR_MAX_VERSION, and
+// it asks for that ceiling explicitly through the options; the match frames
+// keep the v2–3 rule.
 
 const VENDOR_BASE = new URL('../vendor/', import.meta.url).href;
 
@@ -11,27 +16,30 @@ export const QR_MIN_VERSION = 2;
 export const QR_MAX_VERSION = 3;
 export const QR_EC_LEVEL = 'M';
 
-export function buildQr(text) {
-  if (!/^[0-9A-Z $%*+\-./:]+$/.test(text)) throw new Error('QR payload must be alphanumeric-mode safe');
+export function buildQr(text, { minVersion = QR_MIN_VERSION, maxVersion = QR_MAX_VERSION, ec = QR_EC_LEVEL, mode = 'Alphanumeric' } = {}) {
+  if (mode === 'Alphanumeric' && !/^[0-9A-Z $%*+\-./:]+$/.test(text)) throw new Error('QR payload must be alphanumeric-mode safe');
   const factory = globalThis.qrcode;
   if (typeof factory !== 'function') throw new Error('qrcode-generator not loaded');
+  if (mode === 'Byte' && factory.stringToBytesFuncs && factory.stringToBytes !== factory.stringToBytesFuncs['UTF-8']) {
+    factory.stringToBytes = factory.stringToBytesFuncs['UTF-8']; // the library's default is one byte per char code
+  }
   let lastErr;
-  for (let version = QR_MIN_VERSION; version <= QR_MAX_VERSION; version++) {
+  for (let version = minVersion; version <= maxVersion; version++) {
     try {
-      const qr = factory(version, QR_EC_LEVEL);
-      qr.addData(text, 'Alphanumeric');
+      const qr = factory(version, ec);
+      qr.addData(text, mode);
       qr.make();
       return { qr, version, modules: qr.getModuleCount() };
     } catch (err) {
       lastErr = err;
     }
   }
-  throw new Error(`payload of ${text.length} chars does not fit QR v${QR_MAX_VERSION}-${QR_EC_LEVEL}: ${lastErr}`);
+  throw new Error(`payload of ${text.length} chars does not fit QR v${maxVersion}-${ec}: ${lastErr}`);
 }
 
 /** Render as an inline SVG string: black modules on white, 4-module quiet zone. */
-export function qrSvg(text, { quiet = 4 } = {}) {
-  const { qr, version, modules } = buildQr(text);
+export function qrSvg(text, { quiet = 4, ...opts } = {}) {
+  const { qr, version, modules } = buildQr(text, opts);
   const size = modules + quiet * 2;
   let d = '';
   for (let r = 0; r < modules; r++) {
@@ -45,8 +53,8 @@ export function qrSvg(text, { quiet = 4 } = {}) {
 }
 
 /** Draw onto a canvas 2D context (used by tests and by the Sonar page). */
-export function qrToCanvas(text, canvas, { scale = 8, quiet = 4 } = {}) {
-  const { qr, version, modules } = buildQr(text);
+export function qrToCanvas(text, canvas, { scale = 8, quiet = 4, ...opts } = {}) {
+  const { qr, version, modules } = buildQr(text, opts);
   const size = (modules + quiet * 2) * scale;
   canvas.width = size;
   canvas.height = size;

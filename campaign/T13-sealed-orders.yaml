@@ -1,0 +1,21 @@
+id: T13
+title: Sealed Orders — the household card as a full feature (half-day timebox)
+day: Wednesday 2026-11-04
+persona: Product-minded frontend engineer (with the security engineer's claims discipline)
+depends_on: [T2, T6]
+verify: npm test
+scope:
+  - app/js/orders.js: card codec (MWO1 + JSON), limits (note ≤ 700 chars, ≤ 8 items of ≤ 40 chars, ≤ 1300 wire bytes), validator messages, localStorage CardStore
+  - app/js/orders-ui.js: list / compose / card / scan views; mark-as-done; pass it on (hop + 1); print; delete
+  - app/js/qr.js: Byte-mode, UTF-8, version ceiling options for the card (frames keep v2–3 Alphanumeric)
+  - app/js/app.js: routeText sends MWO1 text to the card screen, never to the FrameGate
+  - tests/orders.test.js, tests/browser/orders.js
+rules:
+  - over-limit input is refused with a message naming the count and the limit; nothing is ever truncated
+  - the words secret, secure and encrypted do not appear in the screen's copy; the standing label is "LOCAL, NOT SECRET"
+  - no network, no account; the card is kept on the receiving phone only
+done_when:
+  - compose → one static QR → scan-to-keep on the other instance → kept in localStorage → mark done → reload keeps it → pass it on renders hop 2
+  - the over-limit note is refused with the message visible
+  - the composed card and the largest allowed card decode from pixels through the app's decoder
+evidence: docs/evidence/browser-gates.txt (orders), docs/evidence/orders-harness.png, docs/evidence/unit-tests.txt

@@ -35,6 +35,24 @@ executed sequentially by one executor in dependency order.
 
 Order executed: T6 → T7 → T8 → T9 → T10.
 
+## Wednesday campaign (day 3, dispatched 2026-11-02 evening)
+
+Same shape, same leaf-executor policy (the dispatch's orchestration policy
+ruled out delegation: the write scopes overlap in `app/js/app.js`,
+`app/index.html`, `app/css/app.css` and `app/sw.js`). The swarm gate scored
+the scoped plan SUGGEST (0.42); the policy ruled, and the five manifests were
+executed sequentially by one executor in dependency order.
+
+| id | task | persona | depends on |
+|---|---|---|---|
+| T11 | Sonar engine: ggwave under the unchanged CSP (vendor patch), AudioWorklet capture, feel effects | DSP / audio engineer | T4, T7 |
+| T12 | The kill switch: one flag in `config.js`; Sonar row, near-miss drama, effects wired | PWA frontend lead | T11 |
+| T13 | Sealed Orders as a full feature: codec, limits, store, screen | Product-minded frontend (claims discipline) | T2, T6 |
+| T14 | Harness carries chirps and cards; mutable frame transport; served overrides | Developer-tooling engineer | T9, T11, T13 |
+| T15 | End-of-Wednesday gates and report | QA engineer | T11–T14 |
+
+Order executed: T11 → T12 → T13 → T14 → T15.
+
 ## Trusted check
 
 Every manifest carries `verify: npm test` (unit codec tests plus the five

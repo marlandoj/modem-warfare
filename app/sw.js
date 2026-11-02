@@ -4,15 +4,20 @@
  *  - Everything the app needs is listed in PRECACHE and fetched exactly once,
  *    at install time. After that the shell is served cache-first and never
  *    touches the network for a precached URL.
- *  - Nothing outside app/ is precached: the dev harness (/dev/) and the
- *    ggwave spike (/spike/) are tools, not product.
+ *  - Nothing outside app/ is precached: the dev harness (/dev/), the ggwave
+ *    spike (/spike/) and the repository's GitHub Pages landing page
+ *    (/index.html, /.nojekyll) are not the app.
+ *  - Wednesday: config.js, the Sonar (sonar.js, the AudioWorklet module
+ *    sonar-worklet.js, vendor/ggwave/ggwave.js) and Sealed Orders
+ *    (orders.js, orders-ui.js) join the list; ggwave is precached whatever
+ *    config.SOUND says, so flipping the flag never changes the cache list.
  *  - The page can ask "are you really all cached?" over postMessage and gets
  *    a per-URL answer; the Home badge is driven by that, not by a flag.
  *
  * Bump VERSION whenever any precached file changes, so old caches are dropped.
  */
 
-const VERSION = 'mw-tue-v1';
+const VERSION = 'mw-wed-v1';
 const CACHE = `modem-warfare-${VERSION}`;
 
 const PRECACHE = [
@@ -20,17 +25,23 @@ const PRECACHE = [
   './index.html',
   './manifest.webmanifest',
   './css/app.css',
+  './js/config.js',
   './js/app.js',
   './js/frame.js',
   './js/fleet.js',
   './js/sha256.js',
   './js/audit.js',
   './js/audio.js',
+  './js/sonar.js',
+  './js/sonar-worklet.js',
+  './js/orders.js',
+  './js/orders-ui.js',
   './js/qr.js',
   './js/scanner.js',
   './vendor/qrcode-generator.js',
   './vendor/zxing/zxing-reader.js',
   './vendor/zxing/zxing_reader.wasm',
+  './vendor/ggwave/ggwave.js',
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',

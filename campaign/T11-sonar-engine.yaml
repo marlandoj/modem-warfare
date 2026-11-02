@@ -1,0 +1,22 @@
+id: T11
+title: Sonar engine — ggwave in the app under the unchanged CSP, AudioWorklet capture
+day: Wednesday 2026-11-04 (dispatched 2026-11-02 evening)
+persona: DSP / audio engineer
+depends_on: [T4, T7]
+verify: npm test
+scope:
+  - app/js/sonar.js: the engine (ready / encode / transmit / listen / stop / injectLoopback), shared AudioContext at 48 kHz
+  - app/js/sonar-worklet.js: AudioWorklet capture, chunk = one ggwave frame after resampling
+  - app/vendor/ggwave/ggwave.js + tools/patch-ggwave.js: three documented edits so embind runs without 'unsafe-eval' and the data: wasm is never fetched
+  - app/js/audio.js: context owner; fire / damage / victory / defeat / ping / nearMiss effects
+rules:
+  - audible protocol only (AUDIBLE_FAST, volume 50 — the spike's numbers)
+  - mic opened with echoCancellation / noiseSuppression / autoGainControl off
+  - mic closed before transmit, reopened after
+  - the chirp carries the same base32 text the QR carries; it enters through routeText → injectText → FrameGate
+  - the shell CSP is byte-identical to Tuesday's (asserted in tests/browser/sonar.js)
+done_when:
+  - ggwave loads in the app with zero console errors under the unchanged policy
+  - LISTEN reports capture 'worklet'; CHIRP closes and reopens the mic
+  - harness chirp round-trip: handshake by chirp alone both ways, salvo ×10 ≥ 8 decoded, every decode identical
+evidence: docs/evidence/browser-gates.txt (sonar), docs/evidence/sonar-harness.png

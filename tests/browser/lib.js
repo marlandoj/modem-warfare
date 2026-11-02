@@ -11,8 +11,8 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 export const OUT = path.join(ROOT, 'test-output');
 fs.mkdirSync(OUT, { recursive: true });
 
-export async function startServer() {
-  const server = createServer(ROOT);
+export async function startServer({ overrides = {} } = {}) {
+  const server = createServer(ROOT, { overrides });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   const { port } = server.address();
   return { server, port, base: `http://127.0.0.1:${port}`, close: () => new Promise((r) => server.close(r)) };

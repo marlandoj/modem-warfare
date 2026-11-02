@@ -32,6 +32,9 @@ const suites = [
   ['harness', () => import('./harness.js')],
   ['match', () => import('./match.js')],
   ['spike', () => import('./spike.js')],
+  ['sonar', () => import('./sonar.js')],
+  ['soundflag', () => import('./soundflag.js')],
+  ['orders', () => import('./orders.js')],
 ];
 
 const lines = [];

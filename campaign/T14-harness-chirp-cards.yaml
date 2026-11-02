@@ -1,0 +1,16 @@
+id: T14
+title: Harness carries chirps and cards; frame transport can be muted
+day: Wednesday 2026-11-04
+persona: Developer-tooling engineer
+depends_on: [T9, T11, T13]
+verify: npm test
+scope:
+  - dev/channel.js: posts chirp waveform samples (mw:chirp) and card text (mw:orders-render); MW.devMuteFrames silences the frame transport; routes through MW.routeText
+  - dev/harness.js + harness.html: runChirp({ n }) and runOrders() scripts and buttons; iframes allow microphone and autoplay
+  - app/js/sonar.js: listen({ loopback: true }) + injectLoopback(samples) — the only dev-facing hook, same graph as the mic from the MediaStream onwards
+  - tools/serve.js + tests/browser/lib.js: per-path overrides so a gate can serve the flipped config.js without editing the repository
+  - per-instance Sealed Orders store key under ?dev=, since two iframes share one origin's localStorage
+done_when:
+  - runChirp proves the Salute crosses by chirp alone with the text transport muted
+  - runOrders proves compose / keep / done / reload / pass-on across the two instances
+evidence: docs/evidence/browser-gates.txt (sonar, orders, soundflag)

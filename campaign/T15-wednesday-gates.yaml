@@ -1,0 +1,15 @@
+id: T15
+title: End-of-Wednesday gates and report
+day: Wednesday 2026-11-04
+persona: QA engineer
+depends_on: [T11, T12, T13, T14]
+verify: npm test
+scope:
+  - tests/browser/sonar.js, soundflag.js, orders.js joined to tests/browser/run.js
+  - tests/orders.test.js joined to npm run test:unit
+  - app/sw.js precache bumped to mw-wed-v1 (25 files); offline gate reflects it
+  - docs/WEDNESDAY-REPORT.md, docs/evidence/*, README status, campaign/README
+done_when:
+  - npm test exits 0 from a bare shell: unit 38/38; browser gates shell, qr-roundtrip, offline, harness, match, spike, sonar, soundflag, orders all PASS
+  - the report names the sound flag's file and line, the chirp integration numbers, the AudioWorklet outcome under the unchanged policy, the Sealed Orders evidence, and what remains unproven on physical phones
+evidence: docs/evidence/browser-gates.txt, docs/evidence/unit-tests.txt

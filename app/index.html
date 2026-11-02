@@ -97,6 +97,16 @@
           <button class="btn btn--small" type="submit">DECODE</button>
         </form>
       </div>
+      <div class="sonar-row" data-sonar="handshake" data-needs-sound>
+        <div class="sonar-row__head"><span class="sonar-row__title">SONAR · CHIRP</span><span class="sonar-row__sub">COMPANION TO THE LAMP · THE QR IS THE TRUTH</span></div>
+        <div class="sweep" aria-hidden="true"><div class="sweep__disc"></div><div class="sweep__arm"></div><div class="sweep__blip"></div></div>
+        <div class="sonar-row__status" data-sonar-status>SONAR IDLE</div>
+        <div class="sonar-row__heard" data-sonar-heard data-state="none">NOTHING HEARD YET</div>
+        <div class="row">
+          <button class="btn btn--half" type="button" data-action="chirp" title="Send the frame on the lamp as sound">CHIRP</button>
+          <button class="btn btn--half btn--ghost" type="button" data-action="listen" title="Open the microphone and listen for a chirp">LISTEN</button>
+        </div>
+      </div>
       <div class="contact" id="contact-handshake" data-state="waiting">WAITING FOR CONTACT…</div>
       <div class="wager">
         <label class="wager__label" for="wager-input">WAGER <span class="muted" id="wager-role-hint">· THE HOST SENDS IT · SHOWN ON BOTH PHONES ALL MATCH</span></label>
@@ -135,18 +145,20 @@
       </div>
 
       <div class="phase" data-phase-panel="exchange" hidden>
-        <div class="mode-toggle" role="group" aria-label="Channel">
-          <button class="mode" type="button" data-mode="lamp" aria-pressed="true">LAMP · QR</button>
-          <button class="mode" type="button" data-mode="sonar" aria-pressed="false">SONAR · CHIRP</button>
-        </div>
         <div class="lamp" id="lamp-round">
           <div class="lamp__qr" id="qr-round" aria-label="Your salvo frame"></div>
           <div class="lamp__caption" id="caption-round">SALVO · ROUND 1</div>
           <div class="lamp__hint">BRIGHTNESS UP · HOLD STEADY · HOLD UNTIL BOTH PHONES CHIME</div>
         </div>
-        <div class="sonar-shell" id="sonar-shell" hidden>
-          <div class="sonar-shell__bar"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          <p class="hint">SONAR ARRIVES WEDNESDAY. MONDAY'S CHIRP SPIKE LIVES AT <code>/spike/</code>.</p>
+        <div class="sonar-row" data-sonar="round" data-needs-sound>
+          <div class="sonar-row__head"><span class="sonar-row__title">SONAR · CHIRP</span><span class="sonar-row__sub">COMPANION TO THE LAMP · THE QR IS THE TRUTH</span></div>
+          <div class="sweep" aria-hidden="true"><div class="sweep__disc"></div><div class="sweep__arm"></div><div class="sweep__blip"></div></div>
+          <div class="sonar-row__status" data-sonar-status>SONAR IDLE</div>
+          <div class="sonar-row__heard" data-sonar-heard data-state="none">NOTHING HEARD YET</div>
+          <div class="row">
+            <button class="btn btn--half" type="button" data-action="chirp" title="Send the frame on the lamp as sound">CHIRP</button>
+            <button class="btn btn--half btn--ghost" type="button" data-action="listen" title="Open the microphone and listen for a chirp">LISTEN</button>
+          </div>
         </div>
         <div class="scan" data-scan="round">
           <video class="scan__video" playsinline muted hidden></video>
@@ -229,6 +241,16 @@
           <button class="btn btn--small" type="submit">DECODE</button>
         </form>
       </div>
+      <div class="sonar-row" data-sonar="gameover" data-needs-sound>
+        <div class="sonar-row__head"><span class="sonar-row__title">SONAR · CHIRP</span><span class="sonar-row__sub">COMPANION TO THE LAMP · THE QR IS THE TRUTH</span></div>
+        <div class="sweep" aria-hidden="true"><div class="sweep__disc"></div><div class="sweep__arm"></div><div class="sweep__blip"></div></div>
+        <div class="sonar-row__status" data-sonar-status>SONAR IDLE</div>
+        <div class="sonar-row__heard" data-sonar-heard data-state="none">NOTHING HEARD YET</div>
+        <div class="row">
+          <button class="btn btn--half" type="button" data-action="chirp" title="Send the frame on the lamp as sound">CHIRP</button>
+          <button class="btn btn--half btn--ghost" type="button" data-action="listen" title="Open the microphone and listen for a chirp">LISTEN</button>
+        </div>
+      </div>
       <div class="contact" id="contact-gameover" data-state="waiting">WAITING FOR THEIR REVEAL…</div>
       <button class="btn btn--ghost" type="button" data-action="claim-forfeit" id="btn-forfeit">NO REVEAL? CLAIM FORFEIT</button>
       <div class="row">
@@ -240,19 +262,76 @@
     <!-- 6 · SEALED ORDERS -->
     <section class="screen" id="screen-sealed" data-route="sealed" hidden>
       <h2 class="stencil h2">SEALED ORDERS</h2>
-      <p class="hint">ONE QR · PHONE TO PHONE · ARRIVES WEDNESDAY</p>
+      <p class="hint">ONE QR · PHONE TO PHONE · KEPT ON THIS PHONE</p>
       <div class="notice">LOCAL, NOT SECRET — ANYONE WHO CAN SEE THE SCREEN CAN READ IT.</div>
-      <form class="orders" id="orders-form">
-        <label>WI-FI NAME <input type="text" disabled placeholder="SSID"></label>
-        <label>WI-FI KEY <input type="text" disabled placeholder="KEY"></label>
-        <label>GATE / DOOR CODE <input type="text" disabled placeholder="CODE"></label>
-        <label>EMERGENCY CONTACT 1 <input type="text" disabled placeholder="NAME · NUMBER"></label>
-        <label>EMERGENCY CONTACT 2 <input type="text" disabled placeholder="NAME · NUMBER"></label>
-        <label>NOTE <input type="text" disabled placeholder="ONE FREE LINE"></label>
-      </form>
-      <div class="row">
-        <button class="btn btn--half" type="button" disabled>SHOW CARD</button>
-        <button class="btn btn--half btn--ghost" type="button" disabled>SCAN CARD</button>
+
+      <div class="orders-view" data-orders-view="list">
+        <div class="cards" id="orders-list"></div>
+        <p class="hint hint--small" id="orders-empty">NO CARDS KEPT YET · WRITE ONE, OR SCAN ONE FROM ANOTHER PHONE</p>
+        <div class="row">
+          <button class="btn btn--half btn--amber" type="button" data-orders="compose">NEW CARD</button>
+          <button class="btn btn--half" type="button" data-orders="scan">SCAN CARD</button>
+        </div>
+      </div>
+
+      <div class="orders-view" data-orders-view="compose" hidden>
+        <form class="orders" id="orders-form" novalidate>
+          <label>HOUSEHOLD LABEL
+            <select class="orders__select" id="orders-label" name="label"></select>
+          </label>
+          <label>NOTE <span class="orders__count" id="orders-note-count">0 / 700</span>
+            <textarea class="orders__text" id="orders-note" name="note" rows="6" autocapitalize="sentences" placeholder="BINS GO OUT TUESDAY NIGHT. SPARE KEY IS WITH JORDAN. WI-FI, GATE CODE, WHO TO CALL."></textarea>
+          </label>
+          <label>CHECKLIST · ONE ITEM PER LINE · UP TO 8 <span class="orders__count" id="orders-items-count">0 / 8</span>
+            <textarea class="orders__text" id="orders-items" name="items" rows="4" autocapitalize="sentences" placeholder="FEED THE CAT&#10;WATER THE TOMATOES"></textarea>
+          </label>
+          <div class="orders__error" id="orders-error" role="alert" hidden></div>
+          <div class="row">
+            <button class="btn btn--half btn--ghost" type="button" data-orders="list">BACK</button>
+            <button class="btn btn--half btn--amber" type="submit" id="btn-show-card">SHOW CARD</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="orders-view" data-orders-view="card" hidden>
+        <div class="card" id="orders-card">
+          <div class="card__head"><span class="card__label" id="card-label">—</span><span class="card__hop" id="card-hop">HOP 1</span></div>
+          <div class="card__note" id="card-note"></div>
+          <ul class="card__items" id="card-items"></ul>
+          <div class="card__local">LOCAL, NOT SECRET · KEPT ON THIS PHONE · TAP AN ITEM TO MARK IT DONE</div>
+        </div>
+        <div class="lamp lamp--card" id="lamp-card">
+          <div class="lamp__qr lamp__qr--card" id="qr-card" aria-label="Sealed Orders card"></div>
+          <div class="lamp__caption" id="caption-card"></div>
+          <div class="lamp__hint">THE OTHER PHONE: SEALED ORDERS → SCAN CARD</div>
+        </div>
+        <div class="row">
+          <button class="btn btn--half btn--amber" type="button" data-orders="pass-on" title="Hand the card on: the QR re-renders with the hop count bumped">PASS IT ON</button>
+          <button class="btn btn--half" type="button" data-orders="print">PRINT</button>
+        </div>
+        <div class="row">
+          <button class="btn btn--half btn--ghost" type="button" data-orders="list">ALL CARDS</button>
+          <button class="btn btn--half btn--ghost" type="button" data-orders="delete">DELETE CARD</button>
+        </div>
+      </div>
+
+      <div class="orders-view" data-orders-view="scan" hidden>
+        <p class="hint">SCAN THE OTHER PHONE'S CARD · IT IS KEPT ON THIS ONE</p>
+        <div class="scan" data-scan="sealed">
+          <video class="scan__video" playsinline muted hidden></video>
+          <div class="scan__status" data-scan-status>SCANNER IDLE</div>
+          <div class="row">
+            <button class="btn btn--half" type="button" data-action="scan-toggle">SCAN</button>
+            <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
+            <button class="btn btn--half btn--ghost" type="button" data-action="manual-toggle">TYPE</button>
+          </div>
+          <form class="manual" data-manual hidden>
+            <input class="manual__input manual__input--card" type="text" autocomplete="off" spellcheck="false" placeholder="PASTE A CARD" aria-label="Card text">
+            <button class="btn btn--small" type="submit">DECODE</button>
+          </form>
+        </div>
+        <div class="contact" id="contact-sealed" data-state="waiting">WAITING FOR A CARD…</div>
+        <button class="btn btn--ghost" type="button" data-orders="list">BACK</button>
       </div>
     </section>
 

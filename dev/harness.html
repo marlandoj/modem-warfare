@@ -10,7 +10,7 @@
 <body>
   <header class="bar">
     <strong>MODEM WARFARE · DEV HARNESS</strong>
-    <span class="muted">Two app instances. Frames cross over BroadcastChannel as the exact base32 text the QR carries. Dev tool only — not in the precache.</span>
+    <span class="muted">Two app instances. Frames cross over BroadcastChannel as the exact base32 text the QR carries; chirps cross as their waveform samples into the peer's capture graph. Dev tool only — not in the precache.</span>
     <span class="spacer"></span>
     <button id="btn-reload" type="button">Reload both</button>
     <button id="btn-clear" type="button">Clear log</button>
@@ -18,11 +18,11 @@
   <main class="panes">
     <section class="pane">
       <h2>A · host <span class="muted">?dev=A</span></h2>
-      <iframe id="frame-a" src="../app/index.html?dev=A" title="Instance A" allow="camera"></iframe>
+      <iframe id="frame-a" src="../app/index.html?dev=A" title="Instance A" allow="camera; microphone; autoplay"></iframe>
     </section>
     <section class="pane">
       <h2>B · guest <span class="muted">?dev=B</span></h2>
-      <iframe id="frame-b" src="../app/index.html?dev=B" title="Instance B" allow="camera"></iframe>
+      <iframe id="frame-b" src="../app/index.html?dev=B" title="Instance B" allow="camera; microphone; autoplay"></iframe>
     </section>
     <section class="pane pane--log">
       <h2>Channel log <span class="muted" id="counts">0 frames</span></h2>
@@ -30,7 +30,9 @@
         <button id="btn-script" type="button">Run scripted exchange</button>
         <button id="btn-match" type="button">Run full match</button>
         <button id="btn-cheat" type="button">Run match, B lies</button>
-        <span class="muted">exchange: handshake + one salvo both ways · match: fixed fleets, wager, salvos to the last sinking, reveal, audit, stamp</span>
+        <button id="btn-chirp" type="button">Run chirp loopback</button>
+        <button id="btn-orders" type="button">Run Sealed Orders</button>
+        <span class="muted">exchange: handshake + one salvo both ways · match: fixed fleets, wager, salvos to the last sinking, reveal, audit, stamp · chirp: the Salute by sound alone, then ×10 salvo chirps · orders: compose, scan, keep, mark done, reload, pass it on</span>
       </div>
       <pre id="log"></pre>
     </section>

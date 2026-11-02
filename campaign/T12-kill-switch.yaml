@@ -1,0 +1,17 @@
+id: T12
+title: The kill switch — one sound flag in one config module, default ON
+day: Wednesday 2026-11-04
+persona: PWA frontend lead
+depends_on: [T11]
+verify: npm test
+scope:
+  - app/js/config.js: export const SOUND = true (the only line an operator flips)
+  - app/js/audio.js: no AudioContext is ever created when SOUND is false
+  - app/js/sonar.js: engine disabled when SOUND is false
+  - app/index.html: every sound affordance carries data-needs-sound; app.js removes them at boot when SOUND is false
+  - app/js/app.js: Sonar row wiring (CHIRP / LISTEN / sweep / HEARD line), near-miss drama, feel effects wired into fire / reveal / outcome
+done_when:
+  - the scripted match completes VERIFIED both ways with the flag ON (match.js) and OFF (soundflag.js)
+  - with the flag OFF the rendered interface has no data-needs-sound element, no Sonar row, no CHIRP/LISTEN button, no sound word in any screen, and zero AudioContext constructions — asserted, not eyeballed
+  - the flip is a one-line, one-file change: app/js/config.js, the `export const SOUND` line
+evidence: docs/evidence/browser-gates.txt (soundflag), docs/evidence/soundflag-off-exchange.png
