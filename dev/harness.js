@@ -12,7 +12,6 @@
 //                               Thursday: the host's transport rides the handshake and the joiner adopts it
 //   runChirp({ n })             Wednesday: the Salute crosses by chirp alone (text transport muted),
 //                               then n salvo chirps A -> B through B's real capture pipeline
-//   runOrders()                 Wednesday: Sealed Orders compose / scan-to-keep / done / reload / pass on
 const log = document.getElementById('log');
 const counts = document.getElementById('counts');
 const frameA = document.getElementById('frame-a');
@@ -523,86 +522,6 @@ export async function runChirp({ n = 10 } = {}) {
   }
 }
 
-// --------------------------------------------------------- sealed orders ---
-
-function setValue(win, selector, value) {
-  const el = win.document.querySelector(selector);
-  el.value = value;
-  el.dispatchEvent(new win.Event('input', { bubbles: true }));
-}
-
-/**
- * Sealed Orders through the two windows: A composes; the card crosses to B
- * (on SCAN CARD) as the camera would; B keeps it, marks an item done, reloads
- * and still has it; B passes it on at hop 2. An over-limit note is refused
- * first, with the message visible and the text untouched.
- */
-export async function runOrders() {
-  let { A, B, errors } = await instances();
-  await toHome(A); await toHome(B);
-  A.MW.orders.store.clear(); B.MW.orders.store.clear();
-  A.MW.go('sealed'); B.MW.go('sealed');
-  await waitFor(() => A.document.body.dataset.screen === 'sealed' && B.document.body.dataset.screen === 'sealed', 'sealed screens');
-  click(B, '[data-orders="scan"]');
-  click(A, '[data-orders="compose"]');
-  await waitFor(() => A.MW.orders.state.view === 'compose' && B.MW.orders.state.view === 'scan', 'compose on A, scan on B');
-  const summary = { errors };
-
-  // 1. Over the limit: refused, message visible, nothing truncated.
-  const longNote = 'x'.repeat(A.MW.orders.limits.NOTE_MAX + 1);
-  setValue(A, '#orders-label', 'KITCHEN');
-  setValue(A, '#orders-note', longNote);
-  setValue(A, '#orders-items', 'Feed the cat');
-  click(A, '#btn-show-card');
-  await sleep(100);
-  const err = A.document.querySelector('#orders-error');
-  summary.refused = { message: err.textContent, visible: !err.hidden && err.offsetParent !== null, noteStillLong: A.document.querySelector('#orders-note').value.length === longNote.length, view: A.MW.orders.state.view, counter: A.document.querySelector('#orders-note-count').textContent, kept: A.MW.orders.store.list().length };
-  line('script', `orders: over-limit note refused: "${summary.refused.message}" (visible ${summary.refused.visible}, note still ${longNote.length} chars)`);
-
-  // 2. A real card.
-  const note = 'Bins go out Tuesday night.\nSpare key is with Jordan. Gate code is on the fridge.';
-  setValue(A, '#orders-note', note);
-  setValue(A, '#orders-items', 'Feed the cat\nWater the tomatoes\nLock the side gate');
-  click(A, '#btn-show-card');
-  await waitFor(() => A.MW.orders.state.view === 'card' && A.document.querySelector('#qr-card svg'), 'A shows the card');
-  const aRender = A.MW.orders.state.lastRender;
-  summary.composed = { id: aRender.id, hop: aRender.hop, qrVersion: aRender.version, bytes: aRender.bytes, text: aRender.text, hopLine: A.document.querySelector('#card-hop').textContent };
-  line('script', `orders: A composed card ${aRender.id} hop ${aRender.hop} · QR v${aRender.version} · ${aRender.bytes} bytes`);
-
-  // 3. The card crosses to B (dev channel, as the camera would) and is kept.
-  await waitFor(() => B.MW.orders.state.view === 'card' && B.MW.orders.state.current && B.MW.orders.state.current.id === aRender.id, 'B keeps the card', 8000);
-  const keptB = B.MW.orders.store.get(aRender.id);
-  summary.received = { id: keptB.id, hop: keptB.hop, note: keptB.note, items: keptB.items.map((i) => i.text), contact: B.document.querySelector('#contact-sealed').textContent, stored: B.localStorage.getItem(B.MW.orders.store.key) !== null && B.MW.orders.store.key !== A.MW.orders.store.key, from: keptB.from };
-  line('script', `orders: B kept ${keptB.id} hop ${keptB.hop} (${keptB.items.length} items) · ${summary.received.contact}`);
-
-  // 4. Mark item 2 done on B.
-  B.document.querySelector('#card-items input[data-index="1"]').click();
-  await waitFor(() => B.MW.orders.store.get(aRender.id).items[1].done === true, 'item 2 done');
-
-  // 5. Reload B: the card and its done mark survive.
-  const oldMW = B.MW;
-  frameB.contentWindow.location.reload();
-  B = await waitFor(() => frameB.contentWindow.MW && frameB.contentWindow.MW !== oldMW && frameB.contentWindow, 'B reloaded', 15000);
-  B.addEventListener('error', (e) => errors.push(`B: ${e.message}`));
-  B.MW.go('sealed');
-  await waitFor(() => B.document.body.dataset.screen === 'sealed' && B.document.querySelector('#orders-list .cardrow'), 'B lists the card after reload');
-  B.document.querySelector(`#orders-list .cardrow[data-card-id="${aRender.id}"]`).click();
-  await waitFor(() => B.MW.orders.state.view === 'card' && B.document.querySelector('#qr-card svg'), 'B reopens the card');
-  const after = B.MW.orders.store.get(aRender.id);
-  summary.afterReload = { hop: after.hop, done: after.items.map((i) => i.done), hopLine: B.document.querySelector('#card-hop').textContent, checkedBoxes: Array.from(B.document.querySelectorAll('#card-items input')).map((i) => i.checked) };
-  line('script', `orders: after reload B still has the card, done=${JSON.stringify(summary.afterReload.done)}, ${summary.afterReload.hopLine}`);
-
-  // 6. Pass it on: the card re-renders at hop 2.
-  click(B, '[data-orders="pass-on"]');
-  await waitFor(() => B.document.querySelector('#qr-card').dataset.hop === '2', 'hop 2 rendered');
-  const passText = B.document.querySelector('#qr-card').dataset.text;
-  const parsed = B.MW.orders.parse(passText);
-  summary.passedOn = { hop: parsed.hop, id: parsed.id, hopLine: B.document.querySelector('#card-hop').textContent, caption: B.document.querySelector('#caption-card').textContent, doneCarried: parsed.items.map((i) => i.done), qrVersion: B.MW.orders.state.lastRender.version };
-  line('script', `orders: B passes it on → ${summary.passedOn.hopLine} · QR v${summary.passedOn.qrVersion} · done marks carried ${JSON.stringify(summary.passedOn.doneCarried)}`);
-  if (errors.length) line('error', errors.join(' | '));
-  return summary;
-}
-
 function hexOf(bytes) { return Array.from(bytes || [], (b) => b.toString(16).padStart(2, '0')).join(''); }
 function tallyGate(logEntries) {
   const t = { accepted: 0, duplicate: 0, rejected: 0, rejectedReasons: {} };
@@ -615,5 +534,4 @@ document.getElementById('btn-match').addEventListener('click', () => runMatch({ 
 document.getElementById('btn-match-chirp').addEventListener('click', () => runMatch({ transport: 'chirp' }).catch((e) => line('error', e.message)));
 document.getElementById('btn-cheat').addEventListener('click', () => runMatch({ cheat: 'result' }).catch((e) => line('error', e.message)));
 document.getElementById('btn-chirp').addEventListener('click', () => runChirp().catch((e) => line('error', e.message)));
-document.getElementById('btn-orders').addEventListener('click', () => runOrders().catch((e) => line('error', e.message)));
-window.harness = { runScript, runMatch, runAdoption, runChirp, runOrders, presentedCarriers, lines, FLEETS };
+window.harness = { runScript, runMatch, runAdoption, runChirp, presentedCarriers, lines, FLEETS };

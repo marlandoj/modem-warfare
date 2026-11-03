@@ -14,7 +14,7 @@
 //     (overflow: hidden would clip, so scrollHeight vs clientHeight is checked
 //     on both);
 //   - every visible element's box lies inside the viewport.
-// Home and Sealed Orders are allowed to scroll and are not measured.
+// Home is allowed to scroll and is not measured.
 import path from 'node:path';
 import { startServer, launch, capture, assert, banner, OUT, AUDIO_ARGS } from './lib.js';
 

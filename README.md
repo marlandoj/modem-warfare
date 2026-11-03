@@ -12,9 +12,7 @@ fleet is committed under a salted hash before the first shot, and when the
 last ship sinks both phones reveal and audit every round. The end screen
 stamps the match **VERIFIED — NO SHIP MOVED**, or names the lie.
 
-Built solo in one week for Hackyard Yard #6 ("Offline"). It also carries
-**Sealed Orders**, a household note card passed phone to phone on one static
-QR code — local, not secret.
+Built solo in one week for Hackyard Yard #6 ("Offline").
 
 ![Two phones face to face: one shows its handshake QR, the other a hit landing](thumbnail.png)
 
@@ -29,7 +27,7 @@ but has not been tested as of this build.
 ### Install on a phone (once, while online)
 
 1. Open the play URL in the phone's browser. Wait for the badge at the bottom
-   of Home to read **OFFLINE READY ✓ 25/25 CACHED**. That is the app telling
+   of Home to read **OFFLINE READY ✓ 23/23 CACHED**. That is the app telling
    you every file it will ever need is on the phone.
 2. Add it to the home screen: Android Chrome → menu → **Add to Home screen**;
    iPhone Safari → share sheet → **Add to Home Screen**.
@@ -79,22 +77,11 @@ behind", so game state can never fork. **RESEND** re-shows the previous
 frame; **TYPE** lets you paste the other phone's frame text by hand if a
 camera or microphone is unusable.
 
-### Sealed Orders (local, not secret)
-
-Home → **SEALED ORDERS** → **NEW CARD**: pick a household label, write a note
-(up to 700 characters) and a checklist (up to 8 lines). **SHOW CARD** keeps
-the card on this phone and renders it as one static QR code. On the other
-phone: **SEALED ORDERS** → **SCAN CARD**; the card is kept there, items can
-be ticked off, and **PASS IT ON** hands it to a third phone with the hop
-count bumped. The card is plaintext: the app's standing label is
-**LOCAL, NOT SECRET — anyone who can see the screen can read it.** It is a
-note handed across a kitchen table, not a vault.
-
 ## Technical notes
 
 - **No server, no account, no network after install.** The app is static
-  HTML, CSS and JavaScript with a hand-written precache service worker (25
-  files, cache `mw-thu-v1`). The content-security policy allows `'self'`
+  HTML, CSS and JavaScript with a hand-written precache service worker (23
+  files, cache `mw-final-v1`). The content-security policy allows `'self'`
   only; nothing in the app can contact a network at runtime, and the
   browser-gate suite proves a cold launch with the server gone.
 - **The fleet commitment is a salted hash.** At LOCK the phone draws a
@@ -132,7 +119,6 @@ app/        the product — vanilla HTML/CSS/JS, no framework, no build step
   js/audit.js   end-of-game audit: commitment + every reported result vs the reveal
   js/audio.js   WebAudio feel: lamp clack, contact bell, fire, splash, hit, horn, stamp
   js/sonar.js   the Sonar engine: ggwave chirp send, AudioWorklet capture, decode → gate
-  js/orders.js  Sealed Orders codec, limits, localStorage store
   js/qr.js      QR render (qrcode-generator) and decode (BarcodeDetector → zxing-wasm)
   vendor/   every third-party file the app loads (see vendor/VENDOR.md)
 dev/        two-window harness — dev tool, not precached
@@ -141,7 +127,7 @@ tests/      node --test unit tests + Playwright browser gates
 tools/      zero-dependency static server, icon rasteriser, ggwave patch tool, gallery tool
 screenshots/  the shipped build's real screens (see docs/SHIP-REPORT.md)
 campaign/   the build week's task manifests
-docs/       the daily reports, the ship report and their evidence
+docs/       the daily reports, the ship report, the removal record and their evidence
 ```
 
 ## Run it locally
@@ -157,17 +143,17 @@ node tools/serve.js 8080 --bind 0.0.0.0   # reachable from phones on the LAN
   `chrome://flags/#unsafely-treat-insecure-origin-as-secure`.
 - Dev harness: `http://<host>:8080/dev/harness.html` — two app instances
   side by side; **Run full match (QR)**, **Run full match (chirp)**, **Run
-  match, B lies**, **Run Sealed Orders**, or drive them by hand.
+  match, B lies**, **Run chirp loopback**, or drive them by hand.
 - ggwave spike: `http://<host>:8080/spike/` — the acoustic send / receive
   test page with honest counters.
 
 ## Test it
 
 ```sh
-npm run test:unit                     # node --test, no dependencies: codec, sha256, audit, sealed orders
+npm run test:unit                     # node --test, no dependencies: codec, sha256, audit
 npm install && npx playwright install chromium
 npm run test:browser                  # shell, QR pixels, cold offline launch, harness, full match + cheats,
-                                      # spike, sonar, soundflag, orders, transport, viewport
+                                      # spike, sonar, soundflag, transport, viewport
 npm test                              # both; the trusted check in .verity.json (about 2½ minutes in 4 lanes;
                                       # MW_LANES=1 runs the browser gates one after another, about 7 minutes)
 node tools/gallery.js                 # after npm test: rebuilds thumbnail.png and screenshots/ from the gate evidence
@@ -184,11 +170,9 @@ waveforms through the production capture pipeline.
 
 Say: no internet, no Wi-Fi, no Bluetooth, no server, no account; install
 once, then never again; cheating is provable — the end-of-game stamp is
-real. Never say "secure" or "encrypted" about Sealed Orders (it is
-plaintext to anyone who can see the screen, and the app says so),
-"unhackable", or "provably fair" as a slogan. The browser gate for Sealed
-Orders asserts that the words secret, secure and encrypted appear nowhere
-in its copy outside the standing label.
+real. Never say "secure" or "encrypted" about the app, "unhackable", or
+"provably fair" as a slogan. The shell gate asserts that the words secure
+and encrypted appear nowhere in the app's copy.
 
 ## Licences
 

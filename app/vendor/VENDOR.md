@@ -21,7 +21,7 @@ Notes
   would block a CDN fetch anyway.
 - `qrcode-generator` converts strings to bytes one char code per byte by
   default; `app/js/qr.js` switches it to the library's own UTF-8 converter
-  for Byte-mode payloads (the Sealed Orders card). Frames stay Alphanumeric.
+  whenever a caller asks for Byte mode. Frames stay Alphanumeric.
 - BarcodeDetector is a browser API and needs no vendoring; it is used when the
   browser reports `qr_code` support, otherwise zxing-wasm decodes.
 

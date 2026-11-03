@@ -36,7 +36,7 @@ if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
 }
 const { OUT } = await import('./lib.js');
 
-// [name, file, typical seconds alone] — the estimate only orders the start.
+// [name, file, typical seconds alone] — the estimate only decides which suites start first.
 const suites = [
   ['shell', 'shell.js', 7],
   ['qr-roundtrip', 'qr-roundtrip.js', 1],
@@ -46,7 +46,6 @@ const suites = [
   ['spike', 'spike.js', 25],
   ['sonar', 'sonar.js', 37],
   ['soundflag', 'soundflag.js', 20],
-  ['orders', 'orders.js', 3],
   ['transport', 'transport.js', 88],
   ['viewport', 'viewport.js', 117],
 ];

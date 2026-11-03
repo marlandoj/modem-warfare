@@ -8,8 +8,7 @@
    and never scroll. Everything that has a size on those screens is sized
    from --avail, the height the screen area actually has (kept by a
    ResizeObserver in app.js; the CSS fallback is the dynamic viewport), never
-   from the content. Home and Sealed Orders keep the ordinary flow and may
-   scroll. */
+   from the content. Home keeps the ordinary flow and may scroll. */
 
 :root {
   --navy: #061a2e;
@@ -325,11 +324,10 @@ body.offline-ready .firstrun { display: none; }
 .scan__row { display: flex; align-items: center; gap: 10px; min-height: 16px; }
 .scan__video { width: 96px; height: 72px; flex: 0 0 auto; object-fit: cover; background: #000; border-radius: 6px; border: 1px solid var(--phosphor-dim); }
 .scan__status { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: center; text-transform: none; min-height: 14px; flex: 1 1 0; }
-.scan--card .scan__video { width: 100%; height: auto; aspect-ratio: 4 / 3; }
 .manual { display: flex; gap: 8px; }
 /* On the fixed screens the TYPE form floats over the carrier, so it takes no room. */
 .screen--match .manual { position: absolute; left: 0; right: 0; bottom: 72px; z-index: 4; padding: 8px; background: var(--ink); border: 1px solid var(--amber); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); }
-.manual__input, .orders input {
+.manual__input {
   flex: 1;
   min-width: 0;
   min-height: 44px;
@@ -343,7 +341,7 @@ body.offline-ready .firstrun { display: none; }
   border-radius: 6px;
   text-transform: uppercase;
 }
-.manual__input::placeholder, .orders input::placeholder { color: #3f5c6b; }
+.manual__input::placeholder { color: #3f5c6b; }
 
 .contact {
   min-height: 44px;
@@ -399,51 +397,6 @@ body.offline-ready .firstrun { display: none; }
 .stamp--pending { color: var(--amber); border-color: var(--amber); box-shadow: 0 0 24px var(--amber-dim); }
 .stamp--liar { color: var(--red); border-color: var(--red); }
 .tally { text-align: center; font-size: 13px; letter-spacing: 0.18em; color: var(--amber); flex: 0 0 auto; }
-
-/* ----------------------------------------------------- sealed orders --- */
-.notice { padding: 12px; border: 2px solid var(--amber); border-radius: var(--radius); color: var(--amber); font-size: 14px; letter-spacing: 0.12em; text-align: center; }
-.orders { display: flex; flex-direction: column; gap: 10px; }
-.orders label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; letter-spacing: 0.2em; color: var(--muted); }
-.orders input:disabled { opacity: 0.5; }
-.orders-view { display: flex; flex-direction: column; gap: 14px; }
-.orders-view[hidden] { display: none; }
-.orders__select, .orders__text {
-  min-height: 44px; padding: 8px 10px; font-family: var(--mono); font-size: 15px; letter-spacing: 0.04em;
-  color: var(--foam); background: var(--ink); border: 1px solid var(--phosphor-dim); border-radius: 6px; text-transform: none; resize: vertical;
-}
-.orders__select { text-transform: uppercase; }
-.orders__text::placeholder { color: #3f5c6b; }
-.orders__count { float: right; font-family: var(--mono); letter-spacing: 0; color: var(--muted); }
-.orders__count.over { color: var(--red); font-weight: bold; }
-.orders__error { padding: 10px 12px; border: 2px solid var(--red); border-radius: var(--radius); color: var(--red); font-family: var(--mono); font-size: 13px; text-transform: none; text-align: center; animation: nearmiss 400ms ease; }
-.cards { display: flex; flex-direction: column; gap: 8px; }
-.cardrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 56px; padding: 8px 12px; font: inherit; font-size: 16px; letter-spacing: 0.1em; color: var(--foam); text-align: left; background: rgba(3, 16, 28, 0.6); border: 1px solid var(--phosphor-dim); border-radius: var(--radius); cursor: pointer; }
-.cardrow__meta { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: none; letter-spacing: 0; }
-.card { display: flex; flex-direction: column; gap: 8px; padding: 14px; background: var(--foam); color: var(--ink); border: 3px solid var(--amber); border-radius: var(--radius); text-transform: none; }
-.card__head { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--stencil); text-transform: uppercase; }
-.card__label { font-size: 22px; letter-spacing: 0.18em; }
-.card__hop { font-size: 13px; letter-spacing: 0.25em; color: #7a4a00; }
-.card__note { font-family: var(--mono); font-size: 14px; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
-.card__items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
-.card__item { display: flex; align-items: center; gap: 10px; min-height: 40px; font-family: var(--mono); font-size: 14px; }
-.card__item input { width: 22px; height: 22px; accent-color: #1a5a3c; }
-.card__item--done span { text-decoration: line-through; color: #5b6b74; }
-.card__local { font-family: var(--stencil); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #7a4a00; }
-.lamp__qr--card { width: min(90vw, 420px); }
-.lamp--card .lamp__caption { word-break: break-all; text-align: center; }
-#screen-sealed .scan { gap: 10px; }
-#screen-sealed .manual { position: static; }
-
-@media print {
-  .sea, .topbar, .toast, .notice, .h2, .hint, .btn, .row, .orders-view:not([data-orders-view="card"]), .screen:not(#screen-sealed), .lamp__hint { display: none !important; }
-  html, body { background: #fff; color: #000; }
-  #screens { max-width: none; padding: 0; }
-  #screen-sealed { min-height: 0; gap: 8mm; }
-  .card { border-color: #000; background: #fff; color: #000; }
-  .card__hop, .card__local { color: #000; }
-  .lamp__qr--card { width: 100mm; box-shadow: none; animation: none; }
-  .lamp__caption { color: #000; }
-}
 
 /* ------------------------------------------------------------- toast --- */
 .toast {
@@ -550,7 +503,7 @@ body.offline-ready .firstrun { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .sonar__sweep, .sonar__blip, .badge__dot { animation: none; }
-  .sonar-row--listening .sweep__arm, .sonar-row--chirping .sweep__disc, .sweep__blip, .sonar-row__heard, .orders__error { animation: none; }
+  .sonar-row--listening .sweep__arm, .sonar-row--chirping .sweep__disc, .sweep__blip, .sonar-row__heard { animation: none; }
   .cell--shake, .contact[data-state="contact"], .lamp__qr { animation: none; }
   .cell--burn, .cell--splash::before, .cell--flash, .board--shake, .banner, .stamp, .stamp--land { animation: none; }
   .impact, .screens--shake, .screens--thud, .cell--sinking, .fleet__ship--sinking { animation: none; }

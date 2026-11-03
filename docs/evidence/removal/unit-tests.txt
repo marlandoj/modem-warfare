@@ -1,0 +1,191 @@
+
+> modem-warfare@0.4.0-thu test:unit
+> node --test tests/frame.test.js tests/sha256.test.js tests/audit.test.js
+
+TAP version 13
+# Subtest: audit: a clean match is VERIFIED — NO SHIP MOVED
+ok 1 - audit: a clean match is VERIFIED — NO SHIP MOVED
+  ---
+  duration_ms: 5.761297
+  type: 'test'
+  ...
+# Subtest: audit: a reveal with the wrong salt fails the commitment check
+ok 2 - audit: a reveal with the wrong salt fails the commitment check
+  ---
+  duration_ms: 1.052419
+  type: 'test'
+  ...
+# Subtest: audit: a revealed fleet that differs from the committed one is LIAR even when every result matches it
+ok 3 - audit: a revealed fleet that differs from the committed one is LIAR even when every result matches it
+  ---
+  duration_ms: 1.004928
+  type: 'test'
+  ...
+# Subtest: audit: one false result (a HIT reported as a miss) is LIAR, named by round and cell
+ok 4 - audit: one false result (a HIT reported as a miss) is LIAR, named by round and cell
+  ---
+  duration_ms: 1.035935
+  type: 'test'
+  ...
+# Subtest: audit: a miss reported as a HIT, and a ship reported sunk early, are both LIAR
+ok 5 - audit: a miss reported as a HIT, and a ship reported sunk early, are both LIAR
+  ---
+  duration_ms: 4.186163
+  type: 'test'
+  ...
+# Subtest: audit: an off-board or overlapping revealed fleet is LIAR before any result is checked
+ok 6 - audit: an off-board or overlapping revealed fleet is LIAR before any result is checked
+  ---
+  duration_ms: 0.579088
+  type: 'test'
+  ...
+# Subtest: audit: a round with no reported results is a finding, and forfeit has its own stamp
+ok 7 - audit: a round with no reported results is a finding, and forfeit has its own stamp
+  ---
+  duration_ms: 0.828462
+  type: 'test'
+  ...
+#   handshake text: CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME -> HANDSHAKE s=a1b2c3d4 r=0 · commit 0b30557a… · by chirp
+#   salvo text: CKQ3FQ6UAROLYLACABKA -> SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT · sunk 3
+#   reveal text: COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ -> REVEAL s=a1b2c3d4 r=11 · sunk 4,3,2 · fleet A2h G3v C6h E1v
+# Subtest: base32: RFC 4648 vectors (unpadded)
+ok 8 - base32: RFC 4648 vectors (unpadded)
+  ---
+  duration_ms: 4.162335
+  type: 'test'
+  ...
+# Subtest: crc8: known value and single-bit sensitivity
+ok 9 - crc8: known value and single-bit sensitivity
+  ---
+  duration_ms: 0.662035
+  type: 'test'
+  ...
+# Subtest: salvo frame is exactly 12 bytes / 20 base32 chars
+ok 10 - salvo frame is exactly 12 bytes / 20 base32 chars
+  ---
+  duration_ms: 1.022826
+  type: 'test'
+  ...
+# Subtest: round-trip: handshake frame (session + commitment placeholder)
+ok 11 - round-trip: handshake frame (session + commitment placeholder)
+  ---
+  duration_ms: 3.875299
+  type: 'test'
+  ...
+# Subtest: round-trip: salvo frame with piggybacked results and sunk flags
+ok 12 - round-trip: salvo frame with piggybacked results and sunk flags
+  ---
+  duration_ms: 1.04406
+  type: 'test'
+  ...
+# Subtest: round-trip: salvo frame without results (first salvo of a round) and partial salvo
+ok 13 - round-trip: salvo frame without results (first salvo of a round) and partial salvo
+  ---
+  duration_ms: 0.738386
+  type: 'test'
+  ...
+# Subtest: round-trip: reveal frame (packed fleet + 16-byte salt)
+ok 14 - round-trip: reveal frame (packed fleet + 16-byte salt)
+  ---
+  duration_ms: 1.394858
+  type: 'test'
+  ...
+# Subtest: fleet packing is lossless for every corner
+ok 15 - fleet packing is lossless for every corner
+  ---
+  duration_ms: 0.495043
+  type: 'test'
+  ...
+# Subtest: encode(decode(x)) is byte-identical for all representative frames
+ok 16 - encode(decode(x)) is byte-identical for all representative frames
+  ---
+  duration_ms: 2.878813
+  type: 'test'
+  ...
+# Subtest: corruption: a flipped bit fails the check byte; wrong version/type rejected
+ok 17 - corruption: a flipped bit fails the check byte; wrong version/type rejected
+  ---
+  duration_ms: 2.046371
+  type: 'test'
+  ...
+# Subtest: gate: handshake binds the session, duplicate re-scan is a no-op
+ok 18 - gate: handshake binds the session, duplicate re-scan is a no-op
+  ---
+  duration_ms: 1.232552
+  type: 'test'
+  ...
+# Subtest: gate: salvo round flow — accept expected, no-op on identical, reject stale and future
+ok 19 - gate: salvo round flow — accept expected, no-op on identical, reject stale and future
+  ---
+  duration_ms: 0.806839
+  type: 'test'
+  ...
+# Subtest: gate: wrong session, undecodable text, and late handshake are rejected without state change
+ok 20 - gate: wrong session, undecodable text, and late handshake are rejected without state change
+  ---
+  duration_ms: 0.6945
+  type: 'test'
+  ...
+# Subtest: gate: reveal frame accepted at the expected round
+ok 21 - gate: reveal frame accepted at the expected round
+  ---
+  duration_ms: 0.36922
+  type: 'test'
+  ...
+# Subtest: cell labels
+ok 22 - cell labels
+  ---
+  duration_ms: 0.35872
+  type: 'test'
+  ...
+# Subtest: transport: the handshake carries chirp or qr, defaults to chirp, and stays 28 bytes / 45 chars
+ok 23 - transport: the handshake carries chirp or qr, defaults to chirp, and stays 28 bytes / 45 chars
+  ---
+  duration_ms: 0.974979
+  type: 'test'
+  ...
+# Subtest: transport: the family is three types; the old type 4 is BAD_TYPE
+ok 24 - transport: the family is three types; the old type 4 is BAD_TYPE
+  ---
+  duration_ms: 0.445989
+  type: 'test'
+  ...
+# Subtest: gate: any previously accepted frame is a no-op on re-scan, not just the last one
+ok 25 - gate: any previously accepted frame is a no-op on re-scan, not just the last one
+  ---
+  duration_ms: 0.596532
+  type: 'test'
+  ...
+# Subtest: fleetIsValid: inside the board, no overlap
+ok 26 - fleetIsValid: inside the board, no overlap
+  ---
+  duration_ms: 0.431916
+  type: 'test'
+  ...
+# Subtest: sha256: FIPS 180-4 vectors
+ok 27 - sha256: FIPS 180-4 vectors
+  ---
+  duration_ms: 127.169229
+  type: 'test'
+  ...
+# Subtest: sha256: every padding boundary agrees with node:crypto
+ok 28 - sha256: every padding boundary agrees with node:crypto
+  ---
+  duration_ms: 4.690243
+  type: 'test'
+  ...
+# Subtest: commitment: first 16 bytes of SHA-256(packed fleet ‖ salt); salt-sensitive; no SubtleCrypto needed
+ok 29 - commitment: first 16 bytes of SHA-256(packed fleet ‖ salt); salt-sensitive; no SubtleCrypto needed
+  ---
+  duration_ms: 3.848841
+  type: 'test'
+  ...
+1..29
+# tests 29
+# suites 0
+# pass 29
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 335.163349

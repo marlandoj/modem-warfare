@@ -8,7 +8,7 @@ import path from 'node:path';
 import { startServer, launch, capture, assert, banner, OUT } from './lib.js';
 
 export async function run() {
-  banner('shell: six screens, offline badge, QR versions, one round by TYPE');
+  banner('shell: five screens, offline badge, QR versions, one round by TYPE');
   const srv = await startServer();
   const { context, close } = await launch();
   const page = await context.newPage();
@@ -132,13 +132,11 @@ export async function run() {
     assert(rvVersion === '3', 'reveal frame renders as QR v3');
     await page.screenshot({ path: path.join(OUT, 'screen-5-gameover.png') });
     await page.click('[data-go="home"]');
-    await page.click('[data-go="sealed"]');
-    await page.waitForFunction(() => document.body.dataset.screen === 'sealed');
-    const notice = await page.textContent('#screen-sealed .notice');
-    assert(/NOT SECRET/.test(notice), 'Sealed Orders carries the honesty label');
+    await page.waitForFunction(() => document.body.dataset.screen === 'home');
+    const screens = await page.$$eval('.screen', (els) => els.map((e) => e.dataset.route));
+    assert(screens.join(',') === 'home,placement,handshake,round,gameover', `the shell has exactly the five match screens, got ${screens.join(',')}`);
     const bodyText = await page.evaluate(() => document.body.innerText);
     assert(!/\bSECURE\b|\bENCRYPTED\b/i.test(bodyText), 'no "secure"/"encrypted" copy anywhere in the shell');
-    await page.screenshot({ path: path.join(OUT, 'screen-6-sealed.png') });
 
     const requests = cap.console.filter((l) => l.startsWith('[requestfailed]'));
     assert(requests.length === 0, 'no failed requests: ' + requests.join(', '));

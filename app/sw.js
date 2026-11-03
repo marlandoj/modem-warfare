@@ -7,20 +7,19 @@
  *  - Nothing outside app/ is precached: the dev harness (/dev/), the ggwave
  *    spike (/spike/) and the repository's GitHub Pages landing page
  *    (/index.html, /.nojekyll) are not the app.
- *  - Wednesday: config.js, the Sonar (sonar.js, the AudioWorklet module
- *    sonar-worklet.js, vendor/ggwave/ggwave.js) and Sealed Orders
- *    (orders.js, orders-ui.js) join the list; ggwave is precached whatever
- *    config.SOUND says, so flipping the flag never changes the cache list.
+ *  - Wednesday: config.js and the Sonar (sonar.js, the AudioWorklet module
+ *    sonar-worklet.js, vendor/ggwave/ggwave.js) join the list; ggwave is
+ *    precached whatever config.SOUND says, so flipping the flag never
+ *    changes the cache list.
  *  - The page can ask "are you really all cached?" over postMessage and gets
  *    a per-URL answer; the Home badge is driven by that, not by a flag.
- *  - Thursday: the list is unchanged (25 files); the version is bumped
- *    because the shell, the stylesheet, the controller, the codec, the
- *    sound and the Sonar engine all changed.
+ *  - Final: the list is 23 files; the version is bumped because the shell,
+ *    the stylesheet and the controller changed and two modules left the list.
  *
  * Bump VERSION whenever any precached file changes, so old caches are dropped.
  */
 
-const VERSION = 'mw-thu-v1';
+const VERSION = 'mw-final-v1';
 const CACHE = `modem-warfare-${VERSION}`;
 
 const PRECACHE = [
@@ -37,8 +36,6 @@ const PRECACHE = [
   './js/audio.js',
   './js/sonar.js',
   './js/sonar-worklet.js',
-  './js/orders.js',
-  './js/orders-ui.js',
   './js/qr.js',
   './js/scanner.js',
   './vendor/qrcode-generator.js',

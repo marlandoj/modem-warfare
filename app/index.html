@@ -59,7 +59,6 @@
             <button class="seg" type="button" role="radio" data-transport-choice="qr" aria-checked="false">QR <span class="seg__sub">LAMP</span></button>
           </div>
         </div>
-        <button class="btn btn--ghost" type="button" data-go="sealed">SEALED ORDERS</button>
       </nav>
       <div class="badge-row">
         <div class="badge" id="offline-badge" data-state="checking">
@@ -293,82 +292,6 @@
         <input class="manual__input" type="text" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PASTE A FRAME" aria-label="Frame text">
         <button class="btn btn--small" type="submit">DECODE</button>
       </form>
-    </section>
-
-    <!-- 6 · SEALED ORDERS (may scroll; untouched by Thursday except the shared scan block markup) -->
-    <section class="screen" id="screen-sealed" data-route="sealed" hidden>
-      <h2 class="stencil h2">SEALED ORDERS</h2>
-      <p class="hint">ONE QR · PHONE TO PHONE · KEPT ON THIS PHONE</p>
-      <div class="notice">LOCAL, NOT SECRET — ANYONE WHO CAN SEE THE SCREEN CAN READ IT.</div>
-
-      <div class="orders-view" data-orders-view="list">
-        <div class="cards" id="orders-list"></div>
-        <p class="hint hint--small" id="orders-empty">NO CARDS KEPT YET · WRITE ONE, OR SCAN ONE FROM ANOTHER PHONE</p>
-        <div class="row">
-          <button class="btn btn--half btn--amber" type="button" data-orders="compose">NEW CARD</button>
-          <button class="btn btn--half" type="button" data-orders="scan">SCAN CARD</button>
-        </div>
-      </div>
-
-      <div class="orders-view" data-orders-view="compose" hidden>
-        <form class="orders" id="orders-form" novalidate>
-          <label>HOUSEHOLD LABEL
-            <select class="orders__select" id="orders-label" name="label"></select>
-          </label>
-          <label>NOTE <span class="orders__count" id="orders-note-count">0 / 700</span>
-            <textarea class="orders__text" id="orders-note" name="note" rows="6" autocapitalize="sentences" placeholder="BINS GO OUT TUESDAY NIGHT. SPARE KEY IS WITH JORDAN. WI-FI, GATE CODE, WHO TO CALL."></textarea>
-          </label>
-          <label>CHECKLIST · ONE ITEM PER LINE · UP TO 8 <span class="orders__count" id="orders-items-count">0 / 8</span>
-            <textarea class="orders__text" id="orders-items" name="items" rows="4" autocapitalize="sentences" placeholder="FEED THE CAT&#10;WATER THE TOMATOES"></textarea>
-          </label>
-          <div class="orders__error" id="orders-error" role="alert" hidden></div>
-          <div class="row">
-            <button class="btn btn--half btn--ghost" type="button" data-orders="list">BACK</button>
-            <button class="btn btn--half btn--amber" type="submit" id="btn-show-card">SHOW CARD</button>
-          </div>
-        </form>
-      </div>
-
-      <div class="orders-view" data-orders-view="card" hidden>
-        <div class="card" id="orders-card">
-          <div class="card__head"><span class="card__label" id="card-label">—</span><span class="card__hop" id="card-hop">HOP 1</span></div>
-          <div class="card__note" id="card-note"></div>
-          <ul class="card__items" id="card-items"></ul>
-          <div class="card__local">LOCAL, NOT SECRET · KEPT ON THIS PHONE · TAP AN ITEM TO MARK IT DONE</div>
-        </div>
-        <div class="lamp lamp--card" id="lamp-card">
-          <div class="lamp__qr lamp__qr--card" id="qr-card" aria-label="Sealed Orders card"></div>
-          <div class="lamp__caption" id="caption-card"></div>
-          <div class="lamp__hint">THE OTHER PHONE: SEALED ORDERS → SCAN CARD</div>
-        </div>
-        <div class="row">
-          <button class="btn btn--half btn--amber" type="button" data-orders="pass-on" title="Hand the card on: the QR re-renders with the hop count bumped">PASS IT ON</button>
-          <button class="btn btn--half" type="button" data-orders="print">PRINT</button>
-        </div>
-        <div class="row">
-          <button class="btn btn--half btn--ghost" type="button" data-orders="list">ALL CARDS</button>
-          <button class="btn btn--half btn--ghost" type="button" data-orders="delete">DELETE CARD</button>
-        </div>
-      </div>
-
-      <div class="orders-view" data-orders-view="scan" hidden>
-        <p class="hint">SCAN THE OTHER PHONE'S CARD · IT IS KEPT ON THIS ONE</p>
-        <div class="scan scan--card" data-scan="sealed">
-          <video class="scan__video" playsinline muted hidden></video>
-          <div class="scan__status" data-scan-status>SCANNER IDLE</div>
-          <div class="row">
-            <button class="btn btn--half" type="button" data-action="scan-toggle">SCAN</button>
-            <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
-            <button class="btn btn--half btn--ghost" type="button" data-action="manual-toggle">TYPE</button>
-          </div>
-          <form class="manual manual--inline" data-manual data-manual-block="sealed" hidden>
-            <input class="manual__input manual__input--card" type="text" autocomplete="off" spellcheck="false" placeholder="PASTE A CARD" aria-label="Card text">
-            <button class="btn btn--small" type="submit">DECODE</button>
-          </form>
-        </div>
-        <div class="contact" id="contact-sealed" data-state="waiting">WAITING FOR A CARD…</div>
-        <button class="btn btn--ghost" type="button" data-orders="list">BACK</button>
-      </div>
     </section>
 
   </main>

@@ -4,11 +4,8 @@
 // SPEC.md: base32 payload into a QR version 2–3 at error-correction M. The
 // encoder tries version 2 first and falls back to 3; anything that does not
 // fit version 3 is a bug in the caller, not something to silently upgrade.
-//
-// Wednesday: the Sealed Orders card is the one exception, by design. It is a
-// UTF-8 JSON payload in Byte mode, up to orders.js's CARD_QR_MAX_VERSION, and
-// it asks for that ceiling explicitly through the options; the match frames
-// keep the v2–3 rule.
+// The version, error-correction and mode options exist for callers that
+// need them explicitly; every match frame keeps the v2–3 rule.
 
 const VENDOR_BASE = new URL('../vendor/', import.meta.url).href;
 

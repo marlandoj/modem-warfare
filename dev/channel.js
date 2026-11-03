@@ -25,9 +25,6 @@
 //     samples are posted; a peer listening in loopback mode plays them into
 //     its own capture graph (MediaStream -> AudioWorklet -> ggwave -> gate),
 //     the same path the microphone feeds. Only the air is replaced.
-//   - card: a rendered Sealed Orders card is posted as its wire text and
-//     delivered to a peer whose Sealed Orders screen is on SCAN CARD, as the
-//     camera would.
 //
 // Not precached; only loaded when the app URL carries ?dev=<instance>.
 
@@ -55,14 +52,10 @@ export function attach(MW, instance) {
     channel.postMessage({ kind: 'chirp', from: instance, text, seconds, sampleRate, samples, at: Date.now() });
   });
 
-  window.addEventListener('mw:orders-render', (e) => {
-    channel.postMessage({ kind: 'card', from: instance, text: e.detail.text, id: e.detail.id, hop: e.detail.hop, at: Date.now() });
-  });
-
   window.addEventListener('mw:frame', (e) => {
     log({ event: 'decoded', ...e.detail, meta: undefined });
   });
-  for (const name of ['mw:transport', 'mw:fire', 'mw:round-record', 'mw:gameover', 'mw:audit', 'mw:stamp', 'mw:sonar', 'mw:chirped', 'mw:listen-failed', 'mw:orders-received', 'mw:orders-refused', 'mw:orders-pass']) {
+  for (const name of ['mw:transport', 'mw:fire', 'mw:round-record', 'mw:gameover', 'mw:audit', 'mw:stamp', 'mw:sonar', 'mw:chirped', 'mw:listen-failed']) {
     window.addEventListener(name, (e) => log({ event: name.slice(3), ...e.detail }));
   }
 
@@ -83,8 +76,6 @@ export function attach(MW, instance) {
       } else {
         log({ event: 'chirp-ignored', text: msg.text, reason: MW.sonar ? 'not listening in loopback' : 'sound off' });
       }
-    } else if (msg.kind === 'card' && typeof msg.text === 'string') {
-      if (MW.orders && MW.orders.state.view === 'scan') MW.routeText(msg.text, { source: 'broadcast', block: 'sealed', from: msg.from });
     }
   });
 

@@ -12,8 +12,8 @@
 // the text: camera, typed, the Sonar's chirp decoder, or the dev harness's
 // BroadcastChannel. The gate decides accepted / duplicate / rejected; only an
 // accepted frame touches state, so a failed decode, a misheard chirp or a
-// re-scan can never fork the match. routeText() sits in front of it and
-// sends Sealed Orders card text (prefix MWO1) to that screen instead.
+// re-scan can never fork the match. routeText() sits in front of it as the
+// one entry every carrier calls.
 //
 // Thursday (the playtest rulings):
 //   1. The transport — CHIRP (default) or QR — is a pre-game setting on Home.
@@ -42,8 +42,6 @@ import { qrSvg } from './qr.js';
 import { Scanner } from './scanner.js';
 import * as sfx from './audio.js';
 import { sonar } from './sonar.js';
-import { isCardText } from './orders.js';
-import { initOrders } from './orders-ui.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -103,7 +101,6 @@ const state = freshState();
 const scanners = new Map();
 let wakeLock = null;
 let forfeitArmedAt = 0;
-let orders = null; // Sealed Orders controller (initOrders), set at boot
 
 // --------------------------------------------------------- transport ---
 // The one carrier the match presents. Chirp unless the phone's setting says
@@ -162,8 +159,8 @@ function syncCarriers() {
 
 // ------------------------------------------------------------ router ---
 
-const ROUTES = ['home', 'placement', 'handshake', 'round', 'gameover', 'sealed'];
-const TITLES = { home: 'MODEM WARFARE', placement: 'PLACEMENT', handshake: 'HANDSHAKE', round: 'ROUND LOOP', gameover: 'GAME OVER', sealed: 'SEALED ORDERS' };
+const ROUTES = ['home', 'placement', 'handshake', 'round', 'gameover'];
+const TITLES = { home: 'MODEM WARFARE', placement: 'PLACEMENT', handshake: 'HANDSHAKE', round: 'ROUND LOOP', gameover: 'GAME OVER' };
 
 function routeFromHash() {
   const r = (location.hash || '#/home').replace(/^#\/?/, '').split('?')[0];
@@ -184,13 +181,12 @@ function showRoute(route) {
   $('#nav-back').hidden = route === 'home';
   for (const [key, sc] of scanners) if (!key.startsWith(route)) sc.stop();
   if (SOUND && sonar.listening) { sonar.stop(); syncSonarUI(); } // the mic never stays open across screens
-  for (const m of $$('[data-manual]')) if (!m.closest('#screen-sealed')) m.hidden = true;
+  for (const m of $$('[data-manual]')) m.hidden = true;
   syncCarriers();
   if (route === 'handshake') renderHandshake();
   if (route === 'round') renderRound();
   if (route === 'placement') renderPlacement();
   if (route === 'gameover') renderGameOver();
-  if (route === 'sealed' && orders) orders.show();
   if (route === 'handshake' || route === 'round' || route === 'gameover') requestWakeLock(); else releaseWakeLock();
   window.scrollTo(0, 0);
   measureAvail();
@@ -1110,20 +1106,9 @@ async function offlineStatus() {
 
 /**
  * Every carrier lands here: camera, typed text, the Sonar decoder and the
- * dev channel. Sealed Orders card text (prefix MWO1) goes to that screen;
- * everything else is a match frame for injectText and the gate. A card seen
- * by a match scanner, or a frame seen by the card scanner, is refused aloud.
+ * dev channel. Everything is a match frame for injectText and the gate.
  */
 function routeText(text, meta = {}) {
-  if (isCardText(text)) {
-    if (orders && (meta.block === 'sealed' || routeFromHash() === 'sealed')) return orders.receive(text, meta);
-    toast('THAT IS A SEALED ORDERS CARD · OPEN SEALED ORDERS → SCAN CARD TO KEEP IT', 2800);
-    return { status: 'ignored', reason: 'CARD_IN_MATCH' };
-  }
-  if (meta.block === 'sealed') {
-    toast('THAT IS A MATCH FRAME, NOT A CARD', 2200);
-    return { status: 'ignored', reason: 'FRAME_IN_SEALED' };
-  }
   return injectText(text.toUpperCase(), meta);
 }
 
@@ -1270,7 +1255,6 @@ function scannerFor(block) {
   const status = $('[data-scan-status]', block);
   const sc = new Scanner(video, (text, meta) => routeText(text, { source: 'camera', block: key, ...meta }), {
     onStatus: (msg) => { status.textContent = msg; },
-    maxEdge: key === 'sealed' ? 1280 : 640, // a card is a dense QR: keep more pixels
   });
   scanners.set(key, sc);
   return sc;
@@ -1411,7 +1395,6 @@ window.MW = {
   routeText,
   sound: SOUND,
   sonar: SOUND ? sonar : null,
-  orders: null, // set at boot
   chirp: () => { const b = activeSonarBlock(); return b ? chirpCurrent(b) : Promise.resolve(null); },
   devTamper: null, // dev channel hook: (text) => text, applied to outgoing frames only
   devMuteFrames: false, // dev channel hook: true = frames do not cross the text transport (chirp gate)
@@ -1430,9 +1413,7 @@ function parseLabel(l) {
 if (!SOUND) for (const el of $$('[data-needs-sound]')) el.remove();
 
 // Two dev instances share one origin, so they would share one localStorage;
-// each keeps its cards and its transport under its own key, as two phones would.
-orders = initOrders({ $, $$, toast, dispatch, vibrate, storeKey: DEV_INSTANCE ? `mw.orders.v1.dev-${DEV_INSTANCE}` : undefined });
-window.MW.orders = orders;
+// each keeps its transport under its own key, as two phones would.
 loadTransport();
 wire();
 syncCarriers();

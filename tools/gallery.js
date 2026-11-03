@@ -6,9 +6,7 @@
 //                        QR, built from two real handshake screenshots that the
 //                        viewport gate took of this tree (412x915, QR mode).
 //   screenshots/*.png    the current build's real screens: the gate evidence in
-//                        test-output/ copied under gallery names, plus one
-//                        Sealed Orders card captured here at phone size (the
-//                        orders gate only shows the card inside the harness).
+//                        test-output/ copied under gallery names.
 //
 // No mockups: every pixel of every screen comes from headless Chromium running
 // app/ as served by tools/serve.js. Dev tool only — not in the precache.
@@ -31,7 +29,6 @@ const { createServer } = await import('./serve.js');
 
 const OUT = path.join(repoRoot, 'test-output');
 const SHOTS = path.join(repoRoot, 'screenshots');
-const PHONE = { width: 412, height: 915 };
 
 // Gate evidence -> gallery name. Every source is written by `npm test`.
 const COPIES = [
@@ -61,29 +58,10 @@ try {
     console.log(`screenshots/${dst} <- test-output/${src}`);
   }
 
-  // 1. A Sealed Orders card at phone size, composed through the shipped UI.
-  {
-    const context = await browser.newContext({ viewport: PHONE, deviceScaleFactor: 2.75, isMobile: true, hasTouch: true });
-    const page = await context.newPage();
-    await page.goto(`${base}/app/`);
-    await page.waitForFunction(() => document.querySelector('#offline-badge').dataset.state === 'ready', null, { timeout: 20000 });
-    await page.click('[data-go="sealed"]');
-    await page.click('[data-orders="compose"]');
-    await page.selectOption('#orders-label', 'KITCHEN');
-    await page.fill('#orders-note', 'Bins go out Tuesday night.\nSpare key is with Jordan. Gate code is on the fridge.');
-    await page.fill('#orders-items', 'Feed the cat\nWater the tomatoes\nLock the side gate');
-    await page.click('#btn-show-card');
-    await page.waitForSelector('#qr-card svg', { timeout: 10000 });
-    const card = await page.evaluate(() => ({ hop: document.querySelector('#card-hop').textContent, caption: document.querySelector('#caption-card').textContent }));
-    await page.screenshot({ path: path.join(SHOTS, '08-sealed-orders-card.png') });
-    console.log(`screenshots/08-sealed-orders-card.png <- app/ at ${PHONE.width}x${PHONE.height}: ${card.hop} · ${card.caption}`);
-    await context.close();
-  }
-
-  // 2. The thumbnail: the Salute composition of the submission pack's mockup,
-  //    rebuilt from real screens — left phone holds up its handshake QR, right
-  //    phone shows the reveal that follows (two HITs, a ship sunk). Both are
-  //    the viewport gate's QR-mode screenshots of this tree (412x915).
+  // The thumbnail: the Salute composition of the submission pack's mockup,
+  // rebuilt from real screens — left phone holds up its handshake QR, right
+  // phone shows the reveal that follows (two HITs, a ship sunk). Both are
+  // the viewport gate's QR-mode screenshots of this tree (412x915).
   {
     const left = must('viewport-412x915-qr-handshake.png');
     const right = must('viewport-412x915-qr-reveal.png');

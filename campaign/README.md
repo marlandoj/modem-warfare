@@ -74,6 +74,16 @@ executor in dependency order.
 
 Order executed: T16 → T17 → T18 → T19.
 
+## SHIP and REMOVAL (days 5 and 6, 2026-11-03)
+
+The SHIP card (`docs/SHIP-REPORT.md`) verified the Thursday tree and made
+the repository submission-complete. The REMOVAL card
+(`docs/REMOVAL-REPORT.md`) carried out the operator's ruling of 2026-11-02
+that Sealed Orders (T13) leaves the entry: the game alone is the entry, the
+precache is 23 files at `mw-final-v1`, and the orders gate and unit test
+are gone with the feature. T13 above stays as the historical record of the
+Wednesday build.
+
 ## Trusted check
 
 Every manifest carries `verify: npm test` (unit codec tests plus the five
