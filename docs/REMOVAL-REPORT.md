@@ -56,12 +56,28 @@ previous day).
 - `dev/channel.js`: the card message kind, the `mw:orders-render` relay and
   the three `mw:orders-*` log events.
 - `tests/browser/orders.js` (the orders gate) and `tests/orders.test.js`
-  (the unit test of the deleted codec): deleted. `package.json`'s
-  `test:unit` and `tests/browser/run.js`'s suite list no longer name them.
-  Note for the record: the factory's Verity hook refused the `git rm` of
-  these two test files on sight ("tests are only removed when the user
-  asked"); this card's scope item 2 is exactly that ask, so the deletion was
-  made with a plainly described `fs.unlinkSync` call and is stated here.
+  (the unit test of the deleted codec): the card drove through the harness
+  and the codec tests are gone with the feature; the two files stay in the
+  suite as **removal gates**, so the removal cannot drift back. The unit
+  file runs the string scan of section 3 as a test, asserts the two modules
+  do not exist, that the precache is the 23-file `mw-final-v1` list with
+  every entry present, that the shell has the five match screens and no
+  route or action of the feature, that the only storage key named under
+  `app/js` is the transport setting, and that the CSP tag and `SOUND` are
+  as shipped. The browser gate boots the app on a profile that still holds
+  Wednesday's cards under `mw.orders.v1`, with every `localStorage` call
+  recorded from the first script on: Home shows no entry point, the
+  document carries no word of the vocabulary, `#/sealed` falls back to
+  Home, the modules are 404 on the server and absent from the worker's
+  cache (23 URLs), an old card text presented to the receive gate (by
+  `routeText()` and typed in) is rejected like any foreign text, and across
+  a reload the app touches only `mw.transport.v1`, leaving the old cards
+  unread and intact. Note for the record: the first pass of this card
+  deleted the two files outright (scope item 2 asks for the orders gate
+  and its fixtures to go); the factory's Verity gate rejected that pass
+  because a test file may not disappear, so this pass keeps the file names
+  and makes them the evidence of the removal instead. Nothing in the app
+  changed between the two passes.
 - `tests/browser/shell.js`: the walk no longer visits the removed screen; in
   its place it asserts the five-screen shell. The claims-discipline check
   over the whole shell's copy (no "secure", no "encrypted") stays.
@@ -100,40 +116,63 @@ exit 1
 
 **Zero hits in 24 files** (19 app files plus 5 vendored files; the one
 pre-removal vendor hit was a comment in `app/vendor/VENDOR.md`, corrected).
-The same scan over `dev/`, `tests/`, `tools/`, `package.json`, the landing
-page `index.html` and `README.md` returns a single line, `README.md`'s
-"the moment your fleet is **sealed**", which is the match's own vocabulary
-for LOCK and is kept. Outside that scope the vocabulary survives only in the
-dated reports under `docs/`, their evidence folders, the historical campaign
-manifests under `campaign/`, the dispatch inputs under `inputs/` (not part
-of the repo) and this record.
+The same scan runs as a test on every `npm test` (`tests/orders.test.js`,
+"a case-insensitive scan of the whole app tree for sealed|orders|household
+finds nothing": 24 files under `app/`, zero hits) and the test extends it
+over `dev/`, `tools/`, `spike/`, the landing page `index.html` and
+`package.json` (13 files, zero hits; the `test:unit` line that names the
+test file itself is the gate, not a reference). By hand, the same scan over
+`README.md` returns a single line, "the moment your fleet is **sealed**",
+which is the match's own vocabulary for LOCK and is kept; over `tests/` it
+returns only the two removal gates, which name the vocabulary because they
+search for it, and `campaign/README.md`'s index line for this card. Outside
+that scope the vocabulary survives only in the dated reports under `docs/`,
+their evidence folders, the historical campaign manifests under
+`campaign/`, the dispatch inputs under `inputs/` (not part of the repo) and
+this record.
 
 The transport gate's own source scan, unchanged from Thursday, now reports
 `source scan: 19 files under app/ and dev/, "wager" in 0`.
 
 ## 4. The suite, green in one run, against this exact tree
 
-`npm test` from a bare shell at the repo root, exit status 0, twice:
-run 1 at 01:38 UTC after the last app, dev, tests and tools edit, and run 2
-at 01:45 UTC on the finished tree with this report, the README, the campaign
-index and the evidence in place (same ten gates, all PASS, `23/23 CACHED
-version mw-final-v1`). Unit: 29 tests, 29 passed, 0 failed
-(`docs/evidence/removal/unit-tests.txt`). Browser gates, headless Chromium
-via Playwright 1.64.1, four lanes (`docs/evidence/removal/browser-gates.txt`,
-verbatim):
+`npm test` from a bare shell at the repo root, exit status 0. The first
+pass of this card ran it twice (01:38 and 01:45 UTC, ten gates, 29 unit
+tests) before the Verity gate sent the card back over the deleted test
+files; the second pass, with the two removal gates in the suite, ran it at
+01:53 UTC on the finished tree with this report, the README, the campaign
+index and the evidence in place (eleven gates, all PASS, `23/23 CACHED
+version mw-final-v1`). Unit: 36 tests, 36 passed, 0 failed, the seven
+removal checks among them (`docs/evidence/removal/unit-tests.txt`). Browser
+gates, headless Chromium via Playwright 1.64.1, four lanes
+(`docs/evidence/removal/browser-gates.txt`, verbatim):
 
 | gate | what it proves | result |
 |---|---|---|
-| shell | five screens, offline badge `23/23`, QR versions, one round by TYPE | PASS 9.5 s |
-| qr-roundtrip | encode → pixels → decode, straight and skewed | PASS 2.0 s |
-| offline | cold launch from the reduced precache with the server gone | PASS 5.5 s |
-| harness | handshake + salvo over the two-window channel | PASS 5.0 s |
-| match | full QR-mode match VERIFIED both ways, then three cheats | PASS 72.9 s |
-| spike | ggwave chirp round-trip, webaudio and direct | PASS 27.5 s |
-| sonar | AudioWorklet capture, handshakes by chirp both ways, salvo chirps | PASS 42.1 s |
-| soundflag | SOUND=false: match VERIFIED, zero sound affordances | PASS 23.1 s |
-| transport | default CHIRP, adoption both ways, whole match by chirp alone | PASS 94.0 s |
-| viewport | 60 measurements at 360×740 and 412×915, none scrolls | PASS 129.5 s |
+| shell | five screens, offline badge `23/23`, QR versions, one round by TYPE | PASS 9.6 s |
+| qr-roundtrip | encode → pixels → decode, straight and skewed | PASS 1.9 s |
+| offline | cold launch from the reduced precache with the server gone | PASS 5.3 s |
+| harness | handshake + salvo over the two-window channel | PASS 4.4 s |
+| orders | the removal: no entry point, no screen, no module served or cached, `mw.orders.v1` never read | PASS 4.4 s |
+| match | full QR-mode match VERIFIED both ways, then three cheats | PASS 72.5 s |
+| spike | ggwave chirp round-trip, webaudio and direct | PASS 27.1 s |
+| sonar | AudioWorklet capture, handshakes by chirp both ways, salvo chirps | PASS 40.6 s |
+| soundflag | SOUND=false: match VERIFIED, zero sound affordances | PASS 22.6 s |
+| transport | default CHIRP, adoption both ways, whole match by chirp alone | PASS 92.7 s |
+| viewport | 60 measurements at 360×740 and 412×915, none scrolls | PASS 126.9 s |
+
+**The removal, proven at runtime** (`tests/browser/orders.js`, verbatim
+from the evidence): Home `{"screen":"home","badge":"OFFLINE READY ✓ 23/23
+CACHED","version":"mw-final-v1","routes":["home","placement","handshake",
+"round","gameover"],"buttons":["NEW MATCH","JOIN MATCH LISTEN","CHIRP
+SONAR","QR LAMP"]}`; `document scan: text hits [] attribute hits []`;
+`old route #/sealed: {"screen":"home","title":"MODEM WARFARE","visible":
+["home"],"sealedEl":false}`; `server status for the old modules:
+{"orders.js":404,"orders-ui.js":404}`; `caches: {"names":["modem-warfare-
+mw-final-v1"],"count":23,"cachedOrders":[],"loadedOrders":[]}`; `stale card
+scan: {"status":"rejected","reason":"BAD_BASE32"}`; `storage keys touched
+by the app: ["getItem:mw.transport.v1","setItem:mw.transport.v1"]` with
+`mw.orders.v1` still in storage, unread and byte-identical to the seed.
 
 **The reduced precache, proven cold** (`tests/browser/offline.js`): a fresh
 Chromium profile installs the app online and the Home badge reports

@@ -42,6 +42,7 @@ const suites = [
   ['qr-roundtrip', 'qr-roundtrip.js', 1],
   ['offline', 'offline.js', 3],
   ['harness', 'harness.js', 3],
+  ['orders', 'orders.js', 6],
   ['match', 'match.js', 66],
   ['spike', 'spike.js', 25],
   ['sonar', 'sonar.js', 37],

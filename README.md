@@ -150,9 +150,9 @@ node tools/serve.js 8080 --bind 0.0.0.0   # reachable from phones on the LAN
 ## Test it
 
 ```sh
-npm run test:unit                     # node --test, no dependencies: codec, sha256, audit
+npm run test:unit                     # node --test, no dependencies: codec, sha256, audit, removal (string scan)
 npm install && npx playwright install chromium
-npm run test:browser                  # shell, QR pixels, cold offline launch, harness, full match + cheats,
+npm run test:browser                  # shell, QR pixels, cold offline launch, harness, removal, full match + cheats,
                                       # spike, sonar, soundflag, transport, viewport
 npm test                              # both; the trusted check in .verity.json (about 2½ minutes in 4 lanes;
                                       # MW_LANES=1 runs the browser gates one after another, about 7 minutes)
