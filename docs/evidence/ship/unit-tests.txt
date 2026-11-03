@@ -1,0 +1,249 @@
+TAP version 13
+# Subtest: audit: a clean match is VERIFIED — NO SHIP MOVED
+ok 1 - audit: a clean match is VERIFIED — NO SHIP MOVED
+  ---
+  duration_ms: 7.089897
+  type: 'test'
+  ...
+# Subtest: audit: a reveal with the wrong salt fails the commitment check
+ok 2 - audit: a reveal with the wrong salt fails the commitment check
+  ---
+  duration_ms: 1.208733
+  type: 'test'
+  ...
+# Subtest: audit: a revealed fleet that differs from the committed one is LIAR even when every result matches it
+ok 3 - audit: a revealed fleet that differs from the committed one is LIAR even when every result matches it
+  ---
+  duration_ms: 1.249498
+  type: 'test'
+  ...
+# Subtest: audit: one false result (a HIT reported as a miss) is LIAR, named by round and cell
+ok 4 - audit: one false result (a HIT reported as a miss) is LIAR, named by round and cell
+  ---
+  duration_ms: 1.399695
+  type: 'test'
+  ...
+# Subtest: audit: a miss reported as a HIT, and a ship reported sunk early, are both LIAR
+ok 5 - audit: a miss reported as a HIT, and a ship reported sunk early, are both LIAR
+  ---
+  duration_ms: 8.894981
+  type: 'test'
+  ...
+# Subtest: audit: an off-board or overlapping revealed fleet is LIAR before any result is checked
+ok 6 - audit: an off-board or overlapping revealed fleet is LIAR before any result is checked
+  ---
+  duration_ms: 0.888712
+  type: 'test'
+  ...
+# Subtest: audit: a round with no reported results is a finding, and forfeit has its own stamp
+ok 7 - audit: a round with no reported results is a finding, and forfeit has its own stamp
+  ---
+  duration_ms: 1.085562
+  type: 'test'
+  ...
+#   handshake text: CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME -> HANDSHAKE s=a1b2c3d4 r=0 · commit 0b30557a… · by chirp
+#   salvo text: CKQ3FQ6UAROLYLACABKA -> SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT · sunk 3
+#   reveal text: COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ -> REVEAL s=a1b2c3d4 r=11 · sunk 4,3,2 · fleet A2h G3v C6h E1v
+# Subtest: base32: RFC 4648 vectors (unpadded)
+ok 8 - base32: RFC 4648 vectors (unpadded)
+  ---
+  duration_ms: 4.497392
+  type: 'test'
+  ...
+# Subtest: crc8: known value and single-bit sensitivity
+ok 9 - crc8: known value and single-bit sensitivity
+  ---
+  duration_ms: 0.869643
+  type: 'test'
+  ...
+# Subtest: salvo frame is exactly 12 bytes / 20 base32 chars
+ok 10 - salvo frame is exactly 12 bytes / 20 base32 chars
+  ---
+  duration_ms: 1.242928
+  type: 'test'
+  ...
+# Subtest: round-trip: handshake frame (session + commitment placeholder)
+ok 11 - round-trip: handshake frame (session + commitment placeholder)
+  ---
+  duration_ms: 6.841191
+  type: 'test'
+  ...
+# Subtest: round-trip: salvo frame with piggybacked results and sunk flags
+ok 12 - round-trip: salvo frame with piggybacked results and sunk flags
+  ---
+  duration_ms: 1.981243
+  type: 'test'
+  ...
+# Subtest: round-trip: salvo frame without results (first salvo of a round) and partial salvo
+ok 13 - round-trip: salvo frame without results (first salvo of a round) and partial salvo
+  ---
+  duration_ms: 0.967228
+  type: 'test'
+  ...
+# Subtest: round-trip: reveal frame (packed fleet + 16-byte salt)
+ok 14 - round-trip: reveal frame (packed fleet + 16-byte salt)
+  ---
+  duration_ms: 1.515118
+  type: 'test'
+  ...
+# Subtest: fleet packing is lossless for every corner
+ok 15 - fleet packing is lossless for every corner
+  ---
+  duration_ms: 0.623927
+  type: 'test'
+  ...
+# Subtest: encode(decode(x)) is byte-identical for all representative frames
+ok 16 - encode(decode(x)) is byte-identical for all representative frames
+  ---
+  duration_ms: 3.293273
+  type: 'test'
+  ...
+# Subtest: corruption: a flipped bit fails the check byte; wrong version/type rejected
+ok 17 - corruption: a flipped bit fails the check byte; wrong version/type rejected
+  ---
+  duration_ms: 4.614009
+  type: 'test'
+  ...
+# Subtest: gate: handshake binds the session, duplicate re-scan is a no-op
+ok 18 - gate: handshake binds the session, duplicate re-scan is a no-op
+  ---
+  duration_ms: 3.646288
+  type: 'test'
+  ...
+# Subtest: gate: salvo round flow — accept expected, no-op on identical, reject stale and future
+ok 19 - gate: salvo round flow — accept expected, no-op on identical, reject stale and future
+  ---
+  duration_ms: 1.046215
+  type: 'test'
+  ...
+# Subtest: gate: wrong session, undecodable text, and late handshake are rejected without state change
+ok 20 - gate: wrong session, undecodable text, and late handshake are rejected without state change
+  ---
+  duration_ms: 0.833031
+  type: 'test'
+  ...
+# Subtest: gate: reveal frame accepted at the expected round
+ok 21 - gate: reveal frame accepted at the expected round
+  ---
+  duration_ms: 0.419495
+  type: 'test'
+  ...
+# Subtest: cell labels
+ok 22 - cell labels
+  ---
+  duration_ms: 0.405857
+  type: 'test'
+  ...
+# Subtest: transport: the handshake carries chirp or qr, defaults to chirp, and stays 28 bytes / 45 chars
+ok 23 - transport: the handshake carries chirp or qr, defaults to chirp, and stays 28 bytes / 45 chars
+  ---
+  duration_ms: 1.129552
+  type: 'test'
+  ...
+# Subtest: transport: the family is three types; the old type 4 is BAD_TYPE
+ok 24 - transport: the family is three types; the old type 4 is BAD_TYPE
+  ---
+  duration_ms: 0.585262
+  type: 'test'
+  ...
+# Subtest: gate: any previously accepted frame is a no-op on re-scan, not just the last one
+ok 25 - gate: any previously accepted frame is a no-op on re-scan, not just the last one
+  ---
+  duration_ms: 0.716388
+  type: 'test'
+  ...
+# Subtest: fleetIsValid: inside the board, no overlap
+ok 26 - fleetIsValid: inside the board, no overlap
+  ---
+  duration_ms: 0.526681
+  type: 'test'
+  ...
+# \# card text (176 bytes): MWO1{"id":"98cdb7e7","h":1,"l":"KITCHEN","n":"Bins go out Tuesday night.\\nSpare …
+# \# maximum card: 1133 bytes (budget 1300)
+# Subtest: compose -> text -> card round-trip keeps every field, hop 1, fresh id
+ok 27 - compose -> text -> card round-trip keeps every field, hop 1, fresh id
+  ---
+  duration_ms: 20.369655
+  type: 'test'
+  ...
+# Subtest: UTF-8 survives the wire (accents, emoji)
+ok 28 - UTF-8 survives the wire (accents, emoji)
+  ---
+  duration_ms: 3.656207
+  type: 'test'
+  ...
+# Subtest: the longest card that is allowed still fits the QR byte budget
+ok 29 - the longest card that is allowed still fits the QR byte budget
+  ---
+  duration_ms: 1.249389
+  type: 'test'
+  ...
+# Subtest: over-limit note is refused with a message that names the count and limit (never truncated)
+ok 30 - over-limit note is refused with a message that names the count and limit (never truncated)
+  ---
+  duration_ms: 1.302674
+  type: 'test'
+  ...
+# Subtest: too many items and an over-long item are refused by name
+ok 31 - too many items and an over-long item are refused by name
+  ---
+  duration_ms: 0.686339
+  type: 'test'
+  ...
+# Subtest: empty card, unknown label and a bloated incoming card are refused
+ok 32 - empty card, unknown label and a bloated incoming card are refused
+  ---
+  duration_ms: 1.460546
+  type: 'test'
+  ...
+# Subtest: pass it on bumps the hop count and keeps the id
+ok 33 - pass it on bumps the hop count and keeps the id
+  ---
+  duration_ms: 3.048776
+  type: 'test'
+  ...
+# Subtest: items from textarea lines: blank lines dropped, nothing shortened
+ok 34 - items from textarea lines: blank lines dropped, nothing shortened
+  ---
+  duration_ms: 0.599041
+  type: 'test'
+  ...
+# Subtest: store: keep, mark done, bump hop, persist across a fresh store on the same storage
+ok 35 - store: keep, mark done, bump hop, persist across a fresh store on the same storage
+  ---
+  duration_ms: 1.952685
+  type: 'test'
+  ...
+# Subtest: the labels are a fixed picker and the limits are the published ones
+ok 36 - the labels are a fixed picker and the limits are the published ones
+  ---
+  duration_ms: 0.911789
+  type: 'test'
+  ...
+# Subtest: sha256: FIPS 180-4 vectors
+ok 37 - sha256: FIPS 180-4 vectors
+  ---
+  duration_ms: 138.642168
+  type: 'test'
+  ...
+# Subtest: sha256: every padding boundary agrees with node:crypto
+ok 38 - sha256: every padding boundary agrees with node:crypto
+  ---
+  duration_ms: 3.744034
+  type: 'test'
+  ...
+# Subtest: commitment: first 16 bytes of SHA-256(packed fleet ‖ salt); salt-sensitive; no SubtleCrypto needed
+ok 39 - commitment: first 16 bytes of SHA-256(packed fleet ‖ salt); salt-sensitive; no SubtleCrypto needed
+  ---
+  duration_ms: 4.235091
+  type: 'test'
+  ...
+1..39
+# tests 39
+# suites 0
+# pass 39
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 343.855588
