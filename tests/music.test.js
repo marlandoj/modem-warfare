@@ -8,7 +8,7 @@
 // layers the card asks for with the lead on the last one, the stings hand
 // over to a scene, no pitch is out of range, and the score ships as code —
 // no audio file is referenced by the engine, none exists under app/, and
-// the precache names the engine at mw-final-v2.
+// the precache names the engine (at mw-final-v3 since SHIPS).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -125,7 +125,7 @@ test('the stings are short and hand over: victory to the theme at strength, defe
   assert.ok(!d.events.some((e) => ['kick', 'snare', 'hat', 'arp', 'lead'].includes(e.i)), 'sombre: brass and timpani only');
 });
 
-test('the score is code: no audio file is referenced, none exists under app/, the precache names the engine at mw-final-v2', () => {
+test('the score is code: no audio file is referenced, none exists under app/, the precache names the engine at mw-final-v3', () => {
   const src = fs.readFileSync(path.join(APP, 'js', 'music.js'), 'utf8');
   assert.doesNotMatch(src, /\.(mp3|wav|ogg|m4a|aac|flac|opus|mid|midi)\b/i, 'music.js names no audio file');
   assert.doesNotMatch(src, /fetch\(|decodeAudioData|XMLHttpRequest|<audio|new Audio\(/, 'music.js loads nothing');
@@ -134,11 +134,11 @@ test('the score is code: no audio file is referenced, none exists under app/, th
   const audio = files.filter((f) => /\.(mp3|wav|ogg|m4a|aac|flac|opus|mid|midi)$/i.test(f));
   assert.deepEqual(audio, [], 'no audio file anywhere under app/');
   const sw = fs.readFileSync(path.join(APP, 'sw.js'), 'utf8');
-  assert.match(sw, /const VERSION = 'mw-final-v2';/, 'cache version bumped to mw-final-v2');
+  assert.match(sw, /const VERSION = 'mw-final-v3';/, 'cache version is mw-final-v3 (SHIPS)');
   const entries = Array.from(sw.match(/const PRECACHE = \[([\s\S]*?)\];/)[1].matchAll(/'([^']+)'/g), (m) => m[1]);
   assert.ok(entries.includes('./js/music.js'), 'the engine is precached');
-  assert.equal(entries.length, 24, '24 files');
+  assert.equal(entries.length, 25, '25 files');
   const size = fs.statSync(path.join(APP, 'js', 'music.js')).size;
-  console.log(`# app/js/music.js: ${size} bytes in the precache (${entries.length} files, mw-final-v2); ${files.length} files under app/, 0 audio files`);
+  console.log(`# app/js/music.js: ${size} bytes in the precache (${entries.length} files, mw-final-v3); ${files.length} files under app/, 0 audio files`);
   assert.ok(size < 60000, 'the whole score is under 60 KB of code');
 });

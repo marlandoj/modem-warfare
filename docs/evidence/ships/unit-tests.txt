@@ -1,0 +1,286 @@
+> modem-warfare@0.4.0-thu test
+> npm run test:unit && npm run test:browser
+> modem-warfare@0.4.0-thu test:unit
+> node --test tests/frame.test.js tests/sha256.test.js tests/audit.test.js tests/orders.test.js tests/music.test.js
+TAP version 13
+# Subtest: audit: a clean match is VERIFIED — NO SHIP MOVED
+ok 1 - audit: a clean match is VERIFIED — NO SHIP MOVED
+  ---
+  duration_ms: 5.975714
+  type: 'test'
+  ...
+# Subtest: audit: a reveal with the wrong salt fails the commitment check
+ok 2 - audit: a reveal with the wrong salt fails the commitment check
+  ---
+  duration_ms: 1.096425
+  type: 'test'
+  ...
+# Subtest: audit: a revealed fleet that differs from the committed one is LIAR even when every result matches it
+ok 3 - audit: a revealed fleet that differs from the committed one is LIAR even when every result matches it
+  ---
+  duration_ms: 1.113042
+  type: 'test'
+  ...
+# Subtest: audit: one false result (a HIT reported as a miss) is LIAR, named by round and cell
+ok 4 - audit: one false result (a HIT reported as a miss) is LIAR, named by round and cell
+  ---
+  duration_ms: 1.223677
+  type: 'test'
+  ...
+# Subtest: audit: a miss reported as a HIT, and a ship reported sunk early, are both LIAR
+ok 5 - audit: a miss reported as a HIT, and a ship reported sunk early, are both LIAR
+  ---
+  duration_ms: 5.686552
+  type: 'test'
+  ...
+# Subtest: audit: an off-board or overlapping revealed fleet is LIAR before any result is checked
+ok 6 - audit: an off-board or overlapping revealed fleet is LIAR before any result is checked
+  ---
+  duration_ms: 0.842626
+  type: 'test'
+  ...
+# Subtest: audit: a round with no reported results is a finding, and forfeit has its own stamp
+ok 7 - audit: a round with no reported results is a finding, and forfeit has its own stamp
+  ---
+  duration_ms: 0.977241
+  type: 'test'
+  ...
+#   handshake text: CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME -> HANDSHAKE s=a1b2c3d4 r=0 · commit 0b30557a… · by chirp
+#   salvo text: CKQ3FQ6UAROLYLACABKA -> SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT · sunk 3
+#   reveal text: COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ -> REVEAL s=a1b2c3d4 r=11 · sunk 4,3,2 · fleet A2h G3v C6h E1v
+# Subtest: base32: RFC 4648 vectors (unpadded)
+ok 8 - base32: RFC 4648 vectors (unpadded)
+  ---
+  duration_ms: 4.103739
+  type: 'test'
+  ...
+# Subtest: crc8: known value and single-bit sensitivity
+ok 9 - crc8: known value and single-bit sensitivity
+  ---
+  duration_ms: 0.7246
+  type: 'test'
+  ...
+# Subtest: salvo frame is exactly 12 bytes / 20 base32 chars
+ok 10 - salvo frame is exactly 12 bytes / 20 base32 chars
+  ---
+  duration_ms: 1.136212
+  type: 'test'
+  ...
+# Subtest: round-trip: handshake frame (session + commitment placeholder)
+ok 11 - round-trip: handshake frame (session + commitment placeholder)
+  ---
+  duration_ms: 4.135269
+  type: 'test'
+  ...
+# Subtest: round-trip: salvo frame with piggybacked results and sunk flags
+ok 12 - round-trip: salvo frame with piggybacked results and sunk flags
+  ---
+  duration_ms: 1.120153
+  type: 'test'
+  ...
+# Subtest: round-trip: salvo frame without results (first salvo of a round) and partial salvo
+ok 13 - round-trip: salvo frame without results (first salvo of a round) and partial salvo
+  ---
+  duration_ms: 0.823617
+  type: 'test'
+  ...
+# Subtest: round-trip: reveal frame (packed fleet + 16-byte salt)
+ok 14 - round-trip: reveal frame (packed fleet + 16-byte salt)
+  ---
+  duration_ms: 1.47189
+  type: 'test'
+  ...
+# Subtest: fleet packing is lossless for every corner
+ok 15 - fleet packing is lossless for every corner
+  ---
+  duration_ms: 0.547934
+  type: 'test'
+  ...
+# Subtest: encode(decode(x)) is byte-identical for all representative frames
+ok 16 - encode(decode(x)) is byte-identical for all representative frames
+  ---
+  duration_ms: 5.700266
+  type: 'test'
+  ...
+# Subtest: corruption: a flipped bit fails the check byte; wrong version/type rejected
+ok 17 - corruption: a flipped bit fails the check byte; wrong version/type rejected
+  ---
+  duration_ms: 2.211511
+  type: 'test'
+  ...
+# Subtest: gate: handshake binds the session, duplicate re-scan is a no-op
+ok 18 - gate: handshake binds the session, duplicate re-scan is a no-op
+  ---
+  duration_ms: 3.159591
+  type: 'test'
+  ...
+# Subtest: gate: salvo round flow — accept expected, no-op on identical, reject stale and future
+ok 19 - gate: salvo round flow — accept expected, no-op on identical, reject stale and future
+  ---
+  duration_ms: 0.898117
+  type: 'test'
+  ...
+# Subtest: gate: wrong session, undecodable text, and late handshake are rejected without state change
+ok 20 - gate: wrong session, undecodable text, and late handshake are rejected without state change
+  ---
+  duration_ms: 0.687151
+  type: 'test'
+  ...
+# Subtest: gate: reveal frame accepted at the expected round
+ok 21 - gate: reveal frame accepted at the expected round
+  ---
+  duration_ms: 0.360266
+  type: 'test'
+  ...
+# Subtest: cell labels
+ok 22 - cell labels
+  ---
+  duration_ms: 0.353179
+  type: 'test'
+  ...
+# Subtest: transport: the handshake carries chirp or qr, defaults to chirp, and stays 28 bytes / 45 chars
+ok 23 - transport: the handshake carries chirp or qr, defaults to chirp, and stays 28 bytes / 45 chars
+  ---
+  duration_ms: 1.075782
+  type: 'test'
+  ...
+# Subtest: transport: the family is three types; the old type 4 is BAD_TYPE
+ok 24 - transport: the family is three types; the old type 4 is BAD_TYPE
+  ---
+  duration_ms: 0.466677
+  type: 'test'
+  ...
+# Subtest: gate: any previously accepted frame is a no-op on re-scan, not just the last one
+ok 25 - gate: any previously accepted frame is a no-op on re-scan, not just the last one
+  ---
+  duration_ms: 0.746224
+  type: 'test'
+  ...
+# Subtest: fleetIsValid: inside the board, no overlap
+ok 26 - fleetIsValid: inside the board, no overlap
+  ---
+  duration_ms: 0.534383
+  type: 'test'
+  ...
+# \# theme: 1026 events, 128 beats at 104 bpm = 73.8 s, loops, instruments arp bass hat kick snare brass lead timpani
+# \# placement: 106 events, 32 beats at 92 bpm = 20.9 s, loops, instruments brassDark hat timpani
+# \# battle: 338 events, 32 beats at 108 bpm = 17.8 s, loops, instruments arp bass brass brassLow hat kick lead timpani snare
+# \# victory: 113 events, 12 beats at 104 bpm = 6.9 s, then theme, instruments brass cymbal snare timpani
+# \# defeat: 21 events, 12 beats at 72 bpm = 10.0 s, then placement, instruments brassDark timpani
+# \# app/js/music.js: 33738 bytes in the precache (25 files, mw-final-v3); 26 files under app/, 0 audio files
+# Subtest: notation: pitches, lines, chords and drum grids compile as written
+ok 27 - notation: pitches, lines, chords and drum grids compile as written
+  ---
+  duration_ms: 6.365042
+  type: 'test'
+  ...
+# Subtest: every scene compiles into a sorted, in-range, in-bounds event list
+ok 28 - every scene compiles into a sorted, in-range, in-bounds event list
+  ---
+  duration_ms: 8.596215
+  type: 'test'
+  ...
+# Subtest: the theme loops at a minute to ninety seconds with no gap at the seam
+ok 29 - the theme loops at a minute to ninety seconds with no gap at the seam
+  ---
+  duration_ms: 1.959157
+  type: 'test'
+  ...
+# Subtest: the placement variant is the march, quiet and dark
+ok 30 - the placement variant is the march, quiet and dark
+  ---
+  duration_ms: 0.439481
+  type: 'test'
+  ...
+# Subtest: the battle loop has three layers: ostinato, the first hit, the final rounds
+ok 31 - the battle loop has three layers: ostinato, the first hit, the final rounds
+  ---
+  duration_ms: 1.280221
+  type: 'test'
+  ...
+# Subtest: the stings are short and hand over: victory to the theme at strength, defeat to the quiet march
+ok 32 - the stings are short and hand over: victory to the theme at strength, defeat to the quiet march
+  ---
+  duration_ms: 0.592767
+  type: 'test'
+  ...
+# Subtest: the score is code: no audio file is referenced, none exists under app/, the precache names the engine at mw-final-v3
+ok 33 - the score is code: no audio file is referenced, none exists under app/, the precache names the engine at mw-final-v3
+  ---
+  duration_ms: 11.639133
+  type: 'test'
+  ...
+# \# scanned 26 files under app/ (code, styles, markup, manifest, service worker, icons, vendor)
+# \# scanned 13 files under dev/, tools/, spike/ plus index.html and package.json
+# \# precache: 25 entries, version mw-final-v3
+# \# storage keys named under app/js: ["mw.transport.v1.dev-","mw.transport.v1","mw.music.v1.dev-","mw.music.v1"]
+# \# CSP tag md5: 6c8d92f44b4b6671a44c5abc62e23ca9
+# Subtest: removal: the orders modules no longer exist
+ok 34 - removal: the orders modules no longer exist
+  ---
+  duration_ms: 1.385521
+  type: 'test'
+  ...
+# Subtest: removal: a case-insensitive scan of the whole app tree for sealed|orders|household finds nothing
+ok 35 - removal: a case-insensitive scan of the whole app tree for sealed|orders|household finds nothing
+  ---
+  duration_ms: 30.158119
+  type: 'test'
+  ...
+# Subtest: removal: the dev harness, the tools, the landing page and the manifest carry no dangling reference either
+ok 36 - removal: the dev harness, the tools, the landing page and the manifest carry no dangling reference either
+  ---
+  duration_ms: 2.815337
+  type: 'test'
+  ...
+# Subtest: removal: the precache is the reduced list (23 files, plus the score engine since SOUNDTRACK and the ship art since SHIPS: 25 at mw-final-v3) and every entry exists
+ok 37 - removal: the precache is the reduced list (23 files, plus the score engine since SOUNDTRACK and the ship art since SHIPS: 25 at mw-final-v3) and every entry exists
+  ---
+  duration_ms: 2.156561
+  type: 'test'
+  ...
+# Subtest: removal: the shell has exactly the five match screens and no entry point to the feature
+ok 38 - removal: the shell has exactly the five match screens and no entry point to the feature
+  ---
+  duration_ms: 1.674827
+  type: 'test'
+  ...
+# Subtest: removal: the only storage keys the shipped app names are the transport and music settings (the card store key is never read)
+ok 39 - removal: the only storage keys the shipped app names are the transport and music settings (the card store key is never read)
+  ---
+  duration_ms: 2.741642
+  type: 'test'
+  ...
+# Subtest: untouched: the content-security policy is byte-identical to the shipped one, SOUND stays true
+ok 40 - untouched: the content-security policy is byte-identical to the shipped one, SOUND stays true
+  ---
+  duration_ms: 1.842923
+  type: 'test'
+  ...
+# Subtest: sha256: FIPS 180-4 vectors
+ok 41 - sha256: FIPS 180-4 vectors
+  ---
+  duration_ms: 132.078292
+  type: 'test'
+  ...
+# Subtest: sha256: every padding boundary agrees with node:crypto
+ok 42 - sha256: every padding boundary agrees with node:crypto
+  ---
+  duration_ms: 4.228882
+  type: 'test'
+  ...
+# Subtest: commitment: first 16 bytes of SHA-256(packed fleet ‖ salt); salt-sensitive; no SubtleCrypto needed
+ok 43 - commitment: first 16 bytes of SHA-256(packed fleet ‖ salt); salt-sensitive; no SubtleCrypto needed
+  ---
+  duration_ms: 3.376951
+  type: 'test'
+  ...
+1..43
+# tests 43
+# suites 0
+# pass 43
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 384.47967

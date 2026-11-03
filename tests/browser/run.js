@@ -50,6 +50,7 @@ const suites = [
   ['transport', 'transport.js', 88],
   ['viewport', 'viewport.js', 117],
   ['soundtrack', 'soundtrack.js', 110],
+  ['ships', 'ships.js', 40],
 ];
 
 const lanes = Math.max(1, parseInt(process.env.MW_LANES || '4', 10) || 1);

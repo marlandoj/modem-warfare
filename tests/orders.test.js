@@ -68,15 +68,15 @@ test('removal: the dev harness, the tools, the landing page and the manifest car
   assert.deepEqual(hits, [], 'no feature vocabulary outside app/ in code that runs or builds');
 });
 
-test('removal: the precache is the reduced list (23 files, plus the score engine since SOUNDTRACK: 24 at mw-final-v2) and every entry exists', () => {
+test('removal: the precache is the reduced list (23 files, plus the score engine since SOUNDTRACK and the ship art since SHIPS: 25 at mw-final-v3) and every entry exists', () => {
   const sw = fs.readFileSync(path.join(APP, 'sw.js'), 'utf8');
-  assert.match(sw, /const VERSION = 'mw-final-v2';/, 'cache version bumped to mw-final-v2 for the score');
+  assert.match(sw, /const VERSION = 'mw-final-v3';/, 'cache version bumped to mw-final-v3 for the ship art');
   const list = sw.match(/const PRECACHE = \[([\s\S]*?)\];/);
   assert.ok(list, 'PRECACHE list found');
   const entries = Array.from(list[1].matchAll(/'([^']+)'/g), (m) => m[1]);
-  console.log(`# precache: ${entries.length} entries, version mw-final-v2`);
-  assert.equal(entries.length, 24, 'the reduced precache (23) plus js/music.js: 24 entries');
-  assert.deepEqual(entries.filter((e) => !/^\.\/(js\/music\.js)$/.test(e)).length, 23, 'the only entry added since the removal is the score engine');
+  console.log(`# precache: ${entries.length} entries, version mw-final-v3`);
+  assert.equal(entries.length, 25, 'the reduced precache (23) plus js/music.js and js/ships.js: 25 entries');
+  assert.deepEqual(entries.filter((e) => !/^\.\/(js\/(music|ships)\.js)$/.test(e)).length, 23, 'the only entries added since the removal are the score engine and the ship art');
   assert.deepEqual(entries.filter((e) => /orders/i.test(e)), [], 'no orders entry in the precache');
   for (const e of entries) {
     if (e === './') continue;

@@ -44,6 +44,7 @@ import {
   randomSession, FrameGate, describeFrame, hex, fleetIsValid, TRANSPORT, DEFAULT_TRANSPORT,
 } from './frame.js';
 import { randomFleet, rotateShip, fleetCellMap, newSalt, commitment, shipCells } from './fleet.js';
+import { segmentSvg, shipSvg } from './ships.js';
 import { auditReveal, stampFor, VERDICT } from './audit.js';
 import { qrSvg } from './qr.js';
 import { Scanner } from './scanner.js';
@@ -352,6 +353,10 @@ function renderBoard(el, { fleet = null, marks = new Map(), onCell = null, picks
         if (ship.bow) cell.classList.add(ship.horizontal ? 'cell--bow-h' : 'cell--bow-v');
         if (ship.stern) cell.classList.add(ship.horizontal ? 'cell--stern-h' : 'cell--stern-v');
         cell.dataset.ship = ship.shipIndex;
+        cell.dataset.segment = ship.k;
+        // SHIPS: the cell's segment of the hull (js/ships.js), drawn inside
+        // this cell only; the states recolour it from the stylesheet.
+        cell.innerHTML = segmentSvg({ shipIndex: ship.shipIndex, size: ship.size, k: ship.k, horizontal: ship.horizontal });
         if (sunkShips[ship.shipIndex]) cell.classList.add('cell--sunk', 'cell--settled');
       }
       const mark = marks.get(idx);
@@ -368,8 +373,9 @@ function renderOwnBoard(el, { sunkShips = state.sunk } = {}) {
   renderBoard(el, { fleet: state.fleet || [], marks: state.shotsAtMe, sunkShips });
 }
 
-/** The fleet strip: one line per ship, a block per cell, hit cells burning,
- *  a sunk ship dark. Compact enough to sit beside the mini board. */
+/** The fleet strip: one line per ship, the ship's own silhouette (the board
+ *  segments end to end, js/ships.js), a hit segment burning, a sunk ship
+ *  dark. Compact enough to sit beside the mini board. */
 function renderFleet(el, { sunkShips = state.sunk } = {}) {
   el.textContent = '';
   if (!state.fleet) return;
@@ -381,14 +387,15 @@ function renderFleet(el, { sunkShips = state.sunk } = {}) {
     name.className = 'fleet__name';
     name.textContent = `${SHIP_SIZES[i]}-SHIP`;
     line.appendChild(name);
+    const cells = shipCells(ship);
+    const hull = document.createElement('span');
+    hull.className = 'fleet__hull-wrap';
+    hull.innerHTML = shipSvg({ shipIndex: i, size: ship.size, cellIndices: cells.map((c) => c.index) });
     let hits = 0;
-    for (const c of shipCells(ship)) {
-      const b = document.createElement('i');
-      b.className = 'fleet__cell';
-      b.dataset.cell = c.index;
-      if (state.shotsAtMe.get(c.index) === 'hit') { b.classList.add('fleet__cell--hit'); hits += 1; }
-      line.appendChild(b);
+    for (const c of cells) {
+      if (state.shotsAtMe.get(c.index) === 'hit') { hull.querySelector(`.fleet__cell[data-cell="${c.index}"]`).classList.add('fleet__cell--hit'); hits += 1; }
     }
+    line.appendChild(hull.firstElementChild);
     const st = document.createElement('span');
     st.className = 'fleet__state';
     st.textContent = sunkShips[i] ? 'SUNK' : hits ? `${hits}/${SHIP_SIZES[i]} HIT` : 'AFLOAT';

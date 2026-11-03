@@ -27,7 +27,7 @@ but has not been tested as of this build.
 ### Install on a phone (once, while online)
 
 1. Open the play URL in the phone's browser. Wait for the badge at the bottom
-   of Home to read **OFFLINE READY ✓ 24/24 CACHED**. That is the app telling
+   of Home to read **OFFLINE READY ✓ 25/25 CACHED**. That is the app telling
    you every file it will ever need is on the phone.
 2. Add it to the home screen: Android Chrome → menu → **Add to Home screen**;
    iPhone Safari → share sheet → **Add to Home Screen**.
@@ -82,10 +82,14 @@ camera or microphone is unusable.
 ## Technical notes
 
 - **No server, no account, no network after install.** The app is static
-  HTML, CSS and JavaScript with a hand-written precache service worker (24
-  files, cache `mw-final-v2`). The content-security policy allows `'self'`
+  HTML, CSS and JavaScript with a hand-written precache service worker (25
+  files, cache `mw-final-v3`). The content-security policy allows `'self'`
   only; nothing in the app can contact a network at runtime, and the
   browser-gate suite proves a cold launch with the server gone.
+- **The fleet is drawn in code.** Every ship is top-down inline SVG from
+  `app/js/ships.js`, one segment per cell (bow, midships, stern) in four
+  classes (battleship, cruiser, destroyer, corvette), recoloured by the
+  stylesheet for hits and wrecks. No image asset is loaded for it.
 - **The fleet commitment is a salted hash.** At LOCK the phone draws a
   128-bit random salt and commits to the first 16 bytes of SHA-256 of
   (fleet ‖ salt), using a vendored SHA-256 so it works in any context. The

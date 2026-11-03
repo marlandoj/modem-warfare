@@ -54,8 +54,8 @@ export async function run() {
     }));
     console.log('home:', JSON.stringify({ screen: home.screen, badge: home.badge, version: home.cache.version, routes: home.routes, buttons: home.buttons }));
     assert(home.screen === 'home', 'cold boot lands on Home');
-    // SOUNDTRACK: the reduced list plus the score engine, 24 files at mw-final-v2.
-    assert(/OFFLINE READY ✓ 24\/24 CACHED/.test(home.badge) && home.cache.version === 'mw-final-v2' && home.cache.missing.length === 0, 'the reduced precache plus the score (24 files, mw-final-v2) installed in full: ' + home.badge);
+    // SOUNDTRACK: the reduced list plus the score engine; SHIPS: plus the ship art, 25 files at mw-final-v3.
+    assert(/OFFLINE READY ✓ 25\/25 CACHED/.test(home.badge) && home.cache.version === 'mw-final-v3' && home.cache.missing.length === 0, 'the reduced precache plus the score and the ship art (25 files, mw-final-v3) installed in full: ' + home.badge);
     assert(home.routes.join(',') === 'home,placement,handshake,round,gameover', 'the shell has exactly the five match screens');
     assert(!home.buttons.some((b) => VOCAB.test(b)), 'no Home button leads to the feature: ' + home.buttons.join(' | '));
     assert(!home.mwKeys.some((k) => /orders|sealed|card/i.test(k)), 'the MW debug surface exposes nothing of the feature');
@@ -93,13 +93,13 @@ export async function run() {
     assert(Object.values(modules).every((s) => s === 404), 'the orders modules are not served');
     const cached = await page.evaluate(async () => {
       const names = await caches.keys();
-      const keys = await (await caches.open(names.find((n) => n.includes('mw-final-v2')))).keys();
+      const keys = await (await caches.open(names.find((n) => n.includes('mw-final-v3')))).keys();
       const loaded = performance.getEntriesByType('resource').map((e) => e.name);
       return { names, count: keys.length, cachedOrders: keys.map((k) => k.url).filter((u) => /orders/i.test(u)), loadedOrders: loaded.filter((u) => /orders/i.test(u)) };
     });
     console.log('caches:', JSON.stringify(cached));
-    assert(cached.names.length === 1 && cached.names[0] === 'modem-warfare-mw-final-v2', 'exactly one cache, the final version');
-    assert(cached.count === 24 && cached.cachedOrders.length === 0, `24 cached URLs, none of the feature (got ${cached.count})`);
+    assert(cached.names.length === 1 && cached.names[0] === 'modem-warfare-mw-final-v3', 'exactly one cache, the final version');
+    assert(cached.count === 25 && cached.cachedOrders.length === 0, `25 cached URLs, none of the feature (got ${cached.count})`);
     assert(cached.loadedOrders.length === 0, 'the page loaded no orders resource');
 
     // A stale card scan goes to the receive gate like any text and is rejected, with no error.

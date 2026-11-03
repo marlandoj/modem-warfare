@@ -233,12 +233,17 @@ body.offline-ready .firstrun { display: none; }
   cursor: pointer;
 }
 .cell::before { content: ""; position: absolute; inset: 35%; border-radius: 50%; background: var(--phosphor); opacity: 0.12; }
-.cell--ship { background: linear-gradient(180deg, #6b7a86, #45535e); border-color: #9aa9b4; }
+/* SHIPS: a ship cell is water with a hull segment drawn over it (js/ships.js).
+   The tile keeps its box (the cell is still exactly the cell), its border goes
+   quiet so no box line cuts the silhouette, and the segment SVG covers the
+   border box edge to edge so the hull runs on into the next cell. */
+.cell--ship { background: #0c2a47; border-color: rgba(61, 255, 143, 0.05); }
 .cell--ship::before { opacity: 0; }
-.cell--bow-h { border-radius: 4px 50% 50% 4px; }
-.cell--stern-h { border-radius: 50% 4px 4px 50%; }
-.cell--bow-v { border-radius: 4px 4px 50% 50%; }
-.cell--stern-v { border-radius: 50% 50% 4px 4px; }
+.cell--bow-h, .cell--stern-h, .cell--bow-v, .cell--stern-v { border-radius: 4px; }
+.board--mini .cell--bow-h, .board--mini .cell--stern-h, .board--mini .cell--bow-v, .board--mini .cell--stern-v { border-radius: 2px; }
+.cell .ship { position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); display: block; pointer-events: none; z-index: 1; overflow: hidden; }
+.cell::after { z-index: 2; }
+.cell .impact { z-index: 3; }
 .cell--pick { background: var(--amber-dim); border-color: var(--amber); box-shadow: inset 0 0 0 2px var(--amber), 0 0 10px var(--amber-dim); }
 .cell--pick::before { background: var(--amber); opacity: 0.9; inset: 38%; }
 .cell--miss::before { background: var(--foam); opacity: 0.9; inset: 30%; border: 2px solid var(--foam); background: transparent; }
@@ -256,15 +261,60 @@ body.offline-ready .firstrun { display: none; }
 .fleetline { display: flex; gap: 10px; align-items: stretch; min-height: 0; flex: 0 0 auto; }
 .fleetline--reveal { flex: 1 1 auto; min-height: 0; }
 .fleetline__col { display: flex; flex-direction: column; gap: 6px; flex: 1 1 0; min-width: 0; min-height: 0; }
-/* Fleet status strip: one line per ship, a block per cell; hit cells burn, a sunk ship goes dark. */
+/* Fleet status strip: one line per ship, the ship's own silhouette (the board
+   segments laid end to end, js/ships.js); a hit segment burns, a sunk ship
+   goes dark and settles. */
 .fleet { display: flex; flex-direction: column; justify-content: center; gap: 5px; flex: 1 1 0; min-width: 0; }
 .fleet__ship { display: flex; align-items: center; gap: 3px; font-size: 11px; letter-spacing: 0.1em; color: var(--muted); }
 .fleet__name { width: 56px; flex: 0 0 auto; }
-.fleet__cell { width: 13px; height: 13px; border-radius: 2px; background: linear-gradient(180deg, #6b7a86, #45535e); border: 1px solid #9aa9b4; }
-.fleet__cell--hit { background: radial-gradient(circle, var(--fire), #7a1d00 80%); border-color: var(--fire); }
+.fleet__hull { height: 16px; width: auto; flex: 0 0 auto; display: block; overflow: hidden; }
+.fleet__cell--hit .sh-hull { fill: #5a1a08; }
+.fleet__cell--hit .sh-deck { fill: var(--fire); }
+.fleet__cell--hit .sh-fit > * { fill: #7a1d00; stroke: #3a0d00; }
+.fleet__cell--hit .sh-edge { stroke: var(--fire); }
 .fleet__ship--sunk { color: var(--red); }
-.fleet__ship--sunk .fleet__cell { background: #2a0a00; border-color: var(--red); opacity: 0.8; }
+.fleet__ship--sunk .fleet__hull { opacity: 0.8; transform: translateY(2px) rotate(2deg); }
 .fleet__state { margin-left: auto; font-size: 10px; letter-spacing: 0.2em; }
+
+/* ------------------------------------------------ SHIPS: the artwork --- */
+/* Haze-grey hulls in the game's palette: a dark side band, a lighter deck,
+   plating lines in sea-ink, light superstructure, dark funnels with a
+   signal-amber cap. Every part is a class so the states recolour it. */
+.ship { --hull: #4b5964; --deck: #7f8e9a; --edge: #b7c5cf; --super: #a7b5bf; --super-top: #cdd7de; --fit: #99a8b3; --fit-dark: #2d3942; --funnel: #2b343c; --cap: var(--amber); --ink-line: rgba(3, 16, 28, 0.35); }
+.ship .sh-hull { fill: var(--hull); }
+.ship .sh-deck { fill: var(--deck); }
+.ship .sh-edge { fill: none; stroke: var(--edge); stroke-width: 1.5; stroke-linecap: butt; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.ship .sh-line { fill: none; stroke: var(--ink-line); stroke-width: 2; }
+.ship .sh-super { fill: var(--super); stroke: var(--fit-dark); stroke-width: 1.5; }
+.ship .sh-super-top { fill: var(--super-top); stroke: var(--fit-dark); stroke-width: 1.2; }
+.ship .sh-window { fill: none; stroke: var(--navy-2); stroke-width: 3; stroke-linecap: round; }
+.ship .sh-mast { fill: var(--fit-dark); }
+.ship .sh-turret { fill: var(--fit); stroke: var(--fit-dark); stroke-width: 1.8; }
+.ship .sh-turret-cap { fill: var(--fit-dark); }
+.ship .sh-barrel { fill: none; stroke: var(--fit-dark); stroke-width: 3; stroke-linecap: round; }
+.ship .sh-funnel { fill: var(--funnel); stroke: #151b20; stroke-width: 1.2; }
+.ship .sh-funnel-cap { fill: var(--cap); opacity: 0.85; }
+.ship .sh-pad { fill: none; stroke: var(--fit-dark); stroke-width: 2; }
+.ship .sh-pad-core { fill: none; stroke: var(--fit-dark); stroke-width: 2; }
+.ship .sh-boat { fill: var(--super-top); stroke: var(--fit-dark); stroke-width: 1.2; }
+.ship .sh-tube { fill: var(--fit-dark); }
+.ship .sh-fitting { fill: var(--fit-dark); }
+
+/* The mini boards and the strip are too small for fittings to read; the
+   silhouette, the deck and the hit colour carry the state there. */
+.board--mini .ship .sh-line, .fleet__hull .sh-line { display: none; }
+.board--mini .ship .sh-edge, .fleet__hull .sh-edge, .boards-2 .ship .sh-edge { stroke-width: 1; }
+
+/* A hit ship cell: the tile burns (the existing fire treatment), the segment
+   scorches dark, and a fireball sits on it so the hit reads at a glance. */
+.cell--ship.cell--hit .ship { --hull: #3a1a10; --deck: #6a2e14; --edge: #ff8a4a; --super: #7a3a1c; --super-top: #8a4a26; --fit: #6a3018; --fit-dark: #2a0d04; --funnel: #1d0b05; --cap: #ff8a4a; --ink-line: rgba(0, 0, 0, 0.3); }
+.cell--ship.cell--hit::after { content: ""; position: absolute; inset: 24%; border-radius: 50%; background: radial-gradient(circle, #fff1c2 0%, var(--fire) 38%, rgba(255, 106, 31, 0.55) 62%, rgba(255, 106, 31, 0) 100%); box-shadow: 0 0 10px var(--fire); opacity: 0.95; }
+
+/* A sunk ship: a dark wreck, low in the water (cell--settled lowers and tilts
+   it); the wreck marker is small so the hull still shows under it. */
+.cell--ship.cell--sunk { background: #091624; border-color: transparent; }
+.cell--ship.cell--sunk .ship { --hull: #1f1614; --deck: #3d2824; --edge: #c8452f; --super: #3a2823; --super-top: #4c342e; --fit: #36261f; --fit-dark: #150c09; --funnel: #120d0b; --cap: #7a2e1c; --ink-line: rgba(0, 0, 0, 0.3); }
+.cell--ship.cell--sunk::after { inset: 38%; opacity: 0.7; background: var(--red); box-shadow: 0 0 6px rgba(255, 59, 59, 0.6); }
 
 /* ------------------------------------------------------------- lamp --- */
 .lamp { display: flex; flex-direction: column; align-items: center; gap: 6px; }

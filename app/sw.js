@@ -18,11 +18,14 @@
  *  - SOUNDTRACK: the score is code (js/music.js) and joins the list as code;
  *    24 files, version mw-final-v2. No audio file is cached, because none
  *    exists.
+ *  - SHIPS: the fleet's artwork is code too (js/ships.js, inline SVG drawn
+ *    per cell) and joins the list; 25 files, version mw-final-v3. No image
+ *    asset is cached for it, because none exists.
  *
  * Bump VERSION whenever any precached file changes, so old caches are dropped.
  */
 
-const VERSION = 'mw-final-v2';
+const VERSION = 'mw-final-v3';
 const CACHE = `modem-warfare-${VERSION}`;
 
 const PRECACHE = [
@@ -34,6 +37,7 @@ const PRECACHE = [
   './js/app.js',
   './js/frame.js',
   './js/fleet.js',
+  './js/ships.js',
   './js/sha256.js',
   './js/audit.js',
   './js/audio.js',
