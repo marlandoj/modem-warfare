@@ -261,17 +261,18 @@ Exit status 0. Unit 39/39 (`docs/evidence/unit-tests.txt`). Browser gates
 (`docs/evidence/browser-gates.txt`, headless Chromium via Playwright):
 
 ```
-shell: PASS (7.3 s)
-qr-roundtrip: PASS (0.7 s)
-offline: PASS (2.9 s)
-harness: PASS (3.0 s)
-match: PASS (65.9 s)
-spike: PASS (27.7 s)
-sonar: PASS (36.7 s)
-soundflag: PASS (19.6 s)
-orders: PASS (2.3 s)
-transport: PASS (87.3 s)
-viewport: PASS (120.8 s)
+browser gates: 11 suites in 4 lanes
+shell: PASS (10.0 s)
+qr-roundtrip: PASS (2.4 s)
+offline: PASS (6.0 s)
+harness: PASS (5.4 s)
+match: PASS (72.6 s)
+spike: PASS (27.5 s)
+sonar: PASS (40.5 s)
+soundflag: PASS (23.1 s)
+orders: PASS (4.4 s)
+transport: PASS (92.8 s)
+viewport: PASS (129.3 s)
 ```
 
 Every pre-existing suite stays green (unit, shell, qr-roundtrip, offline,
@@ -285,8 +286,18 @@ byte-identical to Wednesday's (same digest before and after). Nothing in
 `app/` contacts a network at runtime. The GitHub Pages landing page is
 untouched.
 
-The whole run is about seven minutes now (the chirp-mode match and the
-sixty viewport measurements are the additions).
+The browser gates now run in parallel lanes (`tests/browser/run.js`:
+each suite is its own node process with its own server port and browser,
+started longest-first, at most `MW_LANES` at a time, default 4; output is
+printed in the listed order once each finishes). The whole run is about
+two and a half minutes wall time — about when the viewport gate alone
+ends — instead of the six-and-a-half-minute sum (the chirp-mode match and
+the sixty viewport measurements are the additions); `MW_LANES=1` is the
+old one-after-another run and takes about seven minutes. The timings in
+the block above are per suite under four-lane load, which is why they
+read a little slower than Wednesday's. Three full runs passed in this
+build: two in lane-less order (sum 367 s) and the final one in lanes
+(130 s wall), all exit 0.
 
 ## 6. What remains unproven on physical phones — plainly
 
@@ -346,5 +357,6 @@ node tools/serve.js 8080 --bind 0.0.0.0
   (QR)**, **Run full match (chirp)**, **Run chirp loopback**, **Run Sealed
   Orders**; adoption both ways is `harness.runAdoption({ host, joiner })`
   from the console (the transport gate drives it the same way).
-- Tests: `npm test` (unit + eleven browser gates, about 7 minutes; writes
+- Tests: `npm test` (unit + eleven browser gates in four lanes, about 2½
+  minutes; `MW_LANES=1` for one after another, about 7; writes
   `test-output/browser-gates.txt` and screenshots).

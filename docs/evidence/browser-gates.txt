@@ -1,26 +1,27 @@
+browser gates: 11 suites in 4 lanes
 
 === shell: six screens, offline badge, QR versions, one round by TYPE ===
 badge: OFFLINE READY ✓ 25/25 CACHED
 transport default: {"transport":"chirp","checked":"chirp","join":"LISTEN"}
 reroll changed fleet: true
-handshake QR: version 3 text CEPXRHLAAD777QAQCDINET7OKUF27MP3ASYJT5XSFI3G6 commit d0d24fee550bafb1fb04b099f6f22a36
-handshake frame: HANDSHAKE s=1f789d60 r=0 · commit d0d24fee… · by qr
-salvo QR: version 2 text CIPXRHLAAECIYAAAACFA
+handshake QR: version 3 text CGWAZOD5AD777QAQCDZ3JOYDOBPYVTNEDPIIF7BXIJWYG commit f3b4bb03705f8acda41bd082fc37426d
+handshake frame: HANDSHAKE s=ac0cb87d r=0 · commit f3b4bb03… · by qr
+salvo QR: version 2 text CKWAZOD5AECIYAAAADOA
 contact: CONTACT ✓ ROUND 1 · BOTH PHONES SHOW CONTACT · THEN REVEAL
-reveal played in 1804 ms: My shell 1 → B1 … HITMy shell 2 → B2 … HITMy shell 3 → G7 … splashIncoming shell 1 → A1 … splashIncoming shell 2 → B2 … splashIncoming shell 3 → C3 … HIT on my fleet
+reveal played in 1787 ms: My shell 1 → B1 … HITMy shell 2 → B2 … HITMy shell 3 → G7 … splashIncoming shell 1 → A1 … splashIncoming shell 2 → B2 … splashIncoming shell 3 → C3 … splash
 reveal QR: version 3
 shell: PASS (screenshots in test-output/)
 
 === qr: encode -> pixels -> decode round-trip ===
 decoder in this browser: zxing-wasm
   handshake: QR v3-M (29x29) text=CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME
-    decoded in 44 ms -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME | skewed copy -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME
+    decoded in 46 ms -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME | skewed copy -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME
     frame: HANDSHAKE s=a1b2c3d4 r=0 · commit 0b30557a… · by chirp
   salvo: QR v2-M (25x25) text=CKQ3FQ6UAROLYLACABKA
     decoded in 4 ms -> CKQ3FQ6UAROLYLACABKA | skewed copy -> CKQ3FQ6UAROLYLACABKA
     frame: SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT · sunk 3
   reveal: QR v3-M (29x29) text=COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ
-    decoded in 6 ms -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ | skewed copy -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ
+    decoded in 7 ms -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ | skewed copy -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ
     frame: REVEAL s=a1b2c3d4 r=11 · sunk 4,3,2 · fleet A2h G3v C6h E1v
 qr: PASS
 
@@ -36,14 +37,14 @@ responses: 18, from service worker: 18
   SW  200 /app/vendor/qrcode-generator.js
   SW  200 /app/js/app.js
   SW  200 /app/js/config.js
-  SW  200 /app/js/frame.js
-  SW  200 /app/js/fleet.js
   SW  200 /app/js/audit.js
-  SW  200 /app/js/qr.js
+  SW  200 /app/js/fleet.js
+  SW  200 /app/js/frame.js
   SW  200 /app/js/scanner.js
-  SW  200 /app/js/orders.js
+  SW  200 /app/js/qr.js
   SW  200 /app/js/audio.js
   SW  200 /app/js/sonar.js
+  SW  200 /app/js/orders.js
   SW  200 /app/js/orders-ui.js
   SW  200 /app/js/sha256.js
   SW  200 /app/vendor/zxing/zxing-reader.js
@@ -52,62 +53,60 @@ responses: 18, from service worker: 18
 offline: PASS
 
 === harness: handshake + salvo over BroadcastChannel ===
-session: 2f9fcab0
-A received: SALVO s=2f9fcab0 r=1 · salvo A1 B2 C3 · results HIT/miss/miss
-B received: SALVO s=2f9fcab0 r=1 · salvo C4 E2 G7 · results miss/miss/HIT
-A gate log: [{"status":"accepted","reason":"HANDSHAKE","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"}]
-B gate log: [{"status":"accepted","reason":"HANDSHAKE","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"}]
+session: 5eb7ca73
+A received: SALVO s=5eb7ca73 r=1 · salvo A1 B2 C3 · results miss/miss/miss
+B received: SALVO s=5eb7ca73 r=1 · salvo C4 E2 G7 · results miss/miss/miss
+A gate log: [{"status":"accepted","reason":"HANDSHAKE","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"}]
+B gate log: [{"status":"accepted","reason":"HANDSHAKE","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"}]
 channel log:
-  00:15:33.652 A online
-  00:15:33.654 B online
-  00:15:33.715 script: transport QR on both · A NEW MATCH, B JOIN MATCH, both LOCK
-  00:15:33.783 A · transport {"transport":"qr","source":"setting"}
-  00:15:33.783 B · transport {"transport":"qr","source":"setting"}
-  00:15:33.937 A → HANDSHAKE · ROUND 0 CEXZ7SVQAD777QAQCANOJ2TAZF2B7PQFET62ZRP4W3CZI
-  00:15:33.984 B ← ACCEPTED HANDSHAKE HANDSHAKE s=2f9fcab0 r=0 · commit 1ae4ea60… · by qr
-  00:15:33.985 B → HANDSHAKE · ROUND 0 CEXZ7SVQAD777QAQCAP5E4WPSO2GDPSGQ2YLSMSW27T7C
-  00:15:33.993 B → replay CEXZ7SVQAD777QAQCAP5E4WPSO2GDPSGQ2YLSMSW27T7C
-  00:15:34.000 A ← ACCEPTED HANDSHAKE HANDSHAKE s=2f9fcab0 r=0 · commit 1fd272cf… · by qr
-  00:15:34.001 A → HANDSHAKE · ROUND 0 CEXZ7SVQAD777QAQCANOJ2TAZF2B7PQFET62ZRP4W3CZI
-  00:15:34.003 A → replay CEXZ7SVQAD777QAQCANOJ2TAZF2B7PQFET62ZRP4W3CZI
-  00:15:34.004 A ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=2f9fcab0 r=0 · commit 1fd272cf… · by qr
-  00:15:34.005 B ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=2f9fcab0 r=0 · commit 1ae4ea60… · by qr
-  00:15:34.005 B → replay CEXZ7SVQAD777QAQCAP5E4WPSO2GDPSGQ2YLSMSW27T7C
-  00:15:34.009 B ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=2f9fcab0 r=0 · commit 1ae4ea60… · by qr
-  00:15:34.013 A ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=2f9fcab0 r=0 · commit 1fd272cf… · by qr
-  00:15:34.017 handshake converged: session 2f9fcab0
-  00:15:35.018 idle on handshake for 600 ms: 0 further gate events
-  00:15:35.120 A · fire {"round":1,"picks":[23,11,48]}
-  00:15:35.120 A → SALVO · ROUND 1 CIXZ7SVQAFOLYAAAAC2A
-  00:15:35.125 B · fire {"round":1,"picks":[0,8,16]}
-  00:15:35.126 B → SALVO · ROUND 1 CIXZ7SVQAEAIIAAAADAQ
-  00:15:35.135 B ← ACCEPTED SALVO SALVO s=2f9fcab0 r=1 · salvo C4 E2 G7
-  00:15:35.136 B → SALVO · ROUND 1 CIXZ7SVQAEAIIDAAAA5Q
-  00:15:35.138 B → replay CIXZ7SVQAEAIIDAAAA5Q
-  00:15:35.139 A ← ACCEPTED SALVO SALVO s=2f9fcab0 r=1 · salvo A1 B2 C3
-  00:15:35.139 A → SALVO · ROUND 1 CIXZ7SVQAFOLYJAAABOA
-  00:15:35.141 A → replay CIXZ7SVQAFOLYJAAABOA
-  00:15:35.147 A ← ACCEPTED SALVO SALVO s=2f9fcab0 r=1 · salvo A1 B2 C3 · results HIT/miss/miss
-  00:15:35.151 A → SALVO · ROUND 1 · RESULTS IN CIXZ7SVQAFOLYJAAABOA
-  00:15:35.152 A → replay CIXZ7SVQAFOLYJAAABOA
-  00:15:35.153 A ← DUPLICATE IDENTICAL_FRAME SALVO s=2f9fcab0 r=1 · salvo A1 B2 C3 · results HIT/miss/miss
-  00:15:35.154 B ← ACCEPTED SALVO SALVO s=2f9fcab0 r=1 · salvo C4 E2 G7 · results miss/miss/HIT
-  00:15:35.154 B → SALVO · ROUND 1 · RESULTS IN CIXZ7SVQAEAIIDAAAA5Q
-  00:15:35.155 B → replay CIXZ7SVQAEAIIDAAAA5Q
-  00:15:35.156 B ← DUPLICATE IDENTICAL_FRAME SALVO s=2f9fcab0 r=1 · salvo C4 E2 G7 · results miss/miss/HIT
-  00:15:35.160 salvo converged: A got "SALVO s=2f9fcab0 r=1 · salvo A1 B2 C3 · results HIT/miss/miss", B got "SALVO s=2f9fcab0 r=1 · salvo C4 E2 G7 · results miss/miss/HIT"
-  00:15:35.163 B ← DUPLICATE IDENTICAL_FRAME SALVO s=2f9fcab0 r=1 · salvo C4 E2 G7 · results miss/miss/HIT
-  00:15:35.164 B → replay CIXZ7SVQAEAIIDAAAA5Q
-  00:15:35.165 B ← DUPLICATE IDENTICAL_FRAME SALVO s=2f9fcab0 r=1 · salvo C4 E2 G7 · results miss/miss/HIT
-  00:15:35.165 A ← DUPLICATE IDENTICAL_FRAME SALVO s=2f9fcab0 r=1 · salvo A1 B2 C3 · results HIT/miss/miss
-  00:15:35.165 A → replay CIXZ7SVQAFOLYJAAABOA
-  00:15:35.166 A ← DUPLICATE IDENTICAL_FRAME SALVO s=2f9fcab0 r=1 · salvo A1 B2 C3 · results HIT/miss/miss
-  00:15:35.167 A ← DUPLICATE IDENTICAL_FRAME SALVO s=2f9fcab0 r=1 · salvo A1 B2 C3 · results HIT/miss/miss
-  00:15:35.167 B ← DUPLICATE IDENTICAL_FRAME SALVO s=2f9fcab0 r=1 · salvo C4 E2 G7 · results miss/miss/HIT
+  00:34:36.910 A online
+  00:34:36.990 B online
+  00:34:37.046 script: transport QR on both · A NEW MATCH, B JOIN MATCH, both LOCK
+  00:34:37.157 A · transport {"transport":"qr","source":"setting"}
+  00:34:37.158 B · transport {"transport":"qr","source":"setting"}
+  00:34:37.352 A → HANDSHAKE · ROUND 0 CFPLPSTTAD777QAQCDPNOZ2FMNNGQCU2PLQHOMMAJ63TS
+  00:34:37.400 B ← ACCEPTED HANDSHAKE HANDSHAKE s=5eb7ca73 r=0 · commit ded76745… · by qr
+  00:34:37.402 B → HANDSHAKE · ROUND 0 CFPLPSTTAD777QAQCCSVGWXRZOAOAU53KTFKKAPYPP3OA
+  00:34:37.412 B → replay CFPLPSTTAD777QAQCCSVGWXRZOAOAU53KTFKKAPYPP3OA
+  00:34:37.423 A ← ACCEPTED HANDSHAKE HANDSHAKE s=5eb7ca73 r=0 · commit a5535af1… · by qr
+  00:34:37.424 A → HANDSHAKE · ROUND 0 CFPLPSTTAD777QAQCDPNOZ2FMNNGQCU2PLQHOMMAJ63TS
+  00:34:37.425 A → replay CFPLPSTTAD777QAQCDPNOZ2FMNNGQCU2PLQHOMMAJ63TS
+  00:34:37.427 A ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=5eb7ca73 r=0 · commit a5535af1… · by qr
+  00:34:37.427 B ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=5eb7ca73 r=0 · commit ded76745… · by qr
+  00:34:37.428 B → replay CFPLPSTTAD777QAQCCSVGWXRZOAOAU53KTFKKAPYPP3OA
+  00:34:37.432 B ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=5eb7ca73 r=0 · commit ded76745… · by qr
+  00:34:37.435 A ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=5eb7ca73 r=0 · commit a5535af1… · by qr
+  00:34:37.435 handshake converged: session 5eb7ca73
+  00:34:38.436 idle on handshake for 600 ms: 0 further gate events
+  00:34:38.583 A · fire {"round":1,"picks":[23,11,48]}
+  00:34:38.585 A → SALVO · ROUND 1 CJPLPSTTAFOLYAAAABHA
+  00:34:38.596 B · fire {"round":1,"picks":[0,8,16]}
+  00:34:38.597 B → SALVO · ROUND 1 CJPLPSTTAEAIIAAAAA5Q
+  00:34:38.611 B ← ACCEPTED SALVO SALVO s=5eb7ca73 r=1 · salvo C4 E2 G7
+  00:34:38.611 B → SALVO · ROUND 1 CJPLPSTTAEAIIBAAACIA
+  00:34:38.613 B → replay CJPLPSTTAEAIIBAAACIA
+  00:34:38.617 A ← ACCEPTED SALVO SALVO s=5eb7ca73 r=1 · salvo A1 B2 C3
+  00:34:38.618 A → SALVO · ROUND 1 CJPLPSTTAFOLYBAAADSQ
+  00:34:38.623 A → replay CJPLPSTTAFOLYBAAADSQ
+  00:34:38.631 salvo converged: A got "SALVO s=5eb7ca73 r=1 · salvo A1 B2 C3 · results miss/miss/miss", B got "SALVO s=5eb7ca73 r=1 · salvo C4 E2 G7 · results miss/miss/miss"
+  00:34:38.637 A ← ACCEPTED SALVO SALVO s=5eb7ca73 r=1 · salvo A1 B2 C3 · results miss/miss/miss
+  00:34:38.638 A → SALVO · ROUND 1 · RESULTS IN CJPLPSTTAFOLYBAAADSQ
+  00:34:38.640 A → replay CJPLPSTTAFOLYBAAADSQ
+  00:34:38.642 A ← DUPLICATE IDENTICAL_FRAME SALVO s=5eb7ca73 r=1 · salvo A1 B2 C3 · results miss/miss/miss
+  00:34:38.643 B ← ACCEPTED SALVO SALVO s=5eb7ca73 r=1 · salvo C4 E2 G7 · results miss/miss/miss
+  00:34:38.644 B → SALVO · ROUND 1 · RESULTS IN CJPLPSTTAEAIIBAAACIA
+  00:34:38.645 B → replay CJPLPSTTAEAIIBAAACIA
+  00:34:38.646 B ← DUPLICATE IDENTICAL_FRAME SALVO s=5eb7ca73 r=1 · salvo C4 E2 G7 · results miss/miss/miss
+  00:34:38.653 B ← DUPLICATE IDENTICAL_FRAME SALVO s=5eb7ca73 r=1 · salvo C4 E2 G7 · results miss/miss/miss
+  00:34:38.653 B → replay CJPLPSTTAEAIIBAAACIA
+  00:34:38.655 B ← DUPLICATE IDENTICAL_FRAME SALVO s=5eb7ca73 r=1 · salvo C4 E2 G7 · results miss/miss/miss
+  00:34:38.656 A ← DUPLICATE IDENTICAL_FRAME SALVO s=5eb7ca73 r=1 · salvo A1 B2 C3 · results miss/miss/miss
+  00:34:38.657 A → replay CJPLPSTTAFOLYBAAADSQ
+  00:34:38.661 A ← DUPLICATE IDENTICAL_FRAME SALVO s=5eb7ca73 r=1 · salvo A1 B2 C3 · results miss/miss/miss
 harness: PASS
 
 === match: full match over the harness, then three cheats ===
-clean match: 6 rounds in 15.2 s, session fa97ba0a
+clean match: 6 rounds in 15.9 s, session 9d85837b
   round 1: A B1 B2 A5 → HIT/HIT/miss sunk=0000 | B A2 E5 A4 → HIT/miss/miss sunk=0000
   round 2: A B3 B4 C3 → HIT/HIT/miss sunk=1000 | B B2 A7 D3 → HIT/miss/miss sunk=0000
   round 3: A D5 E5 F4 → HIT/HIT/miss sunk=1000 | B C2 B4 A6 → HIT/miss/miss sunk=0000
@@ -118,8 +117,8 @@ transport: {"a":"qr","b":"qr"}
 outcome: {"a":{"result":"win","finalRound":6},"b":{"result":"loss","finalRound":6}}
 audit: {"a":{"verdict":"VERIFIED","findings":[],"checked":43},"b":{"verdict":"VERIFIED","findings":[],"checked":43}}
 stamps: {"a":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"},"b":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"}}
-commitments: {"aOfB":"164ebd9c2db1ffe45485190b60fec528","bActual":"164ebd9c2db1ffe45485190b60fec528","bOfA":"d9cdcc0c7809440141efc40bd9570879","aActual":"d9cdcc0c7809440141efc40bd9570879"}
-gate tallies: {"a":{"accepted":14,"duplicate":26,"rejected":0,"rejectedReasons":{}},"b":{"accepted":14,"duplicate":26,"rejected":0,"rejectedReasons":{}}}
+commitments: {"aOfB":"ae37364f4f81dfcd04edd09aa0f044d7","bActual":"ae37364f4f81dfcd04edd09aa0f044d7","bOfA":"2f94f734fbf0c169de20cc0e1713d1df","aActual":"2f94f734fbf0c169de20cc0e1713d1df"}
+gate tallies: {"a":{"accepted":14,"duplicate":28,"rejected":0,"rejectedReasons":{}},"b":{"accepted":14,"duplicate":28,"rejected":0,"rejectedReasons":{}}}
 cheat result: 6 rounds; A audit LIAR [{"round":2,"code":"FALSE_RESULT","detail":"B3 reported miss, revealed fleet says HIT"}]; B audit VERIFIED
 stamps: {"a":{"word":"LIAR","sub":"FALSE RESULT · ROUND 2","verdict":"liar","stage":"verdict"},"b":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"}}
 cheat fleet: A audit LIAR [{"round":0,"code":"COMMIT_MISMATCH","detail":"revealed fleet + salt do not hash to the commitment fixed at LOCK"},{"round":5,"code":"FALSE_RESULT","detail":"A7 reported HIT, revealed fleet says miss"}]; B audit VERIFIED
@@ -129,95 +128,96 @@ match: PASS (clean VERIFIED both ways; false result, moved fleet, wrong salt eac
 === spike: ggwave loopback ×10 ===
 env: ggwave ready · AudioContext 48000 Hz · Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36
 frame text: CKQ3FQ6UAROLYLAAAB7A | airtime: 2.09 s at 48000 Hz (AUDIBLE_FAST)
-mic settings: {"autoGainControl":false,"channelCount":2,"deviceId":"default","echoCancellation":false,"groupId":"eb717e5113289a1c2c88651c1d5898ef2b2159ba65b26242368270dbdeb6b04e","latency":0.01,"noiseSuppression":false,"sampleRate":44100,"sampleSize":16,"voiceIsolation":false}
+mic settings: {"autoGainControl":false,"channelCount":2,"deviceId":"default","echoCancellation":false,"groupId":"c72a44aa366179fb0de5e04d6db8a3dbe89f64ecdf0d06715ce906a8cec8c4a4","latency":0.01,"noiseSuppression":false,"sampleRate":44100,"sampleSize":16,"voiceIsolation":false}
 mic log:
-  00:16:42.864 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
-  00:16:42.867 mic closed
-  00:16:42.884 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
-  00:16:44.982 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
-WebAudio MediaStream loopback: {"a":10,"d":9}
+  00:33:48.776 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  00:33:48.779 mic closed
+  00:33:48.796 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
+  00:33:50.912 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+WebAudio MediaStream loopback: {"a":10,"d":10}
 direct buffer: {"a":10,"d":10}
 spike log:
-  00:16:42.864 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
-  00:16:42.867 mic closed
-  00:16:42.884 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
-  00:16:44.982 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
-  00:16:44.985 mic closed
-  00:16:44.993 WebAudio MediaStream loopback ×10 (no microphone)
-  00:16:46.920 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:16:49.023 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:16:51.117 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:16:53.234 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:16:55.356 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:16:57.466 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:04.389 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:06.507 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:08.542 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:08.753 direct buffer ×10
-  00:17:08.804 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:08.857 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:08.891 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:08.934 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:08.970 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:09.012 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:09.049 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:09.091 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:09.133 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-  00:17:09.176 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
-spike: PASS (webaudio 9/10, direct 10/10; acoustic path NOT tested here)
+  00:33:48.776 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  00:33:48.779 mic closed
+  00:33:48.796 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
+  00:33:50.912 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  00:33:50.926 mic closed
+  00:33:50.962 WebAudio MediaStream loopback ×10 (no microphone)
+  00:33:52.886 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:33:55.037 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:33:57.196 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:33:59.335 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:01.538 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:03.707 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:05.833 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:07.947 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:10.102 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:12.208 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:12.422 direct buffer ×10
+  00:34:12.474 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:12.521 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:12.562 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:12.609 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:12.682 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:12.733 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:12.806 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:12.877 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:12.960 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  00:34:13.027 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+spike: PASS (webaudio 10/10, direct 10/10; acoustic path NOT tested here)
 
 === sonar: ggwave under the shell CSP, AudioWorklet capture, chirp round-trip ×10 ===
-LISTEN (auto): {"capture":"worklet","mic":{"autoGainControl":false,"channelCount":2,"deviceId":"default","echoCancellation":false,"groupId":"91a61c8ae5909a5f6a6dd49febf31b485b6910f18f5bbf81bc379e3cbe98bbfc","latency":0.01,"noiseSuppression":false,"sampleRate":44100,"sampleSize":16,"voiceIsolation":false},"status":"LISTENING · WORKLET · EC=OFF NS=OFF AGC=OFF","button":"STOP","sweeping":true,"auto":true,"sampleRate":1024}
-CHIRP from the handshake screen: {"before":true,"result":{"text":"CFNBDM36AD777QAACDUXIY7TICLPHUIA6NZVOAQCXZJGC","seconds":3.498666666666667,"samples":167936,"sampleRate":48000},"afterListening":true,"stats":{"chirps":1,"decodes":0,"listens":2,"chunks":1},"rate":48000}
+LISTEN (auto): {"capture":"worklet","mic":{"autoGainControl":false,"channelCount":2,"deviceId":"default","echoCancellation":false,"groupId":"e1bec0fe839b9f040ea959d5351595b005e27cf8ef9e103df0708c196589c445","latency":0.01,"noiseSuppression":false,"sampleRate":44100,"sampleSize":16,"voiceIsolation":false},"status":"LISTENING · WORKLET · EC=OFF NS=OFF AGC=OFF","button":"STOP","sweeping":true,"auto":true,"sampleRate":1024}
+CHIRP from the handshake screen: {"before":true,"result":{"text":"CGSLGLVOAD777QAACBILOX3QS4Q2DLNLPYJRRQE2OASP4","seconds":3.498666666666667,"samples":167936,"sampleRate":48000},"afterListening":true,"stats":{"chirps":1,"decodes":0,"listens":2,"chunks":2},"rate":48000}
 capture mode: worklet | sample rate: 48000
-handshake A→B by chirp: {"sent":"CGGNTTXMAD777QAACANLW5NBYKBLNXA5ZQTSGMZHKGZWY","heard":"CGGNTTXMAD777QAACANLW5NBYKBLNXA5ZQTSGMZHKGZWY","identical":true,"status":"accepted","airtimeSeconds":3.498666666666667,"ms":3533,"sampleRate":48000,"capture":"worklet"}
-handshake B→A by chirp: {"sent":"CGGNTTXMAD777QAACD6XZEJSAYEUJRRF7K3KP66A7D6IW","heard":"CGGNTTXMAD777QAACD6XZEJSAYEUJRRF7K3KP66A7D6IW","identical":true,"status":"accepted","airtimeSeconds":3.498666666666667,"ms":3521}
-salvo chirps: 10/10 decoded, 10 identical, airtime 2.09 s, latencies ms [2108,2108,2115,2116,2124,2126,2136,2127,2110,2128]
-B holds: SALVO s=8cd9ceec r=1 · salvo C4 E2 G7 | gates: {"a":{"accepted":1,"duplicate":0,"rejected":0,"rejectedReasons":{}},"b":{"accepted":2,"duplicate":9,"rejected":0,"rejectedReasons":{}}}
+handshake A→B by chirp: {"sent":"CFXIVKSZAD777QAACCVL6SC3ILSYRUSFFWBJQHARSJCAY","heard":"CFXIVKSZAD777QAACCVL6SC3ILSYRUSFFWBJQHARSJCAY","identical":true,"status":"accepted","airtimeSeconds":3.498666666666667,"ms":3618,"sampleRate":48000,"capture":"worklet"}
+handshake B→A by chirp: {"sent":"CFXIVKSZAD777QAACBGEXKOVYWHTNBO7SQL7E4HTPZBY2","heard":"CFXIVKSZAD777QAACBGEXKOVYWHTNBO7SQL7E4HTPZBY2","identical":true,"status":"accepted","airtimeSeconds":3.498666666666667,"ms":3551}
+salvo chirps: 10/10 decoded, 10 identical, airtime 2.09 s, latencies ms [2097,2121,2171,2122,2111,2112,2148,2179,2141,2146]
+B holds: SALVO s=6e8aaa59 r=1 · salvo C4 E2 G7 | gates: {"a":{"accepted":1,"duplicate":0,"rejected":0,"rejectedReasons":{}},"b":{"accepted":2,"duplicate":9,"rejected":0,"rejectedReasons":{}}}
 channel log (tail):
-  00:17:40.514 B · chirp-played {"text":"CKGNTTXMAFOLYAAAADWQ","seconds":2.0906666666666665}
-  00:17:40.529 chirp 8/10: identical · gate duplicate IDENTICAL_FRAME · 2127 ms
-  00:17:40.530 A · chirped {"text":"CKGNTTXMAFOLYAAAADWQ","seconds":2.0906666666666665,"sampleRate":48000}
-  00:17:40.699 A ♪ chirp CKGNTTXMAFOLYAAAADWQ (2.09 s at 48000 Hz, 100352 samples)
-  00:17:42.577 B ← DUPLICATE IDENTICAL_FRAME SALVO s=8cd9ceec r=1 · salvo C4 E2 G7
-  00:17:42.578 B · sonar {"text":"CKGNTTXMAFOLYAAAADWQ","status":"duplicate","reason":"IDENTICAL_FRAME","capture":"worklet","loopback":true}
-  00:17:42.787 B · chirp-played {"text":"CKGNTTXMAFOLYAAAADWQ","seconds":2.0906666666666665}
-  00:17:42.790 chirp 9/10: identical · gate duplicate IDENTICAL_FRAME · 2110 ms
-  00:17:42.791 A · chirped {"text":"CKGNTTXMAFOLYAAAADWQ","seconds":2.0906666666666665,"sampleRate":48000}
-  00:17:42.967 A ♪ chirp CKGNTTXMAFOLYAAAADWQ (2.09 s at 48000 Hz, 100352 samples)
-  00:17:44.868 B ← DUPLICATE IDENTICAL_FRAME SALVO s=8cd9ceec r=1 · salvo C4 E2 G7
-  00:17:44.870 B · sonar {"text":"CKGNTTXMAFOLYAAAADWQ","status":"duplicate","reason":"IDENTICAL_FRAME","capture":"worklet","loopback":true}
-  00:17:45.063 B · chirp-played {"text":"CKGNTTXMAFOLYAAAADWQ","seconds":2.0906666666666665}
-  00:17:45.068 chirp 10/10: identical · gate duplicate IDENTICAL_FRAME · 2128 ms
-  00:17:45.104 A · chirped {"text":"CKGNTTXMAFOLYAAAADWQ","seconds":2.0906666666666665,"sampleRate":48000}
-  00:17:45.222 chirp: salvo ×10: 10 decoded, 10 identical · B holds "SALVO s=8cd9ceec r=1 · salvo C4 E2 G7" · B gate {"accepted":2,"duplicate":9,"rejected":0,"rejectedReasons":{}}
+  00:33:39.777 B · chirp-played {"text":"CJXIVKSZAFOLYAAAABWA","seconds":2.0906666666666665}
+  00:33:39.830 chirp 8/10: identical · gate duplicate IDENTICAL_FRAME · 2179 ms
+  00:33:39.881 A · chirped {"text":"CJXIVKSZAFOLYAAAABWA","seconds":2.0906666666666665,"sampleRate":48000}
+  00:33:40.025 A ♪ chirp CJXIVKSZAFOLYAAAABWA (2.09 s at 48000 Hz, 100352 samples)
+  00:33:41.907 B ← DUPLICATE IDENTICAL_FRAME SALVO s=6e8aaa59 r=1 · salvo C4 E2 G7
+  00:33:41.908 B · sonar {"text":"CJXIVKSZAFOLYAAAABWA","status":"duplicate","reason":"IDENTICAL_FRAME","capture":"worklet","loopback":true}
+  00:33:42.123 chirp 9/10: identical · gate duplicate IDENTICAL_FRAME · 2141 ms
+  00:33:42.129 B · chirp-played {"text":"CJXIVKSZAFOLYAAAABWA","seconds":2.0906666666666665}
+  00:33:42.130 A · chirped {"text":"CJXIVKSZAFOLYAAAABWA","seconds":2.0906666666666665,"sampleRate":48000}
+  00:33:42.319 A ♪ chirp CJXIVKSZAFOLYAAAABWA (2.09 s at 48000 Hz, 100352 samples)
+  00:33:44.229 B ← DUPLICATE IDENTICAL_FRAME SALVO s=6e8aaa59 r=1 · salvo C4 E2 G7
+  00:33:44.231 B · sonar {"text":"CJXIVKSZAFOLYAAAABWA","status":"duplicate","reason":"IDENTICAL_FRAME","capture":"worklet","loopback":true}
+  00:33:44.418 B · chirp-played {"text":"CJXIVKSZAFOLYAAAABWA","seconds":2.0906666666666665}
+  00:33:44.420 chirp 10/10: identical · gate duplicate IDENTICAL_FRAME · 2146 ms
+  00:33:44.421 A · chirped {"text":"CJXIVKSZAFOLYAAAABWA","seconds":2.0906666666666665,"sampleRate":48000}
+  00:33:44.572 chirp: salvo ×10: 10 decoded, 10 identical · B holds "SALVO s=6e8aaa59 r=1 · salvo C4 E2 G7" · B gate {"accepted":2,"duplicate":9,"rejected":0,"rejectedReasons":{}}
 sonar: PASS (worklet capture; handshakes by chirp both ways; salvo 10/10 identical; acoustic path NOT tested here)
 
 === soundflag: match with SOUND = false, no sound affordance rendered ===
-match with SOUND=false: 6 rounds in 15.1 s, outcome {"a":{"result":"win","finalRound":6},"b":{"result":"loss","finalRound":6}}
+match with SOUND=false: 6 rounds in 16 s, outcome {"a":{"result":"win","finalRound":6},"b":{"result":"loss","finalRound":6}}
 stamps: {"a":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"},"b":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"}}
 instance A: data-needs-sound=0 sonar rows=0 chirp/listen buttons=0 AudioContexts=0 ggwave=undefined
 instance B: data-needs-sound=0 sonar rows=0 chirp/listen buttons=0 AudioContexts=0 ggwave=undefined
-exchange panel with SOUND=false: SALVO · ROUND 1 · QR v2-M · CJ2U7FBFAECIYAAAADZA BRIGHTNESS UP · HOLD STEADY SCANNER IDLE SCAN FLIP WAITING FOR CONTACT… RESEND REVEAL → TYPE
+exchange panel with SOUND=false: SALVO · ROUND 1 · QR v2-M · CJUMOYASAECIYAAAAACA BRIGHTNESS UP · HOLD STEADY SCANNER IDLE SCAN FLIP WAITING FOR CONTACT… RESEND REVEAL → TYPE
 soundflag: PASS (SOUND=false: VERIFIED both ways, zero sound affordances, zero AudioContexts)
 
 === orders: Sealed Orders compose / scan-to-keep / done / reload / pass it on ===
 refused: {"message":"NOTE TOO LONG · 701 OF 700 CHARACTERS · TRIM 1","visible":true,"noteStillLong":true,"view":"compose","counter":"701 / 700","kept":0}
-composed: {"id":"abdc384c","hop":1,"qrVersion":10,"bytes":204,"text":"MWO1{\"id\":\"abdc384c\",\"h\":1,\"l\":\"KITCHEN\",\"n\":\"Bins go out Tu…","hopLine":"HOP 1"}
-received on B: {"id":"abdc384c","hop":1,"note":"Bins go out Tuesday night.\nSpare key is with Jordan. Gate code is on the fridge.","items":["Feed the cat","Water the tomatoes","Lock the side gate"],"contact":"CARD KEPT ✓ KITCHEN · HOP 1 · 0/3 DONE","stored":true,"from":"broadcast"}
+composed: {"id":"d4393ad0","hop":1,"qrVersion":10,"bytes":204,"text":"MWO1{\"id\":\"d4393ad0\",\"h\":1,\"l\":\"KITCHEN\",\"n\":\"Bins go out Tu…","hopLine":"HOP 1"}
+received on B: {"id":"d4393ad0","hop":1,"note":"Bins go out Tuesday night.\nSpare key is with Jordan. Gate code is on the fridge.","items":["Feed the cat","Water the tomatoes","Lock the side gate"],"contact":"CARD KEPT ✓ KITCHEN · HOP 1 · 0/3 DONE","stored":true,"from":"broadcast"}
 after reload on B: {"hop":1,"done":[false,true,false],"hopLine":"HOP 1","checkedBoxes":[false,true,false]}
-passed on from B: {"hop":2,"id":"abdc384c","hopLine":"HOP 2","caption":"KITCHEN · HOP 2 · QR v10-M · 204 BYTES · ONE STATIC CODE","doneCarried":[false,true,false],"qrVersion":10}
-card QR pixel round-trip: {"current":{"version":10,"modules":57,"bytes":204,"ms":35,"roundTrip":true,"decoder":"zxing-wasm","hop":1},"biggest":{"version":28,"modules":129,"bytes":1136,"ms":30,"roundTrip":true,"decoder":"zxing-wasm","hop":7}}
+passed on from B: {"hop":2,"id":"d4393ad0","hopLine":"HOP 2","caption":"KITCHEN · HOP 2 · QR v10-M · 204 BYTES · ONE STATIC CODE","doneCarried":[false,true,false],"qrVersion":10}
+card QR pixel round-trip: {"current":{"version":10,"modules":57,"bytes":204,"ms":42,"roundTrip":true,"decoder":"zxing-wasm","hop":1},"biggest":{"version":28,"modules":129,"bytes":1136,"ms":35,"roundTrip":true,"decoder":"zxing-wasm","hop":7}}
 orders: PASS (refused over-limit; composed v10; kept on B; done persisted across reload; hop 2 on pass-on; pixels decode)
 
 === transport: pre-game setting, carried by the handshake, one carrier per match; no wager ===
 fresh phone: {"transport":"chirp","source":"default","stored":null,"checked":"chirp","choices":["chirp","qr"],"onHome":true,"onMatchScreens":0,"join":"LISTEN","body":"chirp"}
 after choosing QR and reloading: {"transport":"qr","source":"stored","stored":"qr"}
-chirp mode: HANDSHAKE s=0daea062 r=0 · commit 29184ab1… · by chirp | handshake {"route":"handshake","phase":"target","qr":0,"chirp":1,"scanButtons":0,"chirpButtons":2,"qrSvg":0,"choices":0,"frameText":"HANDSHAKE · ROUND 0 · CEG25IDCAD777QAACAURQSVRWZYSITPKJYNYQRDZZUQAC","visibleText":"THE SALUTE | PHONES FLAT · THE GUEST LISTENS · CHIRP · THEN YOU LISTEN | MY COMMITMENT · 29184ab1b671244dea4e1b884479cd20 · FIXED AT LOCK | SONAR · CHIRP | OPENING MIC… | HANDSHAKE · ROUND 0 · CEG25IDCAD777QAACAURQSVRWZYSITPKJYNYQRDZZUQAC | NOTHING HEARD YET | CHIRP | LISTEN | WAITING FOR CONTACT… | BEGIN ROUND 1 | TYPE"} | exchange {"route":"round","phase":"exchange","qr":0,"chirp":1,"scanButtons":0,"chirpButtons":2,"qrSvg":0,"choices":0,"frameText":"SALVO · ROUND 1 · CIG25IDCAECIYAAAABKQ","visibleText":"SALVO 1 | TARGET | EXCHANGE | REVEAL | SONAR · CHIRP | LISTENING · WORKLET · EC=OFF NS=OFF AGC=OFF | SALVO · ROUND 1 · CIG25IDCAECIYAAAABKQ | NOTHING HEARD YET | CHIRP | STOP | WAITING FOR CONTACT… | RESEND | REVEAL → | TYPE"}
-qr mode: HANDSHAKE s=35852f64 r=0 · commit 1a6ba8ff… · by qr | handshake {"route":"handshake","phase":"target","qr":1,"chirp":0,"scanButtons":2,"chirpButtons":0,"qrSvg":1,"choices":0,"frameText":"HANDSHAKE · ROUND 0 · CE2YKL3EAD777QAQCANGXKH73LM7CXWH6ZUIADI272J46","visibleText":"THE SALUTE | RAISE PHONES FACE TO FACE · 20 CM | MY COMMITMENT · 1a6ba8ffdad9f15ec7f668800d1afe93 · FIXED AT LOCK | HANDSHAKE · ROUND 0 · QR v3-M · CE2YKL3EAD777QAQCANGXKH73LM7CXWH6ZUIADI272J46 | SCANNER IDLE | SCAN | FLIP | WAITING FOR CONTACT… | BEGIN ROUND 1 | TYPE"} | exchange {"route":"round","phase":"exchange","qr":1,"chirp":0,"scanButtons":2,"chirpButtons":0,"qrSvg":1,"choices":0,"frameText":"SALVO · ROUND 1 · CI2YKL3EAECIYAAAAB4A","visibleText":"SALVO 1 | TARGET | EXCHANGE | REVEAL | SALVO · ROUND 1 · QR v2-M · CI2YKL3EAECIYAAAAB4A | BRIGHTNESS UP · HOLD STEADY | SCANNER IDLE | SCAN | FLIP | WAITING FOR CONTACT… | RESEND | REVEAL → | TYPE"}
+chirp mode: HANDSHAKE s=13e79c5f r=0 · commit fc49676b… · by chirp | handshake {"route":"handshake","phase":"target","qr":0,"chirp":1,"scanButtons":0,"chirpButtons":2,"qrSvg":0,"choices":0,"frameText":"HANDSHAKE · ROUND 0 · CEJ6PHC7AD777QAACD6ESZ3L2MBRWXS2BBO24CTTLDPAG","visibleText":"THE SALUTE | PHONES FLAT · THE GUEST LISTENS · CHIRP · THEN YOU LISTEN | MY COMMITMENT · fc49676bd3031b5e5a085dae0a7358de · FIXED AT LOCK | SONAR · CHIRP | OPENING MIC… | HANDSHAKE · ROUND 0 · CEJ6PHC7AD777QAACD6ESZ3L2MBRWXS2BBO24CTTLDPAG | NOTHING HEARD YET | CHIRP | LISTEN | WAITING FOR CONTACT… | BEGIN ROUND 1 | TYPE"} | exchange {"route":"round","phase":"exchange","qr":0,"chirp":1,"scanButtons":0,"chirpButtons":2,"qrSvg":0,"choices":0,"frameText":"SALVO · ROUND 1 · CIJ6PHC7AECIYAAAADSA","visibleText":"SALVO 1 | TARGET | EXCHANGE | REVEAL | SONAR · CHIRP | LISTENING · WORKLET · EC=OFF NS=OFF AGC=OFF | SALVO · ROUND 1 · CIJ6PHC7AECIYAAAADSA | NOTHING HEARD YET | CHIRP | STOP | WAITING FOR CONTACT… | RESEND | REVEAL → | TYPE"}
+qr mode: HANDSHAKE s=26919a48 r=0 · commit 284f8ac6… · by qr | handshake {"route":"handshake","phase":"target","qr":1,"chirp":0,"scanButtons":2,"chirpButtons":0,"qrSvg":1,"choices":0,"frameText":"HANDSHAKE · ROUND 0 · CETJDGSIAD777QAQCAUE7CWGJ2H3IEYFA62VVC7FJXAR4","visibleText":"THE SALUTE | RAISE PHONES FACE TO FACE · 20 CM | MY COMMITMENT · 284f8ac64e8fb4130507b55a8be54dc1 · FIXED AT LOCK | HANDSHAKE · ROUND 0 · QR v3-M · CETJDGSIAD777QAQCAUE7CWGJ2H3IEYFA62VVC7FJXAR4 | SCANNER IDLE | SCAN | FLIP | WAITING FOR CONTACT… | BEGIN ROUND 1 | TYPE"} | exchange {"route":"round","phase":"exchange","qr":1,"chirp":0,"scanButtons":2,"chirpButtons":0,"qrSvg":1,"choices":0,"frameText":"SALVO · ROUND 1 · CITJDGSIAECIYAAAACZQ","visibleText":"SALVO 1 | TARGET | EXCHANGE | REVEAL | SALVO · ROUND 1 · QR v2-M · CITJDGSIAECIYAAAACZQ | BRIGHTNESS UP · HOLD STEADY | SCANNER IDLE | SCAN | FLIP | WAITING FOR CONTACT… | RESEND | REVEAL → | TYPE"}
 adoption (qr host, chirp joiner): {"before":{"a":"qr","b":"chirp","aChecked":"qr","bChecked":"chirp"},"after":{"a":"qr","b":"qr","source":{"a":"setting","b":"handshake"}},"hostFrame":"qr","joinerFrame":"qr","presented":{"a":{"screen":"handshake","qr":1,"chirp":0,"scanButtons":1,"chirpButtons":0,"qrSvg":1},"b":{"screen":"handshake","qr":1,"chirp":0,"scanButtons":1,"chirpButtons":0,"qrSvg":1}}}
 adoption (chirp host, qr joiner): {"before":{"a":"chirp","b":"qr","aChecked":"chirp","bChecked":"qr"},"after":{"a":"chirp","b":"chirp","source":{"a":"setting","b":"handshake"}},"hostFrame":"chirp","joinerFrame":"chirp","presented":{"a":{"screen":"handshake","qr":0,"chirp":1,"scanButtons":0,"chirpButtons":2,"qrSvg":0},"b":{"screen":"handshake","qr":0,"chirp":1,"scanButtons":0,"chirpButtons":2,"qrSvg":0}}}
-chirp match: 6 rounds in 44.5 s, session 97c658ea
+chirp match: 6 rounds in 45.4 s, session 7693a31f
   round 1: A B1 B2 A5 → HIT/HIT/miss sunk=0000 | B A2 E5 A4 → HIT/miss/miss sunk=0000
   round 2: A B3 B4 C3 → HIT/HIT/miss sunk=1000 | B B2 A7 D3 → HIT/miss/miss sunk=0000
   round 3: A D5 E5 F4 → HIT/HIT/miss sunk=1000 | B C2 B4 A6 → HIT/miss/miss sunk=0000
@@ -309,14 +309,14 @@ transport: PASS (default CHIRP; adoption both directions; chirp-mode match VERIF
 viewport: PASS (60 measurements, none scrolls; tightest slack 10px)
 
 === summary ===
-shell: PASS (7.3 s)
-qr-roundtrip: PASS (0.7 s)
-offline: PASS (2.9 s)
-harness: PASS (3.0 s)
-match: PASS (65.9 s)
-spike: PASS (27.7 s)
-sonar: PASS (36.7 s)
-soundflag: PASS (19.6 s)
-orders: PASS (2.3 s)
-transport: PASS (87.3 s)
-viewport: PASS (120.8 s)
+shell: PASS (10.0 s)
+qr-roundtrip: PASS (2.4 s)
+offline: PASS (6.0 s)
+harness: PASS (5.4 s)
+match: PASS (72.6 s)
+spike: PASS (27.5 s)
+sonar: PASS (40.5 s)
+soundflag: PASS (23.1 s)
+orders: PASS (4.4 s)
+transport: PASS (92.8 s)
+viewport: PASS (129.3 s)

@@ -174,7 +174,7 @@ npm install && npx playwright install chromium
 npm run test:browser                  # shell, QR pixels, cold offline launch, harness, full match + cheats, spike,
                                       # sonar (chirp round-trip), soundflag (match with SOUND=false), orders,
                                       # transport (setting, adoption, match by chirp alone, no wager), viewport (no scroll)
-npm test                              # both; this is the trusted check in .verity.json (about 7 minutes)
+npm test                              # both; this is the trusted check in .verity.json (about 2½ minutes: the browser gates run in 4 lanes; MW_LANES=1 runs them one after another, about 7 minutes)
 ```
 
 The browser runner finds Chromium in `$PLAYWRIGHT_BROWSERS_PATH`, else a
