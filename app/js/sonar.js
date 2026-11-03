@@ -67,6 +67,7 @@ export class Sonar {
     this.tx = null;
     this.rx = null;
     this.readyPromise = null;
+    this.opening = null; // an in-flight listen(), so opens never overlap
     this.workletPromise = null;
     this.workletFailed = null;
     this.captureMode = 'none'; // 'worklet' | 'scriptprocessor' once listening
@@ -189,7 +190,19 @@ export class Sonar {
    */
   async listen({ loopback = false } = {}) {
     if (!this.enabled) throw new Error('sound is off');
-    if (this.listening) return this.captureMode;
+    // Thursday: the app opens the mic by itself on Salute screens, so two
+    // opens can race (the app's and the harness's loopback). One at a time;
+    // and asking for the other capture mode while listening switches to it.
+    if (this.opening) await this.opening.catch(() => {});
+    if (this.listening) {
+      if (!!this.loopback === loopback) return this.captureMode;
+      this.stop();
+    }
+    this.opening = this._open(loopback);
+    try { return await this.opening; } finally { this.opening = null; }
+  }
+
+  async _open(loopback) {
     await this.ready();
     const ac = audioContext();
     if (ac.state === 'suspended') ac.resume().catch(() => {});

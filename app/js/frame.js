@@ -14,24 +14,35 @@
 //   6..8   24 bits: cell0(6) cell1(6) cell2(6) hits(3) hasResults(1) rsv(2)
 //          cells index row*7+col, 0..48; 63 = empty slot
 //          hits bit i = opponent's shot i of their previous salvo was a HIT
-//   9      sunk flags: bit i = my ship i (4,3,2,2) is sunk | high nibble rsv
+//   9      low nibble: sunk flags, bit i = my ship i (4,3,2,2) is sunk
+//          high nibble (HANDSHAKE only, Thursday): bits 4..5 = transport
+//          the host chose at new-game setup, 0 = chirp, 1 = qr; the joiner
+//          adopts it. Reserved (zero) on every other frame type.
 //   10     ext length (bytes)
 //   11..   ext: HANDSHAKE = 16-byte fleet commitment: first 16 bytes of
 //                           SHA-256(packed fleet ‖ 128-bit salt)
 //               REVEAL    = 4-byte packed fleet + 16-byte salt
 //               SALVO     = none
-//               WAGER     = the stake note, 6 bits per character (Tuesday),
-//                           up to 26 bytes = 34 characters
 //   last   CRC-8 (poly 0x07, init 0) over every preceding byte
 //
 // A SALVO frame is therefore exactly 12 bytes -> 20 base32 chars -> QR v2-M.
 // HANDSHAKE = 28 bytes -> 45 chars, REVEAL = 32 bytes -> 52 chars -> QR v3-M.
-// WAGER is at most 38 bytes -> 61 chars, the exact alphanumeric capacity of
-// QR v3-M; the encoder refuses anything longer.
+//
+// Thursday: the family is these three types. Tuesday's type 4 (the stake
+// note) is gone; a frame carrying that type byte is rejected as BAD_TYPE
+// like any other unknown type.
 
 export const FRAME_VERSION = 1;
-export const TYPE = Object.freeze({ HANDSHAKE: 1, SALVO: 2, REVEAL: 3, WAGER: 4 });
-export const TYPE_NAME = Object.freeze({ 1: 'HANDSHAKE', 2: 'SALVO', 3: 'REVEAL', 4: 'WAGER' });
+export const TYPE = Object.freeze({ HANDSHAKE: 1, SALVO: 2, REVEAL: 3 });
+export const TYPE_NAME = Object.freeze({ 1: 'HANDSHAKE', 2: 'SALVO', 3: 'REVEAL' });
+
+// The transport the host fixed at setup, carried in the handshake. The frame
+// is the truth whichever carrier moves it; this only tells both phones which
+// carrier to present.
+export const TRANSPORT = Object.freeze({ CHIRP: 'chirp', QR: 'qr' });
+export const TRANSPORT_CODE = Object.freeze({ chirp: 0, qr: 1 });
+export const TRANSPORT_NAME = Object.freeze({ 0: 'chirp', 1: 'qr' });
+export const DEFAULT_TRANSPORT = TRANSPORT.CHIRP;
 
 export const BOARD = 7;
 export const CELL_COUNT = BOARD * BOARD; // 49
@@ -42,8 +53,6 @@ export const HEADER_LEN = 11;
 export const COMMIT_LEN = 16;
 export const SALT_LEN = 16;
 export const FLEET_LEN = 4;
-export const WAGER_MAX_BYTES = 26;
-export const WAGER_MAX_CHARS = Math.floor((WAGER_MAX_BYTES * 8) / 6); // 34
 
 export class FrameError extends Error {
   constructor(code, message) {
@@ -174,47 +183,6 @@ export function fleetIsValid(fleet) {
   return true;
 }
 
-// ---------------------------------------------------------------- wager ---
-// The stake note crosses the table in the same frame format, 6 bits per
-// character from a fixed 64-symbol alphabet (index 0 = space, so padding
-// bits decode as trailing spaces and are trimmed). Anything outside the
-// alphabet becomes '?'. 26 bytes carry 34 characters.
-
-const WAGER_ALPHABET = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?\'"&$-+:;/()%#@*=<>_[]{}';
-if (WAGER_ALPHABET.length !== 64) throw new Error('wager alphabet must have 64 symbols');
-
-export function normaliseWager(text) {
-  const up = String(text || '').toUpperCase().replace(/\s+/g, ' ').trim();
-  return Array.from(up.slice(0, WAGER_MAX_CHARS), (ch) => (WAGER_ALPHABET.includes(ch) ? ch : '?')).join('');
-}
-
-export function packWager(text) {
-  const clean = normaliseWager(text);
-  const out = new Uint8Array(Math.ceil((clean.length * 6) / 8));
-  let acc = 0;
-  let bits = 0;
-  let n = 0;
-  for (const ch of clean) {
-    acc = ((acc << 6) | WAGER_ALPHABET.indexOf(ch)) & 0x3fff;
-    bits += 6;
-    if (bits >= 8) { bits -= 8; out[n++] = (acc >> bits) & 0xff; }
-  }
-  if (bits > 0) out[n++] = (acc << (8 - bits)) & 0xff;
-  return out;
-}
-
-export function unpackWager(bytes) {
-  let text = '';
-  let acc = 0;
-  let bits = 0;
-  for (let i = 0; i < bytes.length; i++) {
-    acc = ((acc << 8) | bytes[i]) & 0x3fff;
-    bits += 8;
-    while (bits >= 6) { bits -= 6; text += WAGER_ALPHABET[(acc >> bits) & 63]; }
-  }
-  return text.replace(/ +$/, '');
-}
-
 // --------------------------------------------------------------- frames ---
 
 function u32(v) {
@@ -259,6 +227,12 @@ export function encodeFrame(frame) {
   let sunk = 0;
   const sunkList = frame.sunk || [];
   for (let i = 0; i < SHIP_SIZES.length; i++) if (sunkList[i]) sunk |= 1 << i;
+  let transportBits = 0;
+  if (type === TYPE.HANDSHAKE) {
+    const t = frame.transport === undefined || frame.transport === null ? DEFAULT_TRANSPORT : frame.transport;
+    if (!(t in TRANSPORT_CODE)) throw new FrameError('BAD_TRANSPORT', `unknown transport ${JSON.stringify(t)}`);
+    transportBits = TRANSPORT_CODE[t] << 4;
+  }
 
   let ext;
   if (type === TYPE.HANDSHAKE) {
@@ -272,9 +246,6 @@ export function encodeFrame(frame) {
     ext.set(packFleet(frame.fleet), 0);
     if (!frame.salt || frame.salt.length !== SALT_LEN) throw new FrameError('BAD_SALT', 'salt must be 16 bytes');
     ext.set(frame.salt, FLEET_LEN);
-  } else if (type === TYPE.WAGER) {
-    ext = packWager(frame.wager);
-    if (ext.length > WAGER_MAX_BYTES) throw new FrameError('BAD_WAGER', `wager packs to ${ext.length} bytes`);
   } else {
     ext = new Uint8Array(0);
   }
@@ -290,7 +261,7 @@ export function encodeFrame(frame) {
   bytes[6] = (packed >>> 16) & 0xff;
   bytes[7] = (packed >>> 8) & 0xff;
   bytes[8] = packed & 0xff;
-  bytes[9] = sunk & 0x0f;
+  bytes[9] = (sunk & 0x0f) | transportBits;
   bytes[10] = ext.length;
   bytes.set(ext, HEADER_LEN);
   bytes[bytes.length - 1] = crc8(bytes.subarray(0, bytes.length - 1));
@@ -327,13 +298,13 @@ export function decodeFrame(bytes) {
   if (type === TYPE.HANDSHAKE) {
     if (extLen !== COMMIT_LEN) throw new FrameError('BAD_EXT', `handshake ext is ${extLen} bytes`);
     frame.commit = ext;
+    const code = (bytes[9] >> 4) & 0x03;
+    if (!(code in TRANSPORT_NAME)) throw new FrameError('BAD_TRANSPORT', `unknown transport code ${code}`);
+    frame.transport = TRANSPORT_NAME[code];
   } else if (type === TYPE.REVEAL) {
     if (extLen !== FLEET_LEN + SALT_LEN) throw new FrameError('BAD_EXT', `reveal ext is ${extLen} bytes`);
     frame.fleet = unpackFleet(ext.subarray(0, FLEET_LEN));
     frame.salt = ext.slice(FLEET_LEN);
-  } else if (type === TYPE.WAGER) {
-    if (extLen > WAGER_MAX_BYTES) throw new FrameError('BAD_EXT', `wager ext is ${extLen} bytes`);
-    frame.wager = unpackWager(ext);
   } else if (extLen !== 0) {
     throw new FrameError('BAD_EXT', `salvo ext is ${extLen} bytes`);
   }
@@ -433,13 +404,6 @@ export class FrameGate {
       this.session = frame.session;
       return this._accept(frame, key, 'HANDSHAKE');
     }
-    if (frame.type === TYPE.WAGER) {
-      // The stake note is informational and may land (or be corrected) at any
-      // point after the handshake; it never moves the round state machine.
-      if (frame.round !== 0) return this._result('rejected', 'BAD_ROUND', frame, 'wager must be round 0');
-      if (this.session === null) return this._result('rejected', 'WRONG_TYPE', frame, 'wager before handshake');
-      return this._accept(frame, key, 'WAGER');
-    }
     if (frame.round < this.expectedRound) return this._result('rejected', 'STALE_ROUND', frame);
     if (frame.round > this.expectedRound) return this._result('rejected', 'FUTURE_ROUND', frame);
     if (this.session === null) this.session = frame.session;
@@ -469,8 +433,8 @@ export function describeFrame(frame) {
   if (frame.results) parts.push('results ' + frame.results.hits.map((h) => (h ? 'HIT' : 'miss')).join('/'));
   if (frame.sunk.some(Boolean)) parts.push('sunk ' + frame.sunk.map((s, i) => (s ? SHIP_SIZES[i] : null)).filter(Boolean).join(','));
   if (frame.commit) parts.push('commit ' + hex(frame.commit).slice(0, 8) + '…');
+  if (frame.transport) parts.push('by ' + frame.transport);
   if (frame.fleet) parts.push('fleet ' + frame.fleet.map((s) => cellLabel(cellIndex(s.col, s.row)) + (s.horizontal ? 'h' : 'v')).join(' '));
-  if (frame.type === TYPE.WAGER) parts.push(`wager "${frame.wager}"`);
   return parts.join(' · ');
 }
 

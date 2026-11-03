@@ -6,7 +6,7 @@ import {
   encodeFrame, decodeFrame, frameToText, textToFrame,
   base32Encode, base32Decode, crc8, packFleet, unpackFleet,
   cellLabel, parseCellLabel, FrameGate, FrameError, describeFrame,
-  normaliseWager, packWager, unpackWager, WAGER_MAX_CHARS, fleetIsValid,
+  fleetIsValid, TRANSPORT, DEFAULT_TRANSPORT,
 } from '../app/js/frame.js';
 
 const SESSION = 0xa1b2c3d4;
@@ -222,51 +222,65 @@ test('cell labels', () => {
   assert.throws(() => parseCellLabel('H1'), (e) => e.code === 'BAD_CELL');
 });
 
-// ------------------------------------------------------------ Tuesday ---
+// ----------------------------------------------------------- Thursday ---
+// The transport is a pre-game setting: the host's choice rides the
+// handshake frame (byte 9, high nibble) and the joiner adopts it.
 
-test('wager: 6-bit text round-trips, caps at 34 chars / 61 base32 chars (QR v3-M), odd chars become ?', () => {
-  const note = 'Loser does the dishes';
-  const text = frameToText({ type: TYPE.WAGER, session: SESSION, round: 0, wager: note });
-  const back = textToFrame(text);
-  assert.equal(back.typeName, 'WAGER');
-  assert.equal(back.wager, 'LOSER DOES THE DISHES');
-  assert.equal(describeFrame(back), 'WAGER s=a1b2c3d4 r=0 · wager "LOSER DOES THE DISHES"');
-  assert.equal(normaliseWager('  winner   picks\tdinner! $5 ok? '), 'WINNER PICKS DINNER! $5 OK?');
-  assert.equal(normaliseWager('café ~ ok'), 'CAF? ? OK');
-  assert.equal(unpackWager(packWager('')), '');
-  assert.equal(unpackWager(packWager('A')), 'A');
-  const max = 'X'.repeat(WAGER_MAX_CHARS);
-  assert.equal(WAGER_MAX_CHARS, 34);
-  const maxText = frameToText({ type: TYPE.WAGER, session: SESSION, round: 0, wager: max });
-  assert.equal(maxText.length, 61, 'longest wager frame is exactly the v3-M alphanumeric capacity');
-  assert.equal(textToFrame(maxText).wager, max);
-  assert.equal(normaliseWager('Y'.repeat(50)).length, 34, 'longer input is cut, never rejected');
-  for (const w of ['DISHES', 'A B', 'LOSER DOES THE DISHES, WINNER PICKS!', '1 2 3 4 5 6 7 8 9 0']) {
-    assert.equal(textToFrame(frameToText({ type: TYPE.WAGER, session: 1, round: 0, wager: w })).wager, normaliseWager(w));
+test('transport: the handshake carries chirp or qr, defaults to chirp, and stays 28 bytes / 45 chars', () => {
+  assert.equal(DEFAULT_TRANSPORT, 'chirp');
+  for (const t of [TRANSPORT.CHIRP, TRANSPORT.QR]) {
+    const text = frameToText({ ...HANDSHAKE, transport: t });
+    assert.equal(text.length, 45, 'the nibble costs no bytes');
+    const back = textToFrame(text);
+    assert.equal(back.transport, t);
+    assert.equal(back.session, SESSION);
+    assert.deepEqual(Array.from(back.commit), Array.from(commit));
+    assert.equal(describeFrame(back), `HANDSHAKE s=a1b2c3d4 r=0 · commit 0b30557a… · by ${t}`);
+    assert.deepEqual(Array.from(encodeFrame(back)), Array.from(encodeFrame({ ...HANDSHAKE, transport: t })), 'byte-identical after a round trip');
   }
+  // A handshake built without the field (Tuesday's shape) is a chirp handshake.
+  const plain = textToFrame(frameToText(HANDSHAKE));
+  assert.equal(plain.transport, 'chirp');
+  assert.equal(encodeFrame(HANDSHAKE)[9], 0x00);
+  assert.equal(encodeFrame({ ...HANDSHAKE, transport: 'qr' })[9], 0x10, 'qr sets bit 4 of byte 9');
+  assert.notEqual(frameToText(HANDSHAKE), frameToText({ ...HANDSHAKE, transport: 'qr' }), 'the two settings are different frames');
+  assert.throws(() => encodeFrame({ ...HANDSHAKE, transport: 'carrier pigeon' }), (e) => e.code === 'BAD_TRANSPORT');
+  // Only the handshake carries it: a salvo or reveal frame has no transport field and byte 9 keeps its low nibble only.
+  assert.equal(textToFrame(frameToText(SALVO)).transport, undefined);
+  assert.equal(textToFrame(frameToText(REVEAL)).transport, undefined);
+  assert.equal(encodeFrame({ ...SALVO, transport: 'qr' })[9], 0x02, 'a transport on a salvo is ignored (sunk flags only)');
+});
+
+test('transport: the family is three types; the old type 4 is BAD_TYPE', () => {
+  assert.deepEqual(Object.keys(TYPE), ['HANDSHAKE', 'SALVO', 'REVEAL']);
+  const bytes = encodeFrame(SALVO);
+  bytes[0] = (FRAME_VERSION << 4) | 4;
+  bytes[bytes.length - 1] = crc8(bytes.subarray(0, bytes.length - 1));
+  assert.throws(() => decodeFrame(bytes), (e) => e.code === 'BAD_TYPE');
+  const gate = new FrameGate({ session: SESSION, round: 0 });
+  assert.equal(gate.accept(base32Encode(bytes)).reason, 'BAD_TYPE');
 });
 
 test('gate: any previously accepted frame is a no-op on re-scan, not just the last one', () => {
   const gate = new FrameGate();
   const hs = frameToText(HANDSHAKE);
-  const wager = frameToText({ type: TYPE.WAGER, session: SESSION, round: 0, wager: 'DISHES' });
   assert.equal(gate.accept(hs).status, 'accepted');
-  assert.equal(gate.accept(wager).status, 'accepted');
-  // The host's handshake QR is still up on the table; the camera reads it again.
-  const again = gate.accept(hs);
+  assert.equal(gate.accept(hs).status, 'duplicate');
+  gate.expectRound(1);
+  const first = frameToText({ type: TYPE.SALVO, session: SESSION, round: 1, salvo: [0, 8, 16] });
+  const withResults = frameToText({ type: TYPE.SALVO, session: SESSION, round: 1, salvo: [0, 8, 16], results: { present: true, hits: [true, false, false] } });
+  assert.equal(gate.accept(first).status, 'accepted');
+  assert.equal(gate.accept(withResults).status, 'accepted');
+  // The opponent's first salvo QR is still up on the table; the camera reads it again.
+  const again = gate.accept(first);
   assert.equal(again.status, 'duplicate');
   assert.equal(again.reason, 'IDENTICAL_FRAME');
-  assert.equal(gate.lastAccepted.typeName, 'WAGER', 'duplicate did not disturb state');
-  assert.equal(gate.accept(frameToText({ type: TYPE.WAGER, session: SESSION, round: 1, wager: 'X' })).reason, 'BAD_ROUND');
-  gate.expectRound(1);
-  assert.equal(gate.accept(wager).status, 'duplicate', 'the very last accepted frame stays a plain no-op');
+  assert.equal(gate.lastAccepted.results.hits[0], true, 'duplicate did not disturb state');
   assert.equal(gate.accept(hs).reason, 'STALE_ROUND', 'an older accepted frame reads as stale once the round advances (the other phone is behind)');
-  assert.equal(gate.lastAccepted.typeName, 'WAGER', 'stale frames never touch state');
-  const corrected = gate.accept(frameToText({ type: TYPE.WAGER, session: SESSION, round: 0, wager: 'OTHER' }));
-  assert.equal(corrected.status, 'accepted', 'a corrected wager lands at any point after the handshake');
-  assert.equal(corrected.frame.wager, 'OTHER');
-  const early = new FrameGate();
-  assert.equal(early.accept(wager).reason, 'WRONG_TYPE', 'a wager before any handshake is refused');
+  gate.expectRound(2);
+  assert.equal(gate.accept(withResults).status, 'duplicate', 'the very last accepted frame stays a plain no-op');
+  assert.equal(gate.accept(first).reason, 'STALE_ROUND');
+  assert.equal(gate.lastAccepted.round, 1, 'stale frames never touch state');
 });
 
 test('fleetIsValid: inside the board, no overlap', () => {

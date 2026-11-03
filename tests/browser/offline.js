@@ -52,12 +52,25 @@ export async function run() {
     console.log('cold launch: navigator.onLine =', onLine, '| title =', title, '| badge =', badge);
     await page.screenshot({ path: path.join(OUT, 'offline-cold-home.png') });
 
+    // The Lamp from the cache: QR library, then the decoder's wasm.
+    await page.click('[data-transport-choice="qr"]');
     await page.click('[data-action="new-match"]');
     await page.click('[data-action="lock"]');
     await page.waitForSelector('#qr-handshake svg', { timeout: 10000 });
     const decoder = await page.evaluate(async () => { const m = await import('./js/qr.js'); return m.prepareDecoder(); });
     console.log('offline decoder warm-up:', decoder);
     await page.screenshot({ path: path.join(OUT, 'offline-cold-handshake.png') });
+    // The Sonar from the cache: in chirp mode the handshake screen loads ggwave by itself.
+    let ggwave = 'sound off';
+    if (await page.evaluate(() => window.MW.sound)) {
+      await page.click('[data-go="home"]');
+      await page.click('[data-transport-choice="chirp"]');
+      await page.click('[data-action="new-match"]');
+      await page.click('[data-action="lock"]');
+      await page.waitForFunction(() => window.MW.sonar && window.MW.sonar.gg, null, { timeout: 15000 });
+      ggwave = await page.evaluate(() => typeof window.ggwave_factory);
+    }
+    console.log('offline ggwave load:', ggwave);
 
     const notSw = responses.filter((r) => !r.sw);
     console.log(`responses: ${responses.length}, from service worker: ${responses.filter((r) => r.sw).length}`);
@@ -70,7 +83,7 @@ export async function run() {
     assert(failed.length === 0, 'no failed requests offline: ' + failed.join(', '));
     assert(cap.errors.length === 0, 'no console/page errors offline: ' + cap.errors.join(' | '));
     console.log('offline: PASS');
-    return { ok: true, phase1, onLine, title, badge, decoder, responses };
+    return { ok: true, phase1, onLine, title, badge, decoder, ggwave, responses };
   } finally {
     await close();
     fs.rmSync(profile, { recursive: true, force: true });

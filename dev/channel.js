@@ -62,7 +62,7 @@ export function attach(MW, instance) {
   window.addEventListener('mw:frame', (e) => {
     log({ event: 'decoded', ...e.detail, meta: undefined });
   });
-  for (const name of ['mw:wager', 'mw:fire', 'mw:round-record', 'mw:gameover', 'mw:audit', 'mw:sonar', 'mw:chirped', 'mw:orders-received', 'mw:orders-refused', 'mw:orders-pass']) {
+  for (const name of ['mw:transport', 'mw:fire', 'mw:round-record', 'mw:gameover', 'mw:audit', 'mw:stamp', 'mw:sonar', 'mw:chirped', 'mw:listen-failed', 'mw:orders-received', 'mw:orders-refused', 'mw:orders-pass']) {
     window.addEventListener(name, (e) => log({ event: name.slice(3), ...e.detail }));
   }
 

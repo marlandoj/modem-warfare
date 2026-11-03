@@ -1,0 +1,15 @@
+id: T18
+title: One unmoved screen, and the feel pass
+day: Thursday 2026-11-05
+persona: Technical art / UX
+depends_on: [T16, T17]
+verify: npm test
+scope:
+  - app/css/app.css: match screens (placement, handshake, round, game over) lay out inside a fixed viewport; boards, fleet strip and exchange panel sized from the available height (--avail), never from content
+  - app/js/app.js: body[data-match] on match routes, --avail kept by a ResizeObserver; reveal pacing tightened; hit splash ring + screen shake; ships sink cell by cell; sonar sweep runs during listen (auto-listen on Salute screens in chirp mode); stamp lands with a thud and a jolt
+  - app/js/audio.js: sinking gurgle added; every effect stays WebAudio-synthesised behind SOUND
+  - app/sw.js: precache version mw-thu-v1
+done_when:
+  - at 360×740 and 412×915 no match screen scrolls: document, body, #screens and the active screen report no overflow, and every visible element's box is inside the viewport (tests/browser/viewport.js)
+  - Sealed Orders gate still passes (its screen may scroll)
+evidence: docs/evidence/browser-gates.txt (viewport gate), docs/evidence/viewport-*.png

@@ -2,8 +2,9 @@
 // stamp, through the app's real frames, codec and gate (the BroadcastChannel
 // carries exactly the base32 text the QR would).
 //
-//   1. clean match: two automated players, mixed hits and misses, sinkings
-//      before the end, plays to completion, BOTH phones stamp VERIFIED.
+//   1. clean match in QR mode: two automated players, mixed hits and misses,
+//      sinkings before the end, plays to completion, BOTH phones stamp
+//      VERIFIED. (The same match in CHIRP mode runs in transport.js.)
 //   2. cheat (false result): B reports one of A's hits as a miss in round 2;
 //      A's phone stamps LIAR naming the round; B's phone still verifies A.
 //   3. cheat (moved fleet): B's reveal shows a fleet that is not the one it
@@ -25,14 +26,14 @@ export async function run() {
     await page.setViewportSize({ width: 1400, height: 1000 });
 
     // --- 1. clean match -------------------------------------------------
-    const clean = await page.evaluate(() => window.harness.runMatch({ cheat: null, wager: 'LOSER DOES THE DISHES' }));
+    const clean = await page.evaluate(() => window.harness.runMatch({ cheat: null, transport: 'qr' }));
     results.clean = clean;
     console.log(`clean match: ${clean.rounds.length} rounds in ${clean.seconds} s, session ${clean.session}`);
     for (const r of clean.rounds) {
       const f = (s) => `${s.picks.join(' ')} → ${s.hits.map((h) => (h ? 'HIT' : 'miss')).join('/')} sunk=${s.enemySunk.map((x) => (x ? 1 : 0)).join('')}`;
       console.log(`  round ${r.round}: A ${f(r.a)} | B ${f(r.b)}`);
     }
-    console.log('wager:', JSON.stringify(clean.wager));
+    console.log('transport:', JSON.stringify(clean.transport));
     console.log('outcome:', JSON.stringify(clean.outcome));
     console.log('audit:', JSON.stringify(clean.audit));
     console.log('stamps:', JSON.stringify(clean.stamp));
@@ -41,7 +42,7 @@ export async function run() {
     await page.screenshot({ path: path.join(OUT, 'match-verified.png') });
 
     assert(clean.errors.length === 0, 'no errors inside instances: ' + clean.errors.join(' | '));
-    assert(clean.wager.a === 'LOSER DOES THE DISHES' && clean.wager.b === 'LOSER DOES THE DISHES', 'wager shown on both phones');
+    assert(clean.transport.a === 'qr' && clean.transport.b === 'qr', 'both phones play by QR');
     assert(clean.rounds.length >= 4 && clean.rounds.length <= 12, `match length ${clean.rounds.length} rounds inside the spec envelope`);
     const allHits = clean.rounds.flatMap((r) => [...r.a.hits, ...r.b.hits]);
     assert(allHits.some(Boolean) && allHits.some((h) => !h), 'mixed hits and misses');

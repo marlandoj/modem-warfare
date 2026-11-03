@@ -1,0 +1,14 @@
+id: T19
+title: End-of-Thursday gates and report
+day: Thursday 2026-11-05
+persona: QA engineer
+depends_on: [T16, T17, T18]
+verify: npm test
+scope:
+  - tests/browser/transport.js (default, adoption both directions, chirp-mode full match by chirp alone, QR-mode presentation, no wager string) and tests/browser/viewport.js (no-scroll at two Android viewports) joined to tests/browser/run.js
+  - dev/harness.js: runMatch({ transport: 'chirp' }) plays the whole match over the loopback chirp pipeline with the text transport muted; runMatch({ transport: 'qr' }) over the text the QR carries
+  - docs/THURSDAY-REPORT.md, docs/evidence/*, README status, campaign/README
+done_when:
+  - npm test exits 0 from a bare shell: every pre-existing suite green (unit, shell, qr-roundtrip, offline at mw-thu-v1, harness, match, spike, sonar, soundflag, orders) plus transport and viewport
+  - the report names where the transport setting lives and how the handshake carries it, the wager removal evidence, the no-scroll evidence per screen and viewport, and what remains unproven on physical phones
+evidence: docs/evidence/browser-gates.txt, docs/evidence/unit-tests.txt

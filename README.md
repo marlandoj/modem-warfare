@@ -10,14 +10,25 @@ no account. Install once, then never again.
 Hackyard Yard #6 (theme: Offline), build week Mon 2026-11-02 → Fri 2026-11-06.
 Design is locked in `SPEC.md` (kept in the dispatch workspace, not this repo).
 
-## Status — Wednesday (day 3)
+## Status — Thursday (day 4)
+
+The first real-phone playtest (two Android phones, 2026-11-02) decoded 10
+of 10 chirps and produced three rulings, now built in: **transport is a
+pre-game setting** (CHIRP by default, QR the alternative; the host's choice
+rides the handshake and the joiner adopts it; inside a match only that
+carrier is presented), **there is no wager**, and **match play never
+scrolls** (placement, handshake, round and game over fit a fixed viewport,
+asserted at 360×740 and 412×915). Report: `docs/THURSDAY-REPORT.md`.
 
 | deliverable | state |
 |---|---|
-| PWA shell: six screens, hand-written precache service worker, manifest | done, cold offline launch proven (25/25 cached, `mw-wed-v1`) |
-| Frame codec (12-byte base32 frame → QR v2–3 EC-M) + round-trip tests | done; WAGER frame added (6-bit text, v3-M) |
+| PWA shell: six screens, hand-written precache service worker, manifest | done, cold offline launch proven (25/25 cached, `mw-thu-v1`; QR library, decoder wasm and ggwave all served from the cache) |
+| Frame codec (12-byte base32 frame → QR v2–3 EC-M) + round-trip tests | done; HANDSHAKE carries the transport in a reserved nibble (no extra bytes); the family is HANDSHAKE / SALVO / REVEAL |
 | Placement → LOCK fixes the commitment (vendored SHA-256, no SubtleCrypto) | done |
-| Handshake: session + commitment both ways, wager shown on both phones | done |
+| Transport setting on Home; the handshake carries it; the joiner adopts it; one carrier per match | done, proven both directions in the harness; a whole match plays by chirp alone |
+| Handshake: session + commitment both ways | done |
+| One unmoved screen: match play fits a fixed viewport, never scrolls | done, 60 measurements at two Android viewports, in both modes |
+| The feel: tightened reveal, splash rings and screen-shake, ships sink cell by cell, sweep runs while listening, the stamp lands with a thud | done (seen in headless Chromium; felt only on phones) |
 | Salvo round loop over the Lamp: pick 3, exchange, staggered reveal, SUNK, damage | done, playable to the last sinking |
 | Endgame: reveal exchange, audit, stamp VERIFIED / LIAR / FORFEIT, rematch | done |
 | Desktop two-window dev harness (BroadcastChannel) | plays whole matches, chirps and cards, with cheats on demand |
@@ -27,32 +38,47 @@ Design is locked in `SPEC.md` (kept in the dispatch workspace, not this repo).
 | Sealed Orders: compose, one static QR, scan-to-keep, mark done, pass it on, print | done in the browser; camera scan of a card pending on phones |
 
 Proven in the browser: a complete match from placement to stamp over the
-harness (VERIFIED on both phones) with sound on and with sound off; LIAR for
-a false result, a moved fleet and a wrong salt; the Salute crossing by chirp
-alone through the production capture pipeline; a Sealed Orders card kept,
-marked, reloaded and passed on at hop 2. Not yet proven: anything acoustic
-(speaker → air → microphone), a two-phone match over real cameras, the
-BarcodeDetector decode path, the airplane-mode smoke test on the phones.
+harness (VERIFIED on both phones) in QR mode, in chirp mode with the text
+transport muted (every frame a chirp through the production capture
+pipeline), and with sound off; LIAR for a false result, a moved fleet and a
+wrong salt; a Sealed Orders card kept, marked, reloaded and passed on at hop
+2; no match screen scrolls at 360×740 or 412×915. Proven on phones: the
+acoustic path (10 of 10 chirps, 2026-11-02). Not yet proven on phones: this
+build's layout and feel, a two-phone match over real cameras, the
+BarcodeDetector decode path, the airplane-mode smoke test.
 Reports: `docs/MONDAY-REPORT.md`, `docs/TUESDAY-REPORT.md`,
-`docs/WEDNESDAY-REPORT.md`.
+`docs/WEDNESDAY-REPORT.md`, `docs/THURSDAY-REPORT.md`.
+
+### The transport setting
+
+Home → TRANSPORT: **CHIRP** (default) or **QR**. It is set before the match
+and persisted on the phone. The host's choice goes into its handshake frame
+(byte 9, high nibble) and the joining phone adopts it for that match, so
+both phones always play the same carrier; inside a match only that carrier
+is presented — the other one appears nowhere. A failed chirp is chirped
+again (the gate makes repeats harmless); there is no mid-match switch. TYPE
+(paste the other phone's frame text) stays on every Salute screen as the
+carrier-neutral manual entry, not a transport.
 
 ### The sound flag
 
 `app/js/config.js`, line 17: `export const SOUND = true;`. Set it to `false`
 and every sound affordance leaves the interface at boot (no Sonar row, no
-CHIRP / LISTEN, no effects, no AudioContext is ever created); the match plays
-by QR alone. `tests/browser/soundflag.js` plays a whole match that way and
+CHIRP / LISTEN, no CHIRP transport choice, no effects, no AudioContext is
+ever created); the only transport is QR and the match plays by QR alone. `tests/browser/soundflag.js` plays a whole match that way and
 asserts the absence. Vibration is haptic, not sound, and stays.
 
 ### Sonar, in one paragraph
 
-On the handshake, exchange and reveal screens a SONAR row sits under the
-lamp: **CHIRP** plays the frame on the lamp as a ggwave chirp (audible
-FAST protocol, ~2.1 s for a salvo, ~3.5 s for a handshake); **LISTEN** opens
-the microphone (echo cancellation, noise suppression and gain control off)
-through an AudioWorklet and decodes on the main thread. A decoded chirp goes
-through the same gate as a scan: HEARD ✓, HEARD AGAIN, or NEAR MISS · SAY
-AGAIN. The QR is the truth; the chirp can only ever cost a re-send.
+In chirp mode the handshake, exchange and reveal screens show the SONAR
+row: the frame text being carried, the sweep, and **CHIRP**, which plays
+the frame as a ggwave chirp (audible FAST protocol, ~2.1 s for a salvo,
+~3.5 s for a handshake). The microphone opens by itself on those screens
+(echo cancellation, noise suppression and gain control off) through an
+AudioWorklet and decodes on the main thread; **STOP / LISTEN** toggles it.
+A decoded chirp goes through the same gate as a scan: HEARD ✓, HEARD AGAIN,
+or NEAR MISS · CHIRP AGAIN. The frame and its audit are the truth whichever
+carrier moved it; a chirp can only ever cost a re-send.
 
 ### Sealed Orders, in one paragraph
 
@@ -66,28 +92,32 @@ The standing label is **LOCAL, NOT SECRET**.
 
 ## How a match goes
 
+0. On Home, pick the transport: CHIRP (phones flat, speaker to mic) or QR
+   (phones face to face). The host's choice wins; the guest's phone adopts
+   it at the Salute.
 1. Both players place a fleet and tap **LOCK**. LOCK draws a 128-bit salt
    and fixes the commitment (first 16 bytes of SHA-256 of fleet ‖ salt).
-2. **The Salute.** Host shows its handshake QR; guest scans it, then shows
-   its own; host scans that. Each phone now holds the other's commitment.
-   The host types the wager and taps SEND; the guest's phone shows it and
-   echoes it back. Both tap BEGIN ROUND 1.
-3. **Each round.** Pick 3 targets, FIRE. Raise phones face to face: each
-   shows its salvo QR and scans the other's. Once a phone has decoded the
-   opponent's salvo it re-renders its QR with that salvo's results filled
-   in. Hold until both phones chime CONTACT, then tap REVEAL: your shells
-   land (splash / splash / HIT, SUNK horn), then theirs on your fleet.
-   NEXT ROUND until one fleet's four ships are sunk.
-4. **The audit.** Both phones show a REVEAL QR (fleet + salt) and scan the
-   other's. Each recomputes the opponent's commitment and replays every
-   reported result against the revealed fleet. The stamp says
-   **VERIFIED — NO SHIP MOVED**, or **LIAR** with the first finding. A
-   player who never reveals forfeits (two taps to claim).
+2. **The Salute.** By chirp: the guest's phone is listening; the host taps
+   CHIRP; the guest's phone adopts the session and shows its own frame; the
+   guest taps CHIRP back. By QR: host shows its handshake QR, guest scans
+   it, then shows its own; host scans that. Each phone now holds the
+   other's commitment. Both tap BEGIN ROUND 1.
+3. **Each round.** Pick 3 targets, FIRE. Exchange over the one carrier:
+   each phone carries its salvo frame; once it has decoded the opponent's
+   salvo it re-renders its frame with that salvo's results filled in and
+   carries it again. When both phones show CONTACT, tap REVEAL: your shells
+   land (splash / splash / HIT, SUNK horn, the ship goes under), then theirs
+   on your fleet. NEXT ROUND until one fleet's four ships are sunk.
+4. **The audit.** Both phones carry a REVEAL frame (fleet + salt). Each
+   recomputes the opponent's commitment and replays every reported result
+   against the revealed fleet. The stamp lands: **VERIFIED — NO SHIP
+   MOVED**, or **LIAR** with the first finding. A player who never reveals
+   forfeits (two taps to claim).
 
-Cameras: the Salute is screen-to-screen, so the scanner opens the **front**
-camera; FLIP switches to the rear one. If a phone falls a step behind,
-RESEND LAST re-shows the previous frame; the gate treats a repeated frame
-as a no-op and an old one as "their phone is a step behind".
+Cameras (QR mode): the Salute is screen-to-screen, so the scanner opens the
+**front** camera; FLIP switches to the rear one. If a phone falls a step
+behind, RESEND re-shows the previous frame; the gate treats a repeated
+frame as a no-op and an old one as "their phone is a step behind".
 
 ## Layout
 
@@ -109,7 +139,7 @@ dev/        two-window harness — dev tool, not precached
 spike/      ggwave Sonar spike — dev tool, not precached
 tests/      node --test unit tests + Playwright browser gates
 tools/      zero-dependency static server, icon rasteriser, ggwave patch tool
-campaign/   task manifests with personas (Monday T1–T5, Tuesday T6–T10, Wednesday T11–T15)
+campaign/   task manifests with personas (Monday T1–T5, Tuesday T6–T10, Wednesday T11–T15, Thursday T16–T19)
 docs/       the daily reports and their evidence
 ```
 
@@ -125,8 +155,9 @@ node tools/serve.js 8080 --bind 0.0.0.0   # reachable from phones on the LAN
   Home badge to read **OFFLINE READY ✓ 25/25 CACHED**, add to home screen,
   then switch the radios off.
 - Dev harness: `http://<host>:8080/dev/harness.html` — two instances side by
-  side; **Run scripted exchange**, **Run full match**, **Run match, B lies**,
-  **Run chirp loopback**, **Run Sealed Orders**, or drive them by hand.
+  side; **Run scripted exchange**, **Run full match (QR)**, **Run full match
+  (chirp)**, **Run match, B lies**, **Run chirp loopback**, **Run Sealed
+  Orders**, or drive them by hand.
 - ggwave spike: `http://<host>:8080/spike/` — on two Android phones, one
   **LISTEN (MIC)**, the other **TRANSMIT ×1**; counters are on the page.
 
@@ -141,8 +172,9 @@ TLS proxy. The QR codec and the offline shell do not need either.
 npm run test:unit                     # node --test, no dependencies: codec, sha256, audit, sealed orders
 npm install && npx playwright install chromium
 npm run test:browser                  # shell, QR pixels, cold offline launch, harness, full match + cheats, spike,
-                                      # sonar (chirp round-trip), soundflag (match with SOUND=false), orders
-npm test                              # both; this is the trusted check in .verity.json (about 4 minutes)
+                                      # sonar (chirp round-trip), soundflag (match with SOUND=false), orders,
+                                      # transport (setting, adoption, match by chirp alone, no wager), viewport (no scroll)
+npm test                              # both; this is the trusted check in .verity.json (about 7 minutes)
 ```
 
 The browser runner finds Chromium in `$PLAYWRIGHT_BROWSERS_PATH`, else a

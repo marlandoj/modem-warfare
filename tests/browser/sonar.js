@@ -3,7 +3,8 @@
 //   1. The app shell's CSP is byte-identical to Tuesday's and the vendored
 //      ggwave glue loads under it (no 'unsafe-eval', no console error).
 //   2. Microphone capture goes through the AudioWorklet module under that
-//      policy: LISTEN opens the (fake) mic with EC/NS/AGC off, the capture
+//      policy: in chirp mode (the default) the handshake screen opens the
+//      (fake) mic by itself with EC/NS/AGC off, the sweep runs, the capture
 //      mode reports 'worklet', CHIRP closes the mic first and reopens it.
 //   3. Chirp round-trip through the two-window harness with the text
 //      transport MUTED: A's handshake frame reaches B by chirp alone (B
@@ -38,18 +39,22 @@ export async function run(n = 10) {
     await page.goto(`${srv.base}/app/`);
     await page.waitForFunction(() => window.MW && window.MW.sound === true);
     assert(await page.$('[data-sonar="handshake"]') && await page.$('[data-sonar="round"]') && await page.$('[data-sonar="gameover"]'), 'Sonar row present on the three Salute screens');
+    assert((await page.evaluate(() => window.MW.transport())) === 'chirp', 'transport defaults to chirp');
     await page.click('[data-action="new-match"]');
     await page.click('[data-action="lock"]');
-    await page.waitForSelector('#qr-handshake svg');
-    const lampText = await page.getAttribute('#qr-handshake', 'data-text');
+    await page.waitForFunction(() => window.MW.currentText());
+    const lampText = await page.evaluate(() => window.MW.currentText());
+    const frameLine = await page.getAttribute('[data-sonar="handshake"] [data-frame-text]', 'data-text');
+    assert(frameLine === lampText, 'the Sonar row shows the frame text being chirped');
+    assert((await page.$$eval('#screen-handshake .lamp__qr svg', (els) => els.length)) === 0, 'no QR is drawn in chirp mode');
 
-    await page.click('#screen-handshake [data-action="listen"]');
+    // Thursday: the mic opens by itself on a Salute screen in chirp mode; the sweep runs while it listens.
     await page.waitForFunction(() => window.MW.sonar.listening, null, { timeout: 20000 });
-    const listen = await page.evaluate(() => ({ capture: window.MW.sonar.captureMode, mic: window.MW.sonar.micSettings, status: document.querySelector('#screen-handshake [data-sonar-status]').textContent, button: document.querySelector('#screen-handshake [data-action="listen"]').textContent, sampleRate: window.MW.sonar.chunkSize }));
-    console.log('LISTEN:', JSON.stringify(listen));
+    const listen = await page.evaluate(() => ({ capture: window.MW.sonar.captureMode, mic: window.MW.sonar.micSettings, status: document.querySelector('#screen-handshake [data-sonar-status]').textContent, button: document.querySelector('#screen-handshake [data-action="listen"]').textContent, sweeping: document.querySelector('[data-sonar="handshake"]').classList.contains('sonar-row--listening'), auto: window.MW.state.events.some((e) => e.name === 'mw:listen' && e.auto === true), sampleRate: window.MW.sonar.chunkSize }));
+    console.log('LISTEN (auto):', JSON.stringify(listen));
     assert(listen.capture === 'worklet', `capture through the AudioWorklet under the unchanged CSP (got ${listen.capture})`);
     assert(listen.mic && listen.mic.echoCancellation === false && listen.mic.noiseSuppression === false && listen.mic.autoGainControl === false, 'EC/NS/AGC all off on the mic track');
-    assert(listen.button === 'STOP', 'LISTEN button reads STOP while the mic is open');
+    assert(listen.button === 'STOP' && listen.auto && listen.sweeping, 'the mic opened by itself, the button reads STOP and the sweep is running');
 
     const chirp = await page.evaluate(async () => {
       const events = [];

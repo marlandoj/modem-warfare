@@ -40,13 +40,13 @@ export async function run() {
     const flags = await page.evaluate(() => Array.from(document.querySelectorAll('iframe')).map((f) => ({ sound: f.contentWindow.MW.sound, sonar: f.contentWindow.MW.sonar })));
     assert(flags.every((f) => f.sound === false && f.sonar === null), 'both instances report sound off: ' + JSON.stringify(flags));
 
-    const clean = await page.evaluate(() => window.harness.runMatch({ cheat: null, wager: 'LOSER DOES THE DISHES' }));
+    const clean = await page.evaluate(() => window.harness.runMatch({ cheat: null, transport: 'qr' }));
     console.log(`match with SOUND=false: ${clean.rounds.length} rounds in ${clean.seconds} s, outcome ${JSON.stringify(clean.outcome)}`);
     console.log('stamps:', JSON.stringify(clean.stamp));
     assert(clean.errors.length === 0, 'no errors inside instances: ' + clean.errors.join(' | '));
     assert(clean.audit.a.verdict === 'VERIFIED' && clean.audit.b.verdict === 'VERIFIED', 'both audits VERIFIED with the flag off');
     assert(clean.stamp.a.word === 'VERIFIED' && clean.stamp.b.word === 'VERIFIED', 'both stamps VERIFIED with the flag off');
-    assert(clean.wager.a === 'LOSER DOES THE DISHES' && clean.wager.b === 'LOSER DOES THE DISHES', 'wager crossed');
+    assert(clean.transport.a === 'qr' && clean.transport.b === 'qr', 'with the flag off the only transport is QR');
 
     // The interface: walk every screen of both instances and look for any sound affordance.
     const audit = await page.evaluate(() => {
@@ -59,6 +59,8 @@ export async function run() {
         const buttons = Array.from(d.querySelectorAll('button')).map((b) => b.textContent.trim());
         const attrs = Array.from(d.querySelectorAll('[title],[aria-label],[placeholder]')).map((e) => [e.getAttribute('title'), e.getAttribute('aria-label'), e.getAttribute('placeholder')].filter(Boolean).join(' '));
         out.push({
+          transport: w.MW.transport(),
+          choices: Array.from(d.querySelectorAll('[data-transport-choice]')).map((b) => b.dataset.transportChoice),
           needsSound: d.querySelectorAll('[data-needs-sound]').length,
           sonarRows: d.querySelectorAll('[data-sonar], .sonar-row').length,
           chirpButtons: d.querySelectorAll('[data-action="chirp"],[data-action="listen"]').length,
@@ -76,6 +78,7 @@ export async function run() {
     for (const [i, a] of audit.entries()) {
       console.log(`instance ${i === 0 ? 'A' : 'B'}: data-needs-sound=${a.needsSound} sonar rows=${a.sonarRows} chirp/listen buttons=${a.chirpButtons} AudioContexts=${a.acCount} ggwave=${a.ggwaveLoaded}`);
       assert(a.needsSound === 0, 'no element marked data-needs-sound survives boot');
+      assert(a.transport === 'qr' && a.choices.length === 1 && a.choices[0] === 'qr', 'the transport setting offers QR only: ' + JSON.stringify(a.choices));
       assert(a.sonarRows === 0 && a.chirpButtons === 0, 'no Sonar row, no CHIRP / LISTEN button');
       for (const [route, text] of Object.entries(a.screens)) assert(!SOUND_WORDS.test(text), `screen ${route} carries no sound word: ` + (SOUND_WORDS.exec(text) || [])[0]);
       for (const b of a.buttons) assert(!SOUND_WORDS.test(b), `button carries no sound word: ${b}`);

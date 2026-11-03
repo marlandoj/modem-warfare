@@ -1,0 +1,16 @@
+id: T16
+title: Transport is a pre-game setting that rides the handshake
+day: Thursday 2026-11-05
+persona: Protocol engineer
+depends_on: [T6, T11, T12]
+verify: npm test
+scope:
+  - app/js/frame.js: HANDSHAKE frame carries the transport (byte 9 high nibble, 0 = chirp, 1 = qr); WAGER type removed from the frame family
+  - app/js/app.js: state.transport ('chirp' default, 'qr' alternative), persisted per phone; the host's value goes into its handshake frame; the joiner adopts the host's value on the accepted handshake
+  - app/index.html: TRANSPORT setting on the Home screen (new-game setup); inside a match only the configured transport's panel is presented
+  - tests/frame.test.js: wager tests replaced by transport tests (round-trip both values, default chirp, 45-char handshake unchanged, type 4 rejected)
+done_when:
+  - a fresh phone defaults to CHIRP; with SOUND=false the only transport is QR
+  - the joiner adopts the host's transport in both directions (chirp host → qr joiner, qr host → chirp joiner), asserted in the harness
+  - no scan-or-chirp choice exists on any match screen
+evidence: docs/evidence/browser-gates.txt (transport gate)

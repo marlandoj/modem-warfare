@@ -53,6 +53,27 @@ executed sequentially by one executor in dependency order.
 
 Order executed: T11 → T12 → T13 → T14 → T15.
 
+## Thursday campaign (day 4, dispatched 2026-11-02 evening, run 2026-11-02/03)
+
+The first real-phone playtest (two Android phones, 2026-11-02; 10 of 10
+chirps decoded) produced three operator rulings, which are this campaign's
+spine: transport is a pre-game setting carried by the handshake; the wager
+is removed everywhere; match play never scrolls. Same leaf-executor policy
+(the dispatch's orchestration policy forbade delegation: the write scopes
+overlap in `app/js/app.js`, `app/index.html`, `app/css/app.css`,
+`dev/harness.js`). The swarm gate scored the scoped plan SWARM (0.86); the
+policy ruled, and the four manifests were executed sequentially by one
+executor in dependency order.
+
+| id | task | persona | depends on |
+|---|---|---|---|
+| T16 | Transport setting: Home control, handshake nibble, joiner adoption, one carrier per match | Protocol engineer | T6, T11, T12 |
+| T17 | Wager removed from the shell, the frame family, the harness and the suites | PWA frontend lead | T16 |
+| T18 | One unmoved screen (fixed viewport, `--avail` sizing) and the feel pass | Technical art / UX | T16, T17 |
+| T19 | End-of-Thursday gates (transport, viewport) and report | QA engineer | T16–T18 |
+
+Order executed: T16 → T17 → T18 → T19.
+
 ## Trusted check
 
 Every manifest carries `verify: npm test` (unit codec tests plus the five

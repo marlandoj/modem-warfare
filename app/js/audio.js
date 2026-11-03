@@ -9,6 +9,7 @@
 //   hit()      my shell lands: 60 Hz thud + crackle
 //   damage()   their shell lands on my fleet: clang + thud
 //   sunk()     descending three-tone horn
+//   sink()     the hull goes under: a falling gurgle of bubbles (Thursday)
 //   stamp()    the end stamp slams in: a heavier thud
 //   victory()  rising sting at the last enemy sinking
 //   defeat()   falling two-note at the last of mine
@@ -148,6 +149,14 @@ export const damage = safe((c) => {
 export const sunk = safe((c) => {
   const notes = [392, 311, 233];
   notes.forEach((f, i) => tone(c, { freq: f, type: 'sawtooth', at: i * 0.22, peak: 0.16, attack: 0.02, decay: 0.34 }));
+});
+
+export const sink = safe((c) => {
+  // Bubbles: a chain of short, falling bandpass pops under a slow rumble.
+  for (let i = 0; i < 7; i++) {
+    burst(c, { at: 0.12 + i * 0.11, peak: 0.12, attack: 0.004, decay: 0.07, filter: 'bandpass', from: 1400 - i * 120, to: 500 - i * 40, q: 6 });
+  }
+  tone(c, { freq: 90, type: 'sine', at: 0.05, peak: 0.22, attack: 0.1, decay: 0.9, slideTo: 36 });
 });
 
 export const stamp = safe((c) => {

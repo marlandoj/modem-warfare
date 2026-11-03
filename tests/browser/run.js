@@ -35,6 +35,8 @@ const suites = [
   ['sonar', () => import('./sonar.js')],
   ['soundflag', () => import('./soundflag.js')],
   ['orders', () => import('./orders.js')],
+  ['transport', () => import('./transport.js')],
+  ['viewport', () => import('./viewport.js')],
 ];
 
 const lines = [];

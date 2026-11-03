@@ -2,8 +2,14 @@
 // play through the two iframes' public window.MW surfaces.
 //
 //   runScript()                 Monday's exchange: handshake both ways, one salvo both ways
-//   runMatch({ cheat })         Tuesday: two automated players play a whole match to the stamp
+//   runMatch({ cheat, transport })
+//                               Tuesday: two automated players play a whole match to the stamp
 //                               cheat: null | 'result' | 'fleet' | 'salt'  (B is always the cheat)
+//                               Thursday: transport 'qr' (frames cross as the text the QR carries)
+//                               or 'chirp' (text transport MUTED; every frame crosses as a chirp
+//                               into the peer's loopback capture graph, re-sent if not heard)
+//   runAdoption({ host, joiner })
+//                               Thursday: the host's transport rides the handshake and the joiner adopts it
 //   runChirp({ n })             Wednesday: the Salute crosses by chirp alone (text transport muted),
 //                               then n salvo chirps A -> B through B's real capture pipeline
 //   runOrders()                 Wednesday: Sealed Orders compose / scan-to-keep / done / reload / pass on
@@ -86,15 +92,65 @@ async function toHome(win) {
   }
 }
 
-async function placeAndLock(A, B, fleets) {
+/** The transport is a Home-screen setting: set it on both phones before NEW / JOIN. */
+function setTransports(A, B, host, joiner) {
+  if (host) A.MW.setTransport(host);
+  if (joiner) B.MW.setTransport(joiner);
+}
+
+async function placeAndLock(A, B, fleets, { host = 'qr', joiner = host, byChirp = false } = {}) {
+  setTransports(A, B, host, joiner);
   click(A, '[data-action="new-match"]');
   click(B, '[data-action="join-match"]');
   await waitFor(() => A.document.body.dataset.screen === 'placement' && B.document.body.dataset.screen === 'placement', 'placement screens');
   if (fleets) { A.MW.setFleet(fleets.A); B.MW.setFleet(fleets.B); }
   click(A, '[data-action="lock"]');
   click(B, '[data-action="lock"]');
+  await waitFor(() => A.document.body.dataset.screen === 'handshake' && B.document.body.dataset.screen === 'handshake', 'handshake screens');
+  if (byChirp) {
+    // The Salute by sound alone: B listens, A chirps; then A listens, B chirps back.
+    await chirpUntil(A, B, () => B.MW.state.session !== null && B.MW.state.session === A.MW.state.session, 'handshake A → B by chirp');
+    await chirpUntil(B, A, () => A.MW.state.peerHandshake, 'handshake B → A by chirp');
+  }
   await waitFor(() => B.MW.state.session !== null && B.MW.state.session === A.MW.state.session, 'B adopts A session');
   await waitFor(() => A.MW.state.peerHandshake && B.MW.state.peerHandshake, 'handshake both ways');
+}
+
+// ----------------------------------------------------- chirp carrier ---
+// Only the air is replaced: a chirp's samples cross the BroadcastChannel and
+// are played into the peer's loopback capture graph (MediaStream ->
+// AudioWorklet -> ggwave -> routeText -> gate). A chirp that is not heard
+// is sent again, as the game says to.
+
+const CHIRP_TRIES = 4;
+
+async function listenLoopback(...wins) {
+  await Promise.all(wins.map((w) => w.MW.sonar.listen({ loopback: true })));
+}
+
+/** `from` chirps its current frame until `cond` holds on the other side. Returns the number of chirps. */
+async function chirpUntil(from, to, cond, label) {
+  for (let i = 1; i <= CHIRP_TRIES; i++) {
+    await listenLoopback(to);
+    await waitFor(() => from.MW.currentText(), `${label}: a frame to chirp`);
+    const r = await from.MW.chirp();
+    if (!r) throw new Error(`${label}: ${from.MW.devInstance} could not chirp`);
+    try { await waitFor(cond, label, 5000); return i; } catch { line('script', `${label}: not heard, chirping again (${i}/${CHIRP_TRIES})`); }
+  }
+  throw new Error(`${label}: not heard after ${CHIRP_TRIES} chirps`);
+}
+
+/** Both phones chirp their current frame at each other until both conditions hold. */
+async function exchangeByChirp(A, B, condA, condB, label, tally) {
+  for (let i = 1; i <= CHIRP_TRIES; i++) {
+    await listenLoopback(A, B);
+    const [ra, rb] = await Promise.all([A.MW.chirp(), B.MW.chirp()]);
+    if (!ra || !rb) throw new Error(`${label}: a phone could not chirp`);
+    tally.chirps += 2;
+    tally.airtimeSeconds += ra.seconds + rb.seconds;
+    try { await waitFor(() => condA() && condB(), label, 6000); return; } catch { tally.resends += 1; line('script', `${label}: not heard both ways, chirping again (${i}/${CHIRP_TRIES})`); }
+  }
+  throw new Error(`${label}: not heard after ${CHIRP_TRIES} exchanges`);
 }
 
 /**
@@ -103,8 +159,8 @@ async function placeAndLock(A, B, fleets) {
 export async function runScript() {
   const { A, B, errors } = await instances();
   await toHome(A); await toHome(B);
-  line('script', 'script: A NEW MATCH, B JOIN MATCH, both LOCK');
-  await placeAndLock(A, B, null);
+  line('script', 'script: transport QR on both · A NEW MATCH, B JOIN MATCH, both LOCK');
+  await placeAndLock(A, B, null, { host: 'qr' });
   line('script', `handshake converged: session ${A.MW.state.session.toString(16)}`);
   // Both phones now sit on the handshake screen. The channel must go quiet:
   // a duplicate must never cause a re-render (which would re-post, which
@@ -230,73 +286,145 @@ function tamperFor(cheat, B) {
  * Play a complete match. A fires 2 ship cells + 1 water shell per round, B
  * fires 1 ship cell + 2 water, so A wins in 6 rounds with sinkings along the
  * way. Both phones end on the game-over screen with a stamp.
+ *
+ * transport 'qr': frames cross the dev channel as the text the QR carries.
+ * transport 'chirp': the text transport is muted on both phones and every
+ * frame — handshake, salvo, results, reveal — crosses as a chirp.
  */
-export async function runMatch({ cheat = null, wager = 'LOSER DOES THE DISHES' } = {}) {
+export async function runMatch({ cheat = null, transport = 'qr' } = {}) {
   const { A, B, errors } = await instances();
   await toHome(A); await toHome(B);
+  const byChirp = transport === 'chirp';
+  if (byChirp && (!A.MW.sound || !B.MW.sound)) throw new Error('chirp match: sound is OFF in this build');
   A.MW.devTamper = null;
   B.MW.devTamper = tamperFor(cheat, B);
-  line('script', `match: cheat=${cheat || 'none'} · A NEW MATCH, B JOIN MATCH, fixed fleets, both LOCK`);
-  await placeAndLock(A, B, FLEETS);
-  const t0 = performance.now();
+  A.MW.devMuteFrames = byChirp;
+  B.MW.devMuteFrames = byChirp;
+  const tally = { chirps: 0, resends: 0, airtimeSeconds: 0 };
+  const ev0 = { a: A.MW.state.events.length, b: B.MW.state.events.length }; // this match's events only
+  const framesBy = (win, from, source) => win.MW.state.events.slice(from).filter((e) => e.name === 'mw:frame' && e.meta && e.meta.source === source).length;
+  try {
+    line('script', `match: transport=${transport} cheat=${cheat || 'none'} · A NEW MATCH, B JOIN MATCH, fixed fleets, both LOCK`);
+    await placeAndLock(A, B, FLEETS, { host: transport, byChirp });
+    if (byChirp) tally.chirps += 2;
+    const t0 = performance.now();
+    const transportOnBoth = { a: A.MW.transport(), b: B.MW.transport() };
+    line('script', `transport on both phones: A ${transportOnBoth.a} · B ${transportOnBoth.b}`);
 
-  // Wager: the host types it and sends after contact; the guest echoes it.
-  A.MW.setWager(wager);
-  await waitFor(() => B.MW.state.wager === A.MW.state.wager && A.MW.state.wagerConfirmed, 'wager on both phones');
-  line('script', `wager on both phones: "${B.MW.state.wager}"`);
+    click(A, '[data-action="begin-round"]');
+    click(B, '[data-action="begin-round"]');
+    await waitFor(() => A.document.body.dataset.screen === 'round' && B.document.body.dataset.screen === 'round', 'round screens');
 
-  click(A, '[data-action="begin-round"]');
-  click(B, '[data-action="begin-round"]');
-  await waitFor(() => A.document.body.dataset.screen === 'round' && B.document.body.dataset.screen === 'round', 'round screens');
+    const playerA = makePlayer(FLEETS.B, 2, 7);
+    const playerB = makePlayer(FLEETS.A, 1, 11);
+    const rounds = [];
+    for (let round = 1; round <= 20; round++) {
+      const pa = playerA.pick();
+      const pb = playerB.pick();
+      A.MW.setPicks(pa);
+      B.MW.setPicks(pb);
+      click(A, '[data-action="fire"]');
+      click(B, '[data-action="fire"]');
+      if (byChirp) {
+        // Salvo both ways, then the result-bearing re-render both ways.
+        await exchangeByChirp(A, B, () => A.MW.state.incoming, () => B.MW.state.incoming, `round ${round} salvos by chirp`, tally);
+        await exchangeByChirp(A, B, () => A.MW.converged(), () => B.MW.converged(), `round ${round} results by chirp`, tally);
+      }
+      await waitFor(() => A.MW.converged() && B.MW.converged(), `round ${round} converged`);
+      // Both phones show contact: flip and watch the staggered reveal.
+      click(A, '[data-action="reveal"]');
+      click(B, '[data-action="reveal"]');
+      await waitFor(() => A.MW.state.revealDone && B.MW.state.revealDone, `round ${round} reveal played`, 15000);
+      const ra = A.MW.state.history[A.MW.state.history.length - 1];
+      const rb = B.MW.state.history[B.MW.state.history.length - 1];
+      rounds.push({ round, a: { picks: pa, hits: ra.hits, enemySunk: ra.enemySunk }, b: { picks: pb, hits: rb.hits, enemySunk: rb.enemySunk } });
+      line('script', `round ${round}: A ${pa.join(' ')} → ${ra.hits.map((h) => (h ? 'HIT' : 'miss')).join('/')}${ra.enemySunkNow.some(Boolean) ? ' SUNK ' + ra.enemySunkNow.map((s, i) => (s ? SIZES[i] : '')).join('') : ''} · B ${pb.join(' ')} → ${rb.hits.map((h) => (h ? 'HIT' : 'miss')).join('/')}${rb.enemySunkNow.some(Boolean) ? ' SUNK ' + rb.enemySunkNow.map((s, i) => (s ? SIZES[i] : '')).join('') : ''}`);
+      if (A.MW.state.outcome || B.MW.state.outcome) break;
+      click(A, '[data-action="next-round"]');
+      click(B, '[data-action="next-round"]');
+      await waitFor(() => A.MW.state.round === round + 1 && B.MW.state.round === round + 1, `round ${round + 1} ready`);
+    }
+    await waitFor(() => A.MW.state.outcome && B.MW.state.outcome, 'both phones know the outcome');
+    click(A, '[data-action="to-audit"]');
+    click(B, '[data-action="to-audit"]');
+    await waitFor(() => A.document.body.dataset.screen === 'gameover' && B.document.body.dataset.screen === 'gameover', 'game over screens');
+    if (byChirp) await exchangeByChirp(A, B, () => A.MW.state.audit, () => B.MW.state.audit, 'reveal by chirp', tally);
+    await waitFor(() => A.MW.state.audit && B.MW.state.audit, 'reveal both ways, audits run', 10000);
 
-  const playerA = makePlayer(FLEETS.B, 2, 7);
-  const playerB = makePlayer(FLEETS.A, 1, 11);
-  const rounds = [];
-  for (let round = 1; round <= 20; round++) {
-    const pa = playerA.pick();
-    const pb = playerB.pick();
-    A.MW.setPicks(pa);
-    B.MW.setPicks(pb);
-    click(A, '[data-action="fire"]');
-    click(B, '[data-action="fire"]');
-    await waitFor(() => A.MW.converged() && B.MW.converged(), `round ${round} converged`);
-    // Both phones chimed: flip and watch the staggered reveal.
-    click(A, '[data-action="reveal"]');
-    click(B, '[data-action="reveal"]');
-    await waitFor(() => A.MW.state.revealDone && B.MW.state.revealDone, `round ${round} reveal played`, 15000);
-    const ra = A.MW.state.history[A.MW.state.history.length - 1];
-    const rb = B.MW.state.history[B.MW.state.history.length - 1];
-    rounds.push({ round, a: { picks: pa, hits: ra.hits, enemySunk: ra.enemySunk }, b: { picks: pb, hits: rb.hits, enemySunk: rb.enemySunk } });
-    line('script', `round ${round}: A ${pa.join(' ')} → ${ra.hits.map((h) => (h ? 'HIT' : 'miss')).join('/')}${ra.enemySunkNow.some(Boolean) ? ' SUNK ' + ra.enemySunkNow.map((s, i) => (s ? SIZES[i] : '')).join('') : ''} · B ${pb.join(' ')} → ${rb.hits.map((h) => (h ? 'HIT' : 'miss')).join('/')}${rb.enemySunkNow.some(Boolean) ? ' SUNK ' + rb.enemySunkNow.map((s, i) => (s ? SIZES[i] : '')).join('') : ''}`);
-    if (A.MW.state.outcome || B.MW.state.outcome) break;
-    click(A, '[data-action="next-round"]');
-    click(B, '[data-action="next-round"]');
-    await waitFor(() => A.MW.state.round === round + 1 && B.MW.state.round === round + 1, `round ${round + 1} ready`);
+    const stampOf = (win) => ({ word: win.document.querySelector('#stamp-word').textContent, sub: win.document.querySelector('#stamp-sub').textContent, verdict: win.document.querySelector('#stamp').dataset.verdict, stage: win.document.querySelector('#screen-gameover').dataset.stage });
+    const summary = {
+      cheat,
+      transport: transportOnBoth,
+      session: A.MW.state.session.toString(16),
+      rounds,
+      outcome: { a: A.MW.state.outcome, b: B.MW.state.outcome },
+      audit: { a: { verdict: A.MW.state.audit.verdict, findings: A.MW.state.audit.findings, checked: A.MW.state.audit.checked }, b: { verdict: B.MW.state.audit.verdict, findings: B.MW.state.audit.findings, checked: B.MW.state.audit.checked } },
+      stamp: { a: stampOf(A), b: stampOf(B) },
+      commits: { aOfB: hexOf(A.MW.state.peerHandshake.commit), bActual: hexOf(B.MW.state.commit), bOfA: hexOf(B.MW.state.peerHandshake.commit), aActual: hexOf(A.MW.state.commit) },
+      gate: { a: tallyGate(A.MW.state.gate.log), b: tallyGate(B.MW.state.gate.log) },
+      sonar: byChirp ? { ...tally, airtimeSeconds: Math.round(tally.airtimeSeconds * 10) / 10, decodes: { a: A.MW.sonar.stats.decodes, b: B.MW.sonar.stats.decodes }, chirpsSent: { a: A.MW.sonar.stats.chirps, b: B.MW.sonar.stats.chirps }, textFramesSeen: { a: framesBy(A, ev0.a, 'broadcast'), b: framesBy(B, ev0.b, 'broadcast') }, sonarFramesSeen: { a: framesBy(A, ev0.a, 'sonar'), b: framesBy(B, ev0.b, 'sonar') } } : null,
+      seconds: Math.round((performance.now() - t0) / 100) / 10,
+      errors,
+    };
+    line('script', `match over in ${rounds.length} rounds / ${summary.seconds} s: A ${summary.outcome.a.result} · B ${summary.outcome.b.result} · A stamps B: ${summary.stamp.a.word} (${summary.stamp.a.sub}) · B stamps A: ${summary.stamp.b.word} (${summary.stamp.b.sub})${byChirp ? ` · ${tally.chirps} chirps, ${tally.resends} re-sends` : ''}`);
+    if (errors.length) line('error', errors.join(' | '));
+    return summary;
+  } finally {
+    B.MW.devTamper = null;
+    A.MW.devMuteFrames = false;
+    B.MW.devMuteFrames = false;
+    if (byChirp) { try { A.MW.sonar.stop(); B.MW.sonar.stop(); } catch { /* fine */ } }
   }
-  await waitFor(() => A.MW.state.outcome && B.MW.state.outcome, 'both phones know the outcome');
-  click(A, '[data-action="to-audit"]');
-  click(B, '[data-action="to-audit"]');
-  await waitFor(() => A.document.body.dataset.screen === 'gameover' && B.document.body.dataset.screen === 'gameover', 'game over screens');
-  await waitFor(() => A.MW.state.audit && B.MW.state.audit, 'reveal both ways, audits run', 10000);
+}
 
-  const stampOf = (win) => ({ word: win.document.querySelector('#stamp-word').textContent, sub: win.document.querySelector('#stamp-sub').textContent, verdict: win.document.querySelector('#stamp').dataset.verdict });
+/**
+ * The transport rides the handshake: the host's setting goes into its
+ * frame, the joiner — set the other way beforehand — adopts it, and the
+ * joiner's own handshake then carries the adopted value. Over the text
+ * transport (carrier-neutral), so both directions can be proven with or
+ * without sound.
+ */
+export async function runAdoption({ host = 'qr', joiner = 'chirp' } = {}) {
+  const { A, B, errors } = await instances();
+  await toHome(A); await toHome(B);
+  setTransports(A, B, host, joiner);
+  const before = { a: A.MW.transport(), b: B.MW.transport(), aChecked: checkedChoice(A), bChecked: checkedChoice(B) };
+  line('script', `adoption: host set ${before.a}, joiner set ${before.b}`);
+  A.MW.devMuteFrames = false; B.MW.devMuteFrames = false;
+  await placeAndLock(A, B, FLEETS, { host: null, joiner: null });
+  const hostFrame = A.MW.textToFrame(A.MW.currentText());
+  const joinerFrame = B.MW.textToFrame(B.MW.currentText());
+  const after = { a: A.MW.transport(), b: B.MW.transport(), source: { a: A.MW.state.transportSource, b: B.MW.state.transportSource } };
   const summary = {
-    cheat,
-    session: A.MW.state.session.toString(16),
-    wager: { a: A.MW.state.wager, b: B.MW.state.wager },
-    rounds,
-    outcome: { a: A.MW.state.outcome, b: B.MW.state.outcome },
-    audit: { a: { verdict: A.MW.state.audit.verdict, findings: A.MW.state.audit.findings, checked: A.MW.state.audit.checked }, b: { verdict: B.MW.state.audit.verdict, findings: B.MW.state.audit.findings, checked: B.MW.state.audit.checked } },
-    stamp: { a: stampOf(A), b: stampOf(B) },
-    commits: { aOfB: hexOf(A.MW.state.peerHandshake.commit), bActual: hexOf(B.MW.state.commit), bOfA: hexOf(B.MW.state.peerHandshake.commit), aActual: hexOf(A.MW.state.commit) },
-    gate: { a: tallyGate(A.MW.state.gate.log), b: tallyGate(B.MW.state.gate.log) },
-    seconds: Math.round((performance.now() - t0) / 100) / 10,
+    host, joiner, before, after,
+    hostFrame: { transport: hostFrame.transport, described: A.MW.describeFrame(hostFrame) },
+    joinerFrame: { transport: joinerFrame.transport, described: B.MW.describeFrame(joinerFrame) },
+    aHoldsBAs: A.MW.state.peerHandshake.transport,
+    bHoldsAAs: B.MW.state.peerHandshake.transport,
+    presented: { a: presentedCarriers(A), b: presentedCarriers(B) },
     errors,
   };
-  line('script', `match over in ${rounds.length} rounds / ${summary.seconds} s: A ${summary.outcome.a.result} · B ${summary.outcome.b.result} · A stamps B: ${summary.stamp.a.word} (${summary.stamp.a.sub}) · B stamps A: ${summary.stamp.b.word} (${summary.stamp.b.sub})`);
-  if (errors.length) line('error', errors.join(' | '));
-  B.MW.devTamper = null;
+  line('script', `adoption: host frame by ${summary.hostFrame.transport} → joiner now ${after.b} (${after.source.b}); joiner frame by ${summary.joinerFrame.transport}`);
   return summary;
+}
+
+function checkedChoice(win) {
+  const el = win.document.querySelector('[data-transport-choice][aria-checked="true"]');
+  return el ? el.dataset.transportChoice : null;
+}
+
+/** Which carrier blocks are actually visible on the current screen (not hidden, laid out). */
+function presentedCarriers(win) {
+  const screen = win.document.querySelector('.screen:not([hidden])');
+  const vis = (el) => !el.hidden && el.offsetParent !== null;
+  return {
+    screen: screen && screen.dataset.route,
+    qr: Array.from(screen.querySelectorAll('[data-transport="qr"]')).filter(vis).length,
+    chirp: Array.from(screen.querySelectorAll('[data-transport="chirp"]')).filter(vis).length,
+    scanButtons: Array.from(screen.querySelectorAll('[data-action="scan-toggle"]')).filter(vis).length,
+    chirpButtons: Array.from(screen.querySelectorAll('[data-action="chirp"],[data-action="listen"]')).filter(vis).length,
+    qrSvg: Array.from(screen.querySelectorAll('.lamp__qr svg')).filter((e) => vis(e.parentElement)).length,
+  };
 }
 
 // ----------------------------------------------------------- the chirp ---
@@ -317,7 +445,8 @@ export async function runChirp({ n = 10 } = {}) {
   A.MW.devMuteFrames = true;
   B.MW.devMuteFrames = true;
   try {
-    line('script', 'chirp: text transport MUTED on both · A NEW MATCH, B JOIN MATCH, fixed fleets, both LOCK');
+    line('script', 'chirp: text transport MUTED on both · transport CHIRP on both · A NEW MATCH, B JOIN MATCH, fixed fleets, both LOCK');
+    setTransports(A, B, 'chirp', 'chirp');
     click(A, '[data-action="new-match"]');
     click(B, '[data-action="join-match"]');
     await waitFor(() => A.document.body.dataset.screen === 'placement' && B.document.body.dataset.screen === 'placement', 'placement screens');
@@ -482,8 +611,9 @@ function tallyGate(logEntries) {
 }
 
 document.getElementById('btn-script').addEventListener('click', () => runScript().catch((e) => line('error', e.message)));
-document.getElementById('btn-match').addEventListener('click', () => runMatch().catch((e) => line('error', e.message)));
+document.getElementById('btn-match').addEventListener('click', () => runMatch({ transport: 'qr' }).catch((e) => line('error', e.message)));
+document.getElementById('btn-match-chirp').addEventListener('click', () => runMatch({ transport: 'chirp' }).catch((e) => line('error', e.message)));
 document.getElementById('btn-cheat').addEventListener('click', () => runMatch({ cheat: 'result' }).catch((e) => line('error', e.message)));
 document.getElementById('btn-chirp').addEventListener('click', () => runChirp().catch((e) => line('error', e.message)));
 document.getElementById('btn-orders').addEventListener('click', () => runOrders().catch((e) => line('error', e.message)));
-window.harness = { runScript, runMatch, runChirp, runOrders, lines, FLEETS };
+window.harness = { runScript, runMatch, runAdoption, runChirp, runOrders, presentedCarriers, lines, FLEETS };

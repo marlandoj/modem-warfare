@@ -13,11 +13,14 @@
  *    config.SOUND says, so flipping the flag never changes the cache list.
  *  - The page can ask "are you really all cached?" over postMessage and gets
  *    a per-URL answer; the Home badge is driven by that, not by a flag.
+ *  - Thursday: the list is unchanged (25 files); the version is bumped
+ *    because the shell, the stylesheet, the controller, the codec, the
+ *    sound and the Sonar engine all changed.
  *
  * Bump VERSION whenever any precached file changes, so old caches are dropped.
  */
 
-const VERSION = 'mw-wed-v1';
+const VERSION = 'mw-thu-v1';
 const CACHE = `modem-warfare-${VERSION}`;
 
 const PRECACHE = [

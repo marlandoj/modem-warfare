@@ -1,0 +1,15 @@
+id: T17
+title: The wager is removed everywhere
+day: Thursday 2026-11-05
+persona: PWA frontend lead
+depends_on: [T16]
+verify: npm test
+scope:
+  - app/index.html, app/css/app.css, app/js/app.js: no wager field, strip, form, state or event
+  - app/js/frame.js: no WAGER frame type, alphabet, packer or gate branch
+  - dev/harness.js, dev/harness.html, dev/channel.js: runMatch takes a transport, not a wager
+  - tests/browser/shell.js, match.js, soundflag.js: wager assertions replaced by transport assertions
+done_when:
+  - grep -ri wager app/ dev/ tests/ finds nothing
+  - the transport gate walks every screen of both harness instances after a match and finds no WAGER or STAKE string in any text, button, title, label or placeholder
+evidence: docs/evidence/browser-gates.txt (transport gate, "no wager string")

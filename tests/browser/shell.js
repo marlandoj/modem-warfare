@@ -1,7 +1,9 @@
 // Shell smoke: every screen renders without console errors, the offline badge
-// reaches READY from the service worker's real cache report, the handshake
-// and salvo QRs render at the spec'd versions, and one round plays through
-// the TYPE (manual) path with the staggered reveal. Screenshots go to test-output/.
+// reaches READY from the service worker's real cache report, the transport
+// setting defaults to CHIRP and is switched to QR for this walk, the
+// handshake and salvo QRs render at the spec'd versions, and one round plays
+// through the TYPE (manual) path with the staggered reveal. Screenshots go
+// to test-output/.
 import path from 'node:path';
 import { startServer, launch, capture, assert, banner, OUT } from './lib.js';
 
@@ -18,6 +20,14 @@ export async function run() {
     console.log('badge:', badge);
     assert(/OFFLINE READY/.test(badge), 'badge says offline ready');
     await page.screenshot({ path: path.join(OUT, 'screen-1-home.png') });
+
+    // Thursday: the transport is a Home setting. Fresh phone = CHIRP; this walk plays the Lamp.
+    const defaultTransport = await page.evaluate(() => ({ transport: window.MW.transport(), checked: document.querySelector('[data-transport-choice][aria-checked="true"]').dataset.transportChoice, join: document.querySelector('#join-sub').textContent }));
+    console.log('transport default:', JSON.stringify(defaultTransport));
+    assert(defaultTransport.transport === 'chirp' && defaultTransport.checked === 'chirp' && defaultTransport.join === 'LISTEN', 'a fresh phone defaults to CHIRP');
+    await page.click('[data-transport-choice="qr"]');
+    await page.waitForFunction(() => window.MW.transport() === 'qr' && document.body.dataset.transport === 'qr');
+    assert((await page.textContent('#join-sub')) === 'SCAN', 'JOIN MATCH says SCAN in QR mode');
 
     // Host flow to placement.
     await page.click('[data-action="new-match"]');
@@ -56,18 +66,13 @@ export async function run() {
     await page.fill('#screen-handshake .manual__input', peer.text);
     await page.click('#screen-handshake .manual button[type="submit"]');
     await page.waitForFunction(() => document.querySelector('#contact-handshake').dataset.state === 'contact');
-    // Host sets the wager.
-    await page.fill('#wager-input', 'loser does the dishes');
-    await page.click('#btn-wager');
-    const wagerShown = await page.textContent('#wager-shown');
-    console.log('wager line:', wagerShown);
-    assert(/LOSER DOES THE DISHES/.test(wagerShown), 'wager normalised and shown');
-    const wagerQr = await page.getAttribute('#qr-handshake', 'data-text');
-    assert(wagerQr !== hsText && wagerQr.length <= 61, `wager frame on the lamp (${wagerQr.length} chars, within v3-M)`);
+    const hsFrame = await page.evaluate(() => window.MW.describeFrame(window.MW.textToFrame(window.MW.currentText())));
+    console.log('handshake frame:', hsFrame);
+    assert(/by qr$/.test(hsFrame), 'the host\'s handshake carries the transport (by qr)');
+    const stillQr = await page.getAttribute('#qr-handshake', 'data-text');
+    assert(stillQr === hsText, 'the handshake frame stays on the lamp after contact (nothing else is exchanged before round 1)');
     await page.click('#btn-begin-round');
     await page.waitForFunction(() => document.body.dataset.screen === 'round');
-    const strip = await page.textContent('#wager-round');
-    assert(/LOSER DOES THE DISHES/.test(strip), 'wager strip on the round screen');
     await page.screenshot({ path: path.join(OUT, 'screen-4a-round-target.png') });
     await page.evaluate(() => window.MW.setPicks(['B1', 'B2', 'G7']));
     await page.click('[data-action="fire"]');
@@ -109,6 +114,7 @@ export async function run() {
     const logText = await page.textContent('#reveal-log');
     console.log(`reveal played in ${revealMs} ms:`, logText.replace(/\s+/g, ' ').trim());
     assert(revealMs >= 6 * 250 - 50, 'staggered reveal took at least 6 shells × 250 ms');
+    assert(revealMs < 6000, 'and the tightened pacing keeps a round\'s reveal under 6 s');
     assert(/My shell 1 → B1 … HIT/.test(logText) && /My shell 3 → G7 … splash/.test(logText), 'reveal log shows hits and splashes');
     const hitCells = await page.$$eval('#board-reveal-enemy .cell--hit', (els) => els.length);
     assert(hitCells === 2, `two burning cells on the enemy board, got ${hitCells}`);

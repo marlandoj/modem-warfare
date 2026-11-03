@@ -20,7 +20,7 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./css/app.css">
 </head>
-<body data-screen="home">
+<body data-screen="home" data-transport="chirp">
   <div class="sea" aria-hidden="true"></div>
 
   <header class="topbar">
@@ -31,7 +31,7 @@
 
   <main id="screens">
 
-    <!-- 1 · HOME -->
+    <!-- 1 · HOME (may scroll) -->
     <section class="screen screen--home" id="screen-home" data-route="home">
       <div class="hero">
         <h1 class="stencil title">MODEM<br>WARFARE</h1>
@@ -49,7 +49,16 @@
       </div>
       <nav class="stack">
         <button class="btn btn--primary" type="button" data-action="new-match">NEW MATCH</button>
-        <button class="btn" type="button" data-action="join-match">JOIN MATCH <span class="btn__sub">SCAN</span></button>
+        <button class="btn" type="button" data-action="join-match">JOIN MATCH <span class="btn__sub" id="join-sub">LISTEN</span></button>
+        <!-- Thursday ruling 1: the transport is set here, before the match, never inside it.
+             The host's choice rides the handshake frame and the joining phone adopts it. -->
+        <div class="setup" id="setup-transport">
+          <div class="setup__label">TRANSPORT <span class="setup__sub" id="transport-hint">SET BEFORE THE MATCH · THE HOST'S CHOICE RIDES THE HANDSHAKE</span></div>
+          <div class="segmented" role="radiogroup" aria-label="Transport">
+            <button class="seg" type="button" role="radio" data-transport-choice="chirp" aria-checked="true" data-needs-sound>CHIRP <span class="seg__sub">SONAR</span></button>
+            <button class="seg" type="button" role="radio" data-transport-choice="qr" aria-checked="false">QR <span class="seg__sub">LAMP</span></button>
+          </div>
+        </div>
         <button class="btn btn--ghost" type="button" data-go="sealed">SEALED ORDERS</button>
       </nav>
       <div class="badge-row">
@@ -61,69 +70,69 @@
       </div>
     </section>
 
-    <!-- 2 · PLACEMENT -->
-    <section class="screen" id="screen-placement" data-route="placement" hidden>
+    <!-- 2 · PLACEMENT (fixed viewport) -->
+    <section class="screen screen--match" id="screen-placement" data-route="placement" hidden>
       <h2 class="stencil h2">PLACE YOUR FLEET</h2>
       <p class="hint">TAP A SHIP TO ROTATE · 4 · 3 · 2 · 2</p>
-      <div class="board-wrap">
+      <div class="board-wrap board-wrap--placement">
         <div class="board board--mine" id="board-placement" role="grid" aria-label="Your fleet, 7 by 7"></div>
       </div>
       <p class="hint hint--small" id="placement-hint">LOCK SEALS YOUR FLEET · THE COMMITMENT IS FIXED HERE, BEFORE ANY SALUTE</p>
-      <div class="row">
+      <div class="row row--bottom">
         <button class="btn btn--half" type="button" data-action="reroll">REROLL</button>
         <button class="btn btn--half btn--amber" type="button" data-action="lock">LOCK</button>
       </div>
     </section>
 
-    <!-- 3 · HANDSHAKE -->
-    <section class="screen" id="screen-handshake" data-route="handshake" hidden>
+    <!-- 3 · HANDSHAKE (fixed viewport) -->
+    <section class="screen screen--match" id="screen-handshake" data-route="handshake" hidden>
       <h2 class="stencil h2">THE SALUTE</h2>
       <p class="hint" id="handshake-hint">RAISE PHONES FACE TO FACE · 20 CM</p>
-      <div class="lamp" id="lamp-handshake">
-        <div class="lamp__qr" id="qr-handshake" aria-label="Your handshake frame"></div>
-        <div class="lamp__caption" id="caption-handshake">HANDSHAKE · ROUND 0</div>
-      </div>
       <div class="commitline" id="commit-line">COMMITMENT — LOCKED</div>
-      <div class="scan" data-scan="handshake">
-        <video class="scan__video" playsinline muted hidden></video>
-        <div class="scan__status" data-scan-status>SCANNER IDLE</div>
-        <div class="row">
-          <button class="btn btn--half" type="button" data-action="scan-toggle">SCAN</button>
-          <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
-          <button class="btn btn--half btn--ghost" type="button" data-action="manual-toggle">TYPE</button>
+
+      <div class="carrier carrier--qr" data-transport="qr">
+        <div class="lamp" id="lamp-handshake">
+          <div class="lamp__qr" id="qr-handshake" aria-label="Your handshake frame"></div>
+          <div class="lamp__caption" id="caption-handshake">HANDSHAKE · ROUND 0</div>
         </div>
-        <form class="manual" data-manual hidden>
-          <input class="manual__input" type="text" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PASTE A FRAME" aria-label="Frame text">
-          <button class="btn btn--small" type="submit">DECODE</button>
-        </form>
+        <div class="scan" data-scan="handshake">
+          <div class="scan__row">
+            <video class="scan__video" playsinline muted hidden></video>
+            <div class="scan__status" data-scan-status>SCANNER IDLE</div>
+          </div>
+          <div class="row">
+            <button class="btn btn--half btn--amber" type="button" data-action="scan-toggle">SCAN</button>
+            <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
+          </div>
+        </div>
       </div>
-      <div class="sonar-row" data-sonar="handshake" data-needs-sound>
-        <div class="sonar-row__head"><span class="sonar-row__title">SONAR · CHIRP</span><span class="sonar-row__sub">COMPANION TO THE LAMP · THE QR IS THE TRUTH</span></div>
+
+      <div class="carrier sonar-row" data-transport="chirp" data-sonar="handshake" data-needs-sound>
+        <div class="sonar-row__head"><span class="sonar-row__title">SONAR · CHIRP</span><span class="sonar-row__status" data-sonar-status>SONAR IDLE</span></div>
+        <div class="sonar-row__frame" data-frame-text>—</div>
         <div class="sweep" aria-hidden="true"><div class="sweep__disc"></div><div class="sweep__arm"></div><div class="sweep__blip"></div></div>
-        <div class="sonar-row__status" data-sonar-status>SONAR IDLE</div>
         <div class="sonar-row__heard" data-sonar-heard data-state="none">NOTHING HEARD YET</div>
         <div class="row">
-          <button class="btn btn--half" type="button" data-action="chirp" title="Send the frame on the lamp as sound">CHIRP</button>
-          <button class="btn btn--half btn--ghost" type="button" data-action="listen" title="Open the microphone and listen for a chirp">LISTEN</button>
+          <button class="btn btn--half btn--amber" type="button" data-action="chirp" title="Send the frame as sound">CHIRP</button>
+          <button class="btn btn--half btn--ghost" type="button" data-action="listen" title="Open or close the microphone">LISTEN</button>
         </div>
       </div>
+
       <div class="contact" id="contact-handshake" data-state="waiting">WAITING FOR CONTACT…</div>
-      <div class="wager">
-        <label class="wager__label" for="wager-input">WAGER <span class="muted" id="wager-role-hint">· THE HOST SENDS IT · SHOWN ON BOTH PHONES ALL MATCH</span></label>
-        <form class="wager__form" id="wager-form">
-          <input class="wager__input" id="wager-input" type="text" maxlength="34" placeholder="LOSER DOES THE DISHES" autocomplete="off" autocapitalize="characters">
-          <button class="btn btn--small" type="submit" id="btn-wager" disabled>SEND</button>
-        </form>
-        <div class="wager__shown" id="wager-shown" data-state="none">NO WAGER YET</div>
+      <div class="row row--bottom">
+        <button class="btn btn--amber btn--grow" type="button" data-action="begin-round" id="btn-begin-round" disabled>BEGIN ROUND 1</button>
+        <button class="btn btn--small btn--ghost" type="button" data-action="manual-toggle" title="Type the other phone's frame text">TYPE</button>
       </div>
-      <button class="btn btn--amber" type="button" data-action="begin-round" id="btn-begin-round" disabled>BEGIN ROUND 1</button>
+      <form class="manual" data-manual data-manual-block="handshake" hidden>
+        <input class="manual__input" type="text" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PASTE A FRAME" aria-label="Frame text">
+        <button class="btn btn--small" type="submit">DECODE</button>
+      </form>
     </section>
 
-    <!-- 4 · ROUND LOOP -->
-    <section class="screen" id="screen-round" data-route="round" hidden>
+    <!-- 4 · ROUND LOOP (fixed viewport) -->
+    <section class="screen screen--match" id="screen-round" data-route="round" hidden>
       <div class="round-head">
-        <h2 class="stencil h2" id="round-title">SALVO 1</h2>
-        <div class="wager-strip" id="wager-round">NO WAGER</div>
+        <h2 class="stencil h2 h2--left" id="round-title">SALVO 1</h2>
         <div class="tabs" role="tablist">
           <button class="tab" type="button" role="tab" data-phase="target" aria-selected="true">TARGET</button>
           <button class="tab" type="button" role="tab" data-phase="exchange">EXCHANGE</button>
@@ -133,133 +142,160 @@
 
       <div class="phase" data-phase-panel="target">
         <p class="hint" id="target-hint">PICK 3 TARGETS</p>
-        <div class="board-wrap">
+        <div class="board-wrap board-wrap--target">
           <div class="board board--enemy" id="board-enemy" role="grid" aria-label="Enemy waters, 7 by 7"></div>
         </div>
-        <div class="picks" id="picks">— — —</div>
-        <button class="btn btn--amber" type="button" data-action="fire" id="btn-fire" disabled>FIRE → EXCHANGE</button>
-        <p class="hint hint--small">YOUR FLEET · DAMAGE</p>
-        <div class="board-wrap board-wrap--small">
-          <div class="board board--mine" id="board-own-target" role="grid" aria-label="Your fleet with damage"></div>
+        <div class="row row--fire">
+          <div class="picks" id="picks">— — —</div>
+          <button class="btn btn--amber btn--half" type="button" data-action="fire" id="btn-fire" disabled>FIRE</button>
+        </div>
+        <div class="fleetline">
+          <div class="board board--mini board--mine" id="board-own-target" role="grid" aria-label="Your fleet with damage"></div>
+          <div class="fleet" id="fleet-target" aria-label="Fleet status"></div>
         </div>
       </div>
 
       <div class="phase" data-phase-panel="exchange" hidden>
-        <div class="lamp" id="lamp-round">
-          <div class="lamp__qr" id="qr-round" aria-label="Your salvo frame"></div>
-          <div class="lamp__caption" id="caption-round">SALVO · ROUND 1</div>
-          <div class="lamp__hint">BRIGHTNESS UP · HOLD STEADY · HOLD UNTIL BOTH PHONES CHIME</div>
+        <div class="carrier carrier--qr" data-transport="qr">
+          <div class="lamp" id="lamp-round">
+            <div class="lamp__qr" id="qr-round" aria-label="Your salvo frame"></div>
+            <div class="lamp__caption" id="caption-round">SALVO · ROUND 1</div>
+            <div class="lamp__hint">BRIGHTNESS UP · HOLD STEADY</div>
+          </div>
+          <div class="scan" data-scan="round">
+            <div class="scan__row">
+              <video class="scan__video" playsinline muted hidden></video>
+              <div class="scan__status" data-scan-status>SCANNER IDLE</div>
+            </div>
+            <div class="row">
+              <button class="btn btn--half btn--amber" type="button" data-action="scan-toggle">SCAN</button>
+              <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
+            </div>
+          </div>
         </div>
-        <div class="sonar-row" data-sonar="round" data-needs-sound>
-          <div class="sonar-row__head"><span class="sonar-row__title">SONAR · CHIRP</span><span class="sonar-row__sub">COMPANION TO THE LAMP · THE QR IS THE TRUTH</span></div>
+
+        <div class="carrier sonar-row" data-transport="chirp" data-sonar="round" data-needs-sound>
+          <div class="sonar-row__head"><span class="sonar-row__title">SONAR · CHIRP</span><span class="sonar-row__status" data-sonar-status>SONAR IDLE</span></div>
+          <div class="sonar-row__frame" data-frame-text>—</div>
           <div class="sweep" aria-hidden="true"><div class="sweep__disc"></div><div class="sweep__arm"></div><div class="sweep__blip"></div></div>
-          <div class="sonar-row__status" data-sonar-status>SONAR IDLE</div>
           <div class="sonar-row__heard" data-sonar-heard data-state="none">NOTHING HEARD YET</div>
           <div class="row">
-            <button class="btn btn--half" type="button" data-action="chirp" title="Send the frame on the lamp as sound">CHIRP</button>
-            <button class="btn btn--half btn--ghost" type="button" data-action="listen" title="Open the microphone and listen for a chirp">LISTEN</button>
+            <button class="btn btn--half btn--amber" type="button" data-action="chirp" title="Send the frame as sound">CHIRP</button>
+            <button class="btn btn--half btn--ghost" type="button" data-action="listen" title="Open or close the microphone">LISTEN</button>
           </div>
         </div>
-        <div class="scan" data-scan="round">
-          <video class="scan__video" playsinline muted hidden></video>
-          <div class="scan__status" data-scan-status>SCANNER IDLE</div>
-          <div class="row">
-            <button class="btn btn--half" type="button" data-action="scan-toggle">SCAN</button>
-            <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
-            <button class="btn btn--half btn--ghost" type="button" data-action="manual-toggle">TYPE</button>
-          </div>
-          <form class="manual" data-manual hidden>
-            <input class="manual__input" type="text" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PASTE A FRAME" aria-label="Frame text">
-            <button class="btn btn--small" type="submit">DECODE</button>
-          </form>
-        </div>
+
         <div class="contact" id="contact-round" data-state="waiting">WAITING FOR CONTACT…</div>
-        <div class="row">
-          <button class="btn btn--half btn--ghost" type="button" data-action="resend-last" id="btn-resend" title="Show the previous step's frame again for a phone that is behind">RESEND LAST</button>
+        <div class="row row--bottom">
+          <button class="btn btn--half btn--ghost" type="button" data-action="resend-last" id="btn-resend" title="Show the previous step's frame again for a phone that is behind">RESEND</button>
           <button class="btn btn--half btn--amber" type="button" data-action="reveal" id="btn-reveal" disabled>REVEAL →</button>
+          <button class="btn btn--small btn--ghost" type="button" data-action="manual-toggle" title="Type the other phone's frame text">TYPE</button>
         </div>
       </div>
 
       <div class="phase" data-phase-panel="reveal" hidden>
-        <div class="banner" id="banner" hidden></div>
         <p class="hint hint--small">YOUR SHELLS · ENEMY WATERS</p>
-        <div class="board-wrap board-wrap--small">
+        <div class="board-wrap board-wrap--reveal">
           <div class="board board--enemy" id="board-reveal-enemy" role="grid" aria-label="Your shots on the enemy"></div>
+          <div class="banner" id="banner" hidden></div>
         </div>
-        <p class="hint hint--small">INCOMING · YOUR FLEET</p>
-        <div class="board-wrap board-wrap--small">
-          <div class="board board--mine" id="board-reveal-own" role="grid" aria-label="Enemy shots on your fleet"></div>
+        <div class="fleetline fleetline--reveal">
+          <div class="board board--mini board--mine" id="board-reveal-own" role="grid" aria-label="Enemy shots on your fleet"></div>
+          <div class="fleetline__col">
+            <div class="fleet" id="fleet-reveal" aria-label="Fleet status"></div>
+            <div class="reveal" id="reveal-log">
+              <div class="reveal__line muted">No frame received this round.</div>
+            </div>
+          </div>
         </div>
-        <div class="reveal" id="reveal-log">
-          <div class="reveal__line muted">No frame received this round.</div>
-        </div>
-        <div class="row">
+        <div class="row row--bottom">
           <button class="btn btn--half btn--amber" type="button" data-action="next-round" id="btn-next-round" disabled>NEXT ROUND</button>
           <button class="btn btn--half btn--amber" type="button" data-action="to-audit" id="btn-to-audit" hidden>TO THE AUDIT →</button>
         </div>
       </div>
+
+      <form class="manual" data-manual data-manual-block="round" hidden>
+        <input class="manual__input" type="text" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PASTE A FRAME" aria-label="Frame text">
+        <button class="btn btn--small" type="submit">DECODE</button>
+      </form>
     </section>
 
-    <!-- 5 · GAME OVER -->
-    <section class="screen" id="screen-gameover" data-route="gameover" hidden>
-      <h2 class="stencil h2" id="gameover-title">GAME OVER</h2>
-      <div class="wager-strip" id="wager-gameover">NO WAGER</div>
-      <div class="outcome" id="outcome"></div>
-      <div class="stamp-wrap">
-        <div class="boards-2">
-          <div class="boards-2__col">
-            <p class="hint hint--small">YOUR FLEET</p>
-            <div class="board board--mine" id="board-final-own" role="grid" aria-label="Your fleet, final"></div>
+    <!-- 5 · GAME OVER (fixed viewport; two stages: the reveal exchange, then the verdict) -->
+    <section class="screen screen--match" id="screen-gameover" data-route="gameover" data-stage="reveal" hidden>
+      <div class="gameover-head">
+        <h2 class="stencil h2" id="gameover-title">GAME OVER</h2>
+        <div class="outcome" id="outcome"></div>
+      </div>
+
+      <div class="stage" data-stage-panel="reveal">
+        <p class="hint" id="reveal-exchange-hint">THE REVEAL · RAISE PHONES ONCE MORE</p>
+        <div class="carrier carrier--qr" data-transport="qr">
+          <div class="lamp lamp--small" id="lamp-reveal">
+            <div class="lamp__qr" id="qr-reveal" aria-label="Your reveal frame"></div>
+            <div class="lamp__caption" id="caption-reveal">REVEAL</div>
           </div>
-          <div class="boards-2__col">
-            <p class="hint hint--small" id="final-enemy-hint">ENEMY FLEET · AWAITING REVEAL</p>
-            <div class="board board--enemy" id="board-final-enemy" role="grid" aria-label="Enemy fleet, revealed"></div>
+          <div class="scan" data-scan="gameover">
+            <div class="scan__row">
+              <video class="scan__video" playsinline muted hidden></video>
+              <div class="scan__status" data-scan-status>SCANNER IDLE</div>
+            </div>
+            <div class="row">
+              <button class="btn btn--half btn--amber" type="button" data-action="scan-toggle">SCAN</button>
+              <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
+            </div>
           </div>
         </div>
-        <div class="stamp stamp--pending" id="stamp" data-verdict="pending">
-          <div class="stamp__word" id="stamp-word">AUDIT</div>
-          <div class="stamp__sub" id="stamp-sub">AWAITING REVEAL</div>
+
+        <div class="carrier sonar-row" data-transport="chirp" data-sonar="gameover" data-needs-sound>
+          <div class="sonar-row__head"><span class="sonar-row__title">SONAR · CHIRP</span><span class="sonar-row__status" data-sonar-status>SONAR IDLE</span></div>
+          <div class="sonar-row__frame" data-frame-text>—</div>
+          <div class="sweep" aria-hidden="true"><div class="sweep__disc"></div><div class="sweep__arm"></div><div class="sweep__blip"></div></div>
+          <div class="sonar-row__heard" data-sonar-heard data-state="none">NOTHING HEARD YET</div>
+          <div class="row">
+            <button class="btn btn--half btn--amber" type="button" data-action="chirp" title="Send the frame as sound">CHIRP</button>
+            <button class="btn btn--half btn--ghost" type="button" data-action="listen" title="Open or close the microphone">LISTEN</button>
+          </div>
+        </div>
+
+        <div class="contact" id="contact-gameover" data-state="waiting">WAITING FOR THEIR REVEAL…</div>
+        <div class="row row--bottom">
+          <button class="btn btn--ghost btn--grow" type="button" data-action="claim-forfeit" id="btn-forfeit">NO REVEAL? CLAIM FORFEIT</button>
+          <button class="btn btn--small btn--ghost" type="button" data-action="manual-toggle" title="Type the other phone's frame text">TYPE</button>
         </div>
       </div>
-      <div class="tally" id="tally"></div>
-      <div class="audit-detail" id="audit-detail" hidden></div>
-      <p class="hint" id="reveal-exchange-hint">THE REVEAL · RAISE PHONES ONCE MORE</p>
-      <div class="lamp lamp--small" id="lamp-reveal">
-        <div class="lamp__qr" id="qr-reveal" aria-label="Your reveal frame"></div>
-        <div class="lamp__caption" id="caption-reveal">REVEAL</div>
-      </div>
-      <div class="scan" data-scan="gameover">
-        <video class="scan__video" playsinline muted hidden></video>
-        <div class="scan__status" data-scan-status>SCANNER IDLE</div>
-        <div class="row">
-          <button class="btn btn--half" type="button" data-action="scan-toggle">SCAN</button>
-          <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
-          <button class="btn btn--half btn--ghost" type="button" data-action="manual-toggle">TYPE</button>
+
+      <div class="stage" data-stage-panel="verdict" hidden>
+        <div class="stamp-wrap">
+          <div class="boards-2">
+            <div class="boards-2__col">
+              <p class="hint hint--small">YOUR FLEET</p>
+              <div class="board board--mine" id="board-final-own" role="grid" aria-label="Your fleet, final"></div>
+            </div>
+            <div class="boards-2__col">
+              <p class="hint hint--small" id="final-enemy-hint">ENEMY FLEET · AWAITING REVEAL</p>
+              <div class="board board--enemy" id="board-final-enemy" role="grid" aria-label="Enemy fleet, revealed"></div>
+            </div>
+          </div>
+          <div class="stamp stamp--pending" id="stamp" data-verdict="pending">
+            <div class="stamp__word" id="stamp-word">AUDIT</div>
+            <div class="stamp__sub" id="stamp-sub">AWAITING REVEAL</div>
+          </div>
         </div>
-        <form class="manual" data-manual hidden>
-          <input class="manual__input" type="text" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PASTE A FRAME" aria-label="Frame text">
-          <button class="btn btn--small" type="submit">DECODE</button>
-        </form>
-      </div>
-      <div class="sonar-row" data-sonar="gameover" data-needs-sound>
-        <div class="sonar-row__head"><span class="sonar-row__title">SONAR · CHIRP</span><span class="sonar-row__sub">COMPANION TO THE LAMP · THE QR IS THE TRUTH</span></div>
-        <div class="sweep" aria-hidden="true"><div class="sweep__disc"></div><div class="sweep__arm"></div><div class="sweep__blip"></div></div>
-        <div class="sonar-row__status" data-sonar-status>SONAR IDLE</div>
-        <div class="sonar-row__heard" data-sonar-heard data-state="none">NOTHING HEARD YET</div>
-        <div class="row">
-          <button class="btn btn--half" type="button" data-action="chirp" title="Send the frame on the lamp as sound">CHIRP</button>
-          <button class="btn btn--half btn--ghost" type="button" data-action="listen" title="Open the microphone and listen for a chirp">LISTEN</button>
+        <div class="tally" id="tally"></div>
+        <div class="audit-detail" id="audit-detail" hidden></div>
+        <div class="row row--bottom">
+          <button class="btn btn--half btn--amber" type="button" data-action="rematch">REMATCH</button>
+          <button class="btn btn--half" type="button" data-action="next-challenger">NEXT CHALLENGER</button>
         </div>
       </div>
-      <div class="contact" id="contact-gameover" data-state="waiting">WAITING FOR THEIR REVEAL…</div>
-      <button class="btn btn--ghost" type="button" data-action="claim-forfeit" id="btn-forfeit">NO REVEAL? CLAIM FORFEIT</button>
-      <div class="row">
-        <button class="btn btn--half btn--amber" type="button" data-action="rematch">REMATCH</button>
-        <button class="btn btn--half" type="button" data-action="next-challenger">NEXT CHALLENGER</button>
-      </div>
+
+      <form class="manual" data-manual data-manual-block="gameover" hidden>
+        <input class="manual__input" type="text" inputmode="latin" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PASTE A FRAME" aria-label="Frame text">
+        <button class="btn btn--small" type="submit">DECODE</button>
+      </form>
     </section>
 
-    <!-- 6 · SEALED ORDERS -->
+    <!-- 6 · SEALED ORDERS (may scroll; untouched by Thursday except the shared scan block markup) -->
     <section class="screen" id="screen-sealed" data-route="sealed" hidden>
       <h2 class="stencil h2">SEALED ORDERS</h2>
       <p class="hint">ONE QR · PHONE TO PHONE · KEPT ON THIS PHONE</p>
@@ -317,7 +353,7 @@
 
       <div class="orders-view" data-orders-view="scan" hidden>
         <p class="hint">SCAN THE OTHER PHONE'S CARD · IT IS KEPT ON THIS ONE</p>
-        <div class="scan" data-scan="sealed">
+        <div class="scan scan--card" data-scan="sealed">
           <video class="scan__video" playsinline muted hidden></video>
           <div class="scan__status" data-scan-status>SCANNER IDLE</div>
           <div class="row">
@@ -325,7 +361,7 @@
             <button class="btn btn--small btn--ghost" type="button" data-action="scan-flip" title="Front / rear camera">FLIP</button>
             <button class="btn btn--half btn--ghost" type="button" data-action="manual-toggle">TYPE</button>
           </div>
-          <form class="manual" data-manual hidden>
+          <form class="manual manual--inline" data-manual data-manual-block="sealed" hidden>
             <input class="manual__input manual__input--card" type="text" autocomplete="off" spellcheck="false" placeholder="PASTE A CARD" aria-label="Card text">
             <button class="btn btn--small" type="submit">DECODE</button>
           </form>

@@ -1,6 +1,6 @@
 {
   "name": "modem-warfare",
-  "version": "0.3.0-wed",
+  "version": "0.4.0-thu",
   "private": true,
   "description": "Modem Warfare — Radio Silence. Two phones in airplane mode fight a naval war by QR code and modem chirp. Hackyard Yard #6 (Offline).",
   "type": "module",

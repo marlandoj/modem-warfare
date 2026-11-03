@@ -28,11 +28,12 @@
       <h2>Channel log <span class="muted" id="counts">0 frames</span></h2>
       <div class="script">
         <button id="btn-script" type="button">Run scripted exchange</button>
-        <button id="btn-match" type="button">Run full match</button>
+        <button id="btn-match" type="button">Run full match (QR)</button>
+        <button id="btn-match-chirp" type="button">Run full match (chirp)</button>
         <button id="btn-cheat" type="button">Run match, B lies</button>
         <button id="btn-chirp" type="button">Run chirp loopback</button>
         <button id="btn-orders" type="button">Run Sealed Orders</button>
-        <span class="muted">exchange: handshake + one salvo both ways · match: fixed fleets, wager, salvos to the last sinking, reveal, audit, stamp · chirp: the Salute by sound alone, then ×10 salvo chirps · orders: compose, scan, keep, mark done, reload, pass it on</span>
+        <span class="muted">exchange: handshake + one salvo both ways · match (QR): fixed fleets, frames as the text the QR carries, salvos to the last sinking, reveal, audit, stamp · match (chirp): the same match with the text transport muted, every frame crossing as a chirp into the peer's capture graph · chirp: the Salute by sound alone, then ×10 salvo chirps · orders: compose, scan, keep, mark done, reload, pass it on</span>
       </div>
       <pre id="log"></pre>
     </section>
