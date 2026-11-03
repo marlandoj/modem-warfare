@@ -59,6 +59,15 @@
             <button class="seg" type="button" role="radio" data-transport-choice="qr" aria-checked="false">QR <span class="seg__sub">LAMP</span></button>
           </div>
         </div>
+        <!-- SOUNDTRACK: the score's own switch, beside the transport. SOUND stays the master:
+             with it off this block leaves the document at boot like every data-needs-sound element. -->
+        <div class="setup" id="setup-music" data-needs-sound>
+          <div class="setup__label">MUSIC <span class="setup__sub" id="music-hint">THE SCORE · SILENT UNDER EVERY CHIRP AND LISTEN</span></div>
+          <div class="segmented" role="radiogroup" aria-label="Music">
+            <button class="seg" type="button" role="radio" data-music-choice="on" aria-checked="true">ON <span class="seg__sub">SCORE</span></button>
+            <button class="seg" type="button" role="radio" data-music-choice="off" aria-checked="false">OFF <span class="seg__sub">SILENT</span></button>
+          </div>
+        </div>
       </nav>
       <div class="badge-row">
         <div class="badge" id="offline-badge" data-state="checking">

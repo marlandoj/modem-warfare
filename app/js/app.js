@@ -31,6 +31,13 @@
 //      ResizeObserver) sizes the boards, the sweep and the lamp.
 // Everything that makes sound hangs off config.SOUND (see config.js); with
 // it off the chirp carrier leaves the document and the only transport is QR.
+//
+// SOUNDTRACK: the score (music.js) follows the screens — Home plays the
+// theme, placement the chart-room march, the Salute and the rounds the
+// battle ostinato (a layer on the first hit, the lead in the final rounds),
+// the outcome a victory or defeat sting. It starts on the first gesture, is
+// a Home setting (MUSIC, on by default, under SOUND as the master), and is
+// silent to exactly zero gain under every Sonar listen window and chirp.
 import { SOUND } from './config.js';
 import {
   TYPE, SALVO_SIZE, SHIP_SIZES, BOARD, cellIndex, cellLabel, frameToText, textToFrame,
@@ -42,6 +49,7 @@ import { qrSvg } from './qr.js';
 import { Scanner } from './scanner.js';
 import * as sfx from './audio.js';
 import { sonar } from './sonar.js';
+import { music } from './music.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -49,6 +57,7 @@ const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 const params = new URLSearchParams(location.search);
 const DEV_INSTANCE = params.get('dev');
 const TRANSPORT_KEY = DEV_INSTANCE ? `mw.transport.v1.dev-${DEV_INSTANCE}` : 'mw.transport.v1';
+const MUSIC_KEY = DEV_INSTANCE ? `mw.music.v1.dev-${DEV_INSTANCE}` : 'mw.music.v1';
 
 // The reveal's pacing (Thursday: tightened). Each shell: a whump, a short
 // flight, then the impact; the next shell follows REVEAL_STEP_MS after the
@@ -157,6 +166,49 @@ function syncCarriers() {
   if (t !== TRANSPORT.CHIRP && SOUND && sonar.listening) { sonar.stop(); syncSonarUI(); }
 }
 
+// ------------------------------------------------------------- music ---
+// The Music setting (Home, beside the transport). SOUND is the master: with
+// it off the setting's block has left the document and the engine never
+// starts. The score itself follows the screens through syncMusic().
+
+function loadMusic() {
+  let stored = null;
+  try { stored = globalThis.localStorage ? localStorage.getItem(MUSIC_KEY) : null; } catch { /* storage may be unavailable */ }
+  music.setEnabled(SOUND && stored !== 'off');
+  syncMusicUI();
+}
+
+function setMusic(on, { persist = true } = {}) {
+  on = !!on && SOUND;
+  music.setEnabled(on);
+  if (persist) { try { localStorage.setItem(MUSIC_KEY, on ? 'on' : 'off'); } catch { /* fine */ } }
+  syncMusicUI();
+  dispatch('mw:music', { on });
+  return on;
+}
+
+function syncMusicUI() {
+  for (const b of $$('[data-music-choice]')) b.setAttribute('aria-checked', String((b.dataset.musicChoice === 'on') === music.enabled));
+}
+
+/** Which scene this screen wants. The outcome, once known, owns the music until Home. */
+function sceneFor(route) {
+  if (route === 'home') return 'menu';
+  if (route === 'placement') return 'placement';
+  if (state.outcome) return state.outcome.result === 'win' ? 'victory' : 'defeat';
+  return 'battle';
+}
+
+function syncMusic() {
+  music.setScene(sceneFor(routeFromHash()));
+}
+
+/** The battle heats: a layer on the first hit, the lead once three ships are down on either side. */
+function musicHeat(kind) {
+  if (kind === 'hit') music.setLayer(1);
+  if (state.sunk.filter(Boolean).length >= 3 || state.enemySunk.filter(Boolean).length >= 3) music.setLayer(2);
+}
+
 // ------------------------------------------------------------ router ---
 
 const ROUTES = ['home', 'placement', 'handshake', 'round', 'gameover'];
@@ -191,6 +243,7 @@ function showRoute(route) {
   window.scrollTo(0, 0);
   measureAvail();
   dispatch('mw:route', { route });
+  syncMusic();
   autoListen();
 }
 
@@ -780,7 +833,7 @@ async function playReveal() {
     if (!still()) return;
     sfx.whump();
     await sleep(REVEAL_FLIGHT_MS);
-    if (rec.hits[i]) { sfx.hit(); vibrate([40, 30, 80]); markCell(enemyBoard, idx, 'hit', 'cell--burn'); impact(enemyBoard, idx, 'hit'); shakeBoard(enemyBoard); shakeScreen('shake'); }
+    if (rec.hits[i]) { sfx.hit(); musicHeat('hit'); vibrate([40, 30, 80]); markCell(enemyBoard, idx, 'hit', 'cell--burn'); impact(enemyBoard, idx, 'hit'); shakeBoard(enemyBoard); shakeScreen('shake'); }
     else { sfx.splash(); markCell(enemyBoard, idx, 'miss', 'cell--splash'); impact(enemyBoard, idx, 'miss'); }
     logLine(`My shell ${i + 1} → ${cellLabel(idx)} … ${rec.hits[i] ? 'HIT' : 'splash'}`, rec.hits[i] ? 'reveal__line--hit' : '');
     await sleep(REVEAL_STEP_MS - REVEAL_FLIGHT_MS);
@@ -789,6 +842,7 @@ async function playReveal() {
     if (!still()) return;
     sfx.sunk();
     sfx.sink();
+    musicHeat('sunk');
     vibrate([300]);
     const names = rec.enemySunkNow.map((s, i) => (s ? `${SHIP_SIZES[i]}-SHIP` : null)).filter(Boolean).join(' + ');
     showBanner(`SUNK · ENEMY ${names}`);
@@ -806,7 +860,7 @@ async function playReveal() {
     sfx.whump();
     await sleep(REVEAL_FLIGHT_MS);
     if (rec.theirHits[i]) {
-      sfx.damage(); vibrate([40, 30, 80]);
+      sfx.damage(); musicHeat('hit'); vibrate([40, 30, 80]);
       markCell(ownBoard, idx, 'hit', 'cell--burn'); impact(ownBoard, idx, 'hit'); shakeBoard(ownBoard); shakeScreen('shake');
       const b = strip.querySelector(`.fleet__cell[data-cell="${idx}"]`);
       if (b) { b.classList.add('fleet__cell--hit'); const line = b.closest('.fleet__ship'); const hits = line.querySelectorAll('.fleet__cell--hit').length; line.querySelector('.fleet__state').textContent = `${hits}/${line.querySelectorAll('.fleet__cell').length} HIT`; }
@@ -818,6 +872,7 @@ async function playReveal() {
     if (!still()) return;
     sfx.sunk();
     sfx.sink();
+    musicHeat('sunk');
     vibrate([300]);
     const names = rec.mySunkNow.map((s, i) => (s ? `${SHIP_SIZES[i]}-SHIP` : null)).filter(Boolean).join(' + ');
     showBanner(`YOUR ${names} SUNK`, true);
@@ -844,6 +899,8 @@ function finishRound(rec) {
     state.gate.expectRound(state.round + 1);
     logLine(state.outcome.result === 'win' ? 'ENEMY FLEET DESTROYED — TO THE AUDIT' : state.outcome.result === 'loss' ? 'ALL HANDS LOST — TO THE AUDIT' : 'BOTH FLEETS LOST — TO THE AUDIT', 'reveal__line--sunk');
     if (state.outcome.result === 'win') sfx.victory(); else sfx.defeat();
+    // The sting follows the effect, beside it rather than over it.
+    music.setScene(state.outcome.result === 'win' ? 'victory' : 'defeat', { delay: 0.6 });
     $('#btn-next-round').hidden = true;
     $('#btn-to-audit').hidden = false;
     dispatch('mw:gameover', { outcome: state.outcome });
@@ -1050,6 +1107,7 @@ function claimForfeit() {
   state.audit = { verdict: VERDICT.FORFEIT, findings: [], checked: 0, recomputed: null };
   state.outcome = { ...state.outcome, result: 'win' };
   sfx.stamp();
+  syncMusic();
   dispatch('mw:audit', { verdict: VERDICT.FORFEIT, findings: [], checked: 0 });
   renderGameOver();
 }
@@ -1071,6 +1129,7 @@ function resetMatch({ keepRole = false } = {}) {
     }
   }
   $('#stamp').dataset.verdict = 'pending';
+  music.resetLayer(); // a new match starts cold
   syncCarriers();
   updateTopbar();
 }
@@ -1228,6 +1287,9 @@ function sonarHeard(text, res, meta) {
 
 function wireSonarBlocks() {
   if (!SOUND) return;
+  // The chirp is sacred: the score is exactly silent for every listen window
+  // and every chirp, whoever opened it (the app, LISTEN, or the dev harness).
+  sonar.onActivity = (active) => music.duck(active);
   sonar.onText = (text, meta) => {
     const res = routeText(text, { source: 'sonar', ...meta });
     sonarHeard(text, res, meta);
@@ -1301,10 +1363,13 @@ function wireManualForms() {
 function wire() {
   document.body.addEventListener('click', (e) => {
     sfx.unlock();
+    music.start(); // the first gesture starts the score; a no-op afterwards
     const goBtn = e.target.closest('[data-go]');
     if (goBtn) { go(goBtn.dataset.go); return; }
     const choice = e.target.closest('[data-transport-choice]');
     if (choice) { setTransport(choice.dataset.transportChoice); return; }
+    const musicChoice = e.target.closest('[data-music-choice]');
+    if (musicChoice) { setMusic(musicChoice.dataset.musicChoice === 'on'); return; }
     const act = e.target.closest('[data-action]');
     if (!act) return;
     switch (act.dataset.action) {
@@ -1395,6 +1460,8 @@ window.MW = {
   routeText,
   sound: SOUND,
   sonar: SOUND ? sonar : null,
+  music, // the score engine: state(), scene, layer, ducked, gain, stats
+  setMusic: (on) => setMusic(on),
   chirp: () => { const b = activeSonarBlock(); return b ? chirpCurrent(b) : Promise.resolve(null); },
   devTamper: null, // dev channel hook: (text) => text, applied to outgoing frames only
   devMuteFrames: false, // dev channel hook: true = frames do not cross the text transport (chirp gate)
@@ -1415,6 +1482,7 @@ if (!SOUND) for (const el of $$('[data-needs-sound]')) el.remove();
 // Two dev instances share one origin, so they would share one localStorage;
 // each keeps its transport under its own key, as two phones would.
 loadTransport();
+loadMusic();
 wire();
 syncCarriers();
 updateTopbar();

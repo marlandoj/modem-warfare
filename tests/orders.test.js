@@ -68,14 +68,15 @@ test('removal: the dev harness, the tools, the landing page and the manifest car
   assert.deepEqual(hits, [], 'no feature vocabulary outside app/ in code that runs or builds');
 });
 
-test('removal: the precache is the reduced 23-file list at mw-final-v1 and every entry exists', () => {
+test('removal: the precache is the reduced list (23 files, plus the score engine since SOUNDTRACK: 24 at mw-final-v2) and every entry exists', () => {
   const sw = fs.readFileSync(path.join(APP, 'sw.js'), 'utf8');
-  assert.match(sw, /const VERSION = 'mw-final-v1';/, 'cache version bumped to mw-final-v1');
+  assert.match(sw, /const VERSION = 'mw-final-v2';/, 'cache version bumped to mw-final-v2 for the score');
   const list = sw.match(/const PRECACHE = \[([\s\S]*?)\];/);
   assert.ok(list, 'PRECACHE list found');
   const entries = Array.from(list[1].matchAll(/'([^']+)'/g), (m) => m[1]);
-  console.log(`# precache: ${entries.length} entries, version mw-final-v1`);
-  assert.equal(entries.length, 23, 'the reduced precache has 23 entries');
+  console.log(`# precache: ${entries.length} entries, version mw-final-v2`);
+  assert.equal(entries.length, 24, 'the reduced precache (23) plus js/music.js: 24 entries');
+  assert.deepEqual(entries.filter((e) => !/^\.\/(js\/music\.js)$/.test(e)).length, 23, 'the only entry added since the removal is the score engine');
   assert.deepEqual(entries.filter((e) => /orders/i.test(e)), [], 'no orders entry in the precache');
   for (const e of entries) {
     if (e === './') continue;
@@ -93,14 +94,14 @@ test('removal: the shell has exactly the five match screens and no entry point t
   assert.doesNotMatch(appJs, /orders-ui|\.\/orders\.js|MW\.orders/, 'app.js imports and exposes nothing of the feature');
 });
 
-test('removal: the only storage key the shipped app names is the transport setting (the card store key is never read)', () => {
+test('removal: the only storage keys the shipped app names are the transport and music settings (the card store key is never read)', () => {
   const keys = new Set();
   for (const f of walk(path.join(APP, 'js'))) {
     const text = fs.readFileSync(f, 'utf8');
     for (const m of text.matchAll(/['"`](mw\.[a-z-]+\.v\d+[^'"`$]*)['"`$]/g)) keys.add(m[1]);
   }
   console.log('# storage keys named under app/js:', JSON.stringify([...keys]));
-  assert.deepEqual([...keys].sort(), ['mw.transport.v1', 'mw.transport.v1.dev-'], 'only the transport key (and its dev-instance form)');
+  assert.deepEqual([...keys].sort(), ['mw.music.v1', 'mw.music.v1.dev-', 'mw.transport.v1', 'mw.transport.v1.dev-'], 'only the two Home settings (and their dev-instance forms)');
   assert.ok(![...keys].some((k) => /orders/i.test(k)), 'mw.orders.v1 is not named: cards a phone kept are simply never read again');
 });
 

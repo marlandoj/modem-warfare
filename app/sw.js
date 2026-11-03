@@ -15,11 +15,14 @@
  *    a per-URL answer; the Home badge is driven by that, not by a flag.
  *  - Final: the list is 23 files; the version is bumped because the shell,
  *    the stylesheet and the controller changed and two modules left the list.
+ *  - SOUNDTRACK: the score is code (js/music.js) and joins the list as code;
+ *    24 files, version mw-final-v2. No audio file is cached, because none
+ *    exists.
  *
  * Bump VERSION whenever any precached file changes, so old caches are dropped.
  */
 
-const VERSION = 'mw-final-v1';
+const VERSION = 'mw-final-v2';
 const CACHE = `modem-warfare-${VERSION}`;
 
 const PRECACHE = [
@@ -34,6 +37,7 @@ const PRECACHE = [
   './js/sha256.js',
   './js/audit.js',
   './js/audio.js',
+  './js/music.js',
   './js/sonar.js',
   './js/sonar-worklet.js',
   './js/qr.js',

@@ -1,0 +1,344 @@
+browser gates: 12 suites in 4 lanes
+
+=== shell: five screens, offline badge, QR versions, one round by TYPE ===
+badge: OFFLINE READY ✓ 24/24 CACHED
+transport default: {"transport":"chirp","checked":"chirp","join":"LISTEN"}
+reroll changed fleet: true
+handshake QR: version 3 text CHZXGBKAAD777QAQCBIOI4ZVUMJUC6EDWGLX5IYCWYRXY commit 50e47335a313417883b1977ea302b623
+handshake frame: HANDSHAKE s=f3730540 r=0 · commit 50e47335… · by qr
+salvo QR: version 2 text CLZXGBKAAECIYAAAAB3A
+contact: CONTACT ✓ ROUND 1 · BOTH PHONES SHOW CONTACT · THEN REVEAL
+reveal played in 1826 ms: My shell 1 → B1 … HITMy shell 2 → B2 … HITMy shell 3 → G7 … splashIncoming shell 1 → A1 … splashIncoming shell 2 → B2 … splashIncoming shell 3 → C3 … HIT on my fleet
+reveal QR: version 3
+shell: PASS (screenshots in test-output/)
+
+=== qr: encode -> pixels -> decode round-trip ===
+decoder in this browser: zxing-wasm
+  handshake: QR v3-M (29x29) text=CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME
+    decoded in 41 ms -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME | skewed copy -> CGQ3FQ6UAD777QAACAFTAVL2T7COSDRTLB62FR7MCE3ME
+    frame: HANDSHAKE s=a1b2c3d4 r=0 · commit 0b30557a… · by chirp
+  salvo: QR v2-M (25x25) text=CKQ3FQ6UAROLYLACABKA
+    decoded in 2 ms -> CKQ3FQ6UAROLYLACABKA | skewed copy -> CKQ3FQ6UAROLYLACABKA
+    frame: SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT · sunk 3
+  reveal: QR v3-M (29x29) text=COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ
+    decoded in 6 ms -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ | skewed copy -> COQ3FQ6UBP777QALCQDZCXAA77ZOLWGLX2Y2JF4KPVYGGVSJHQQQ
+    frame: REVEAL s=a1b2c3d4 r=11 · sunk 4,3,2 · fleet A2h G3v C6h E1v
+qr: PASS
+
+=== offline: cold launch from precache with the network gone ===
+phase 1 (online install): OFFLINE READY ✓ 24/24 CACHED version mw-final-v2 missing []
+phase 2: server stopped (connection refused), relaunching the same profile with offline emulation
+cold launch: navigator.onLine = false | title = Modem Warfare — Radio Silence | badge = OFFLINE READY ✓ 24/24 CACHED
+offline decoder warm-up: zxing-wasm
+offline ggwave load: function
+responses: 17, from service worker: 17
+  SW  200 /app/
+  SW  200 /app/css/app.css
+  SW  200 /app/vendor/qrcode-generator.js
+  SW  200 /app/js/app.js
+  SW  200 /app/js/config.js
+  SW  200 /app/js/audit.js
+  SW  200 /app/js/fleet.js
+  SW  200 /app/js/qr.js
+  SW  200 /app/js/frame.js
+  SW  200 /app/js/scanner.js
+  SW  200 /app/js/audio.js
+  SW  200 /app/js/sonar.js
+  SW  200 /app/js/music.js
+  SW  200 /app/js/sha256.js
+  SW  200 /app/vendor/zxing/zxing-reader.js
+  SW  200 /app/vendor/zxing/zxing_reader.wasm
+  SW  200 /app/vendor/ggwave/ggwave.js
+offline: PASS
+
+=== harness: handshake + salvo over BroadcastChannel ===
+session: 1ab395dc
+A received: SALVO s=1ab395dc r=1 · salvo A1 B2 C3 · results miss/miss/miss
+B received: SALVO s=1ab395dc r=1 · salvo C4 E2 G7 · results miss/miss/miss
+A gate log: [{"status":"accepted","reason":"HANDSHAKE","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"}]
+B gate log: [{"status":"accepted","reason":"HANDSHAKE","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":0,"type":"HANDSHAKE"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"accepted","reason":"SALVO","round":1,"type":"SALVO"},{"status":"duplicate","reason":"IDENTICAL_FRAME","round":1,"type":"SALVO"}]
+channel log:
+  03:08:43.862 B online
+  03:08:43.864 A online
+  03:08:43.971 script: transport QR on both · A NEW MATCH, B JOIN MATCH, both LOCK
+  03:08:44.134 A · transport {"transport":"qr","source":"setting"}
+  03:08:44.135 B · transport {"transport":"qr","source":"setting"}
+  03:08:44.250 A → HANDSHAKE · ROUND 0 CENLHFO4AD777QAQCCOFPNSHVAWFHRPBVEHNBHE6MP3SG
+  03:08:44.284 B ← ACCEPTED HANDSHAKE HANDSHAKE s=1ab395dc r=0 · commit 9c57b647… · by qr
+  03:08:44.286 B → HANDSHAKE · ROUND 0 CENLHFO4AD777QAQCAYS7HEVYDEQNQK3IGXGURTNZKXVM
+  03:08:44.292 B → replay CENLHFO4AD777QAQCAYS7HEVYDEQNQK3IGXGURTNZKXVM
+  03:08:44.298 A ← ACCEPTED HANDSHAKE HANDSHAKE s=1ab395dc r=0 · commit 312f9c95… · by qr
+  03:08:44.300 A → HANDSHAKE · ROUND 0 CENLHFO4AD777QAQCCOFPNSHVAWFHRPBVEHNBHE6MP3SG
+  03:08:44.303 A → replay CENLHFO4AD777QAQCCOFPNSHVAWFHRPBVEHNBHE6MP3SG
+  03:08:44.305 A ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=1ab395dc r=0 · commit 312f9c95… · by qr
+  03:08:44.306 B ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=1ab395dc r=0 · commit 9c57b647… · by qr
+  03:08:44.306 B → replay CENLHFO4AD777QAQCAYS7HEVYDEQNQK3IGXGURTNZKXVM
+  03:08:44.308 B ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=1ab395dc r=0 · commit 9c57b647… · by qr
+  03:08:44.313 A ← DUPLICATE IDENTICAL_FRAME HANDSHAKE s=1ab395dc r=0 · commit 312f9c95… · by qr
+  03:08:44.318 handshake converged: session 1ab395dc
+  03:08:45.323 idle on handshake for 600 ms: 0 further gate events
+  03:08:45.455 A · fire {"round":1,"picks":[23,11,48]}
+  03:08:45.456 A → SALVO · ROUND 1 CINLHFO4AFOLYAAAACKA
+  03:08:45.465 B · fire {"round":1,"picks":[0,8,16]}
+  03:08:45.466 B → SALVO · ROUND 1 CINLHFO4AEAIIAAAADQQ
+  03:08:45.490 B ← ACCEPTED SALVO SALVO s=1ab395dc r=1 · salvo C4 E2 G7
+  03:08:45.499 B → SALVO · ROUND 1 CINLHFO4AEAIIBAAABFA
+  03:08:45.502 B → replay CINLHFO4AEAIIBAAABFA
+  03:08:45.503 A ← ACCEPTED SALVO SALVO s=1ab395dc r=1 · salvo A1 B2 C3
+  03:08:45.503 A → SALVO · ROUND 1 CINLHFO4AFOLYBAAAA7Q
+  03:08:45.512 A → replay CINLHFO4AFOLYBAAAA7Q
+  03:08:45.513 salvo converged: A got "SALVO s=1ab395dc r=1 · salvo A1 B2 C3 · results miss/miss/miss", B got "SALVO s=1ab395dc r=1 · salvo C4 E2 G7 · results miss/miss/miss"
+  03:08:45.528 A ← ACCEPTED SALVO SALVO s=1ab395dc r=1 · salvo A1 B2 C3 · results miss/miss/miss
+  03:08:45.528 A → SALVO · ROUND 1 · RESULTS IN CINLHFO4AFOLYBAAAA7Q
+  03:08:45.529 A → replay CINLHFO4AFOLYBAAAA7Q
+  03:08:45.530 A ← DUPLICATE IDENTICAL_FRAME SALVO s=1ab395dc r=1 · salvo A1 B2 C3 · results miss/miss/miss
+  03:08:45.530 B ← ACCEPTED SALVO SALVO s=1ab395dc r=1 · salvo C4 E2 G7 · results miss/miss/miss
+  03:08:45.531 B → SALVO · ROUND 1 · RESULTS IN CINLHFO4AEAIIBAAABFA
+  03:08:45.532 B → replay CINLHFO4AEAIIBAAABFA
+  03:08:45.532 B ← DUPLICATE IDENTICAL_FRAME SALVO s=1ab395dc r=1 · salvo C4 E2 G7 · results miss/miss/miss
+  03:08:45.536 B ← DUPLICATE IDENTICAL_FRAME SALVO s=1ab395dc r=1 · salvo C4 E2 G7 · results miss/miss/miss
+  03:08:45.537 B → replay CINLHFO4AEAIIBAAABFA
+  03:08:45.539 B ← DUPLICATE IDENTICAL_FRAME SALVO s=1ab395dc r=1 · salvo C4 E2 G7 · results miss/miss/miss
+harness: PASS
+
+=== orders: removed — no entry point, no screen, no module, the old store key never read ===
+home: {"screen":"home","badge":"OFFLINE READY ✓ 24/24 CACHED","version":"mw-final-v2","routes":["home","placement","handshake","round","gameover"],"buttons":["NEW MATCH","JOIN MATCH LISTEN","CHIRP SONAR","QR LAMP","ON SCORE","OFF SILENT"]}
+document scan: text hits [] attribute hits []
+old route #/sealed: {"screen":"home","title":"MODEM WARFARE","visible":["home"],"sealedEl":false}
+server status for the old modules: {"orders.js":404,"orders-ui.js":404}
+caches: {"names":["modem-warfare-mw-final-v2"],"count":24,"cachedOrders":[],"loadedOrders":[]}
+stale card scan: {"status":"rejected","reason":"BAD_BASE32","screen":"handshake","contact":"rejected"}
+storage keys touched by the app: ["getItem:mw.transport.v1","getItem:mw.music.v1","setItem:mw.transport.v1"]
+localStorage keys now: ["mw.transport.v1","mw.orders.v1"]
+orders: PASS (removed — five screens, no entry point, no module served or cached, old route falls back to Home, stale card rejected, mw.orders.v1 never read)
+
+=== match: full match over the harness, then three cheats ===
+clean match: 6 rounds in 15.3 s, session af3f156c
+  round 1: A B1 B2 A5 → HIT/HIT/miss sunk=0000 | B A2 E5 A4 → HIT/miss/miss sunk=0000
+  round 2: A B3 B4 C3 → HIT/HIT/miss sunk=1000 | B B2 A7 D3 → HIT/miss/miss sunk=0000
+  round 3: A D5 E5 F4 → HIT/HIT/miss sunk=1000 | B C2 B4 A6 → HIT/miss/miss sunk=0000
+  round 4: A F5 F1 G7 → HIT/HIT/miss sunk=1100 | B D2 G6 B6 → HIT/miss/miss sunk=1000
+  round 5: A G1 A7 G5 → HIT/HIT/miss sunk=1110 | B G3 C1 B5 → HIT/miss/miss sunk=1000
+  round 6: A B7 D4 G6 → HIT/miss/miss sunk=1111 | B G4 B7 C3 → HIT/miss/miss sunk=1000
+transport: {"a":"qr","b":"qr"}
+outcome: {"a":{"result":"win","finalRound":6},"b":{"result":"loss","finalRound":6}}
+audit: {"a":{"verdict":"VERIFIED","findings":[],"checked":43},"b":{"verdict":"VERIFIED","findings":[],"checked":43}}
+stamps: {"a":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"},"b":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"}}
+commitments: {"aOfB":"d7a607346f25803f8f3ec6f4836de03e","bActual":"d7a607346f25803f8f3ec6f4836de03e","bOfA":"eeb62b32c86440d8d2ae46bd448af918","aActual":"eeb62b32c86440d8d2ae46bd448af918"}
+gate tallies: {"a":{"accepted":14,"duplicate":26,"rejected":0,"rejectedReasons":{}},"b":{"accepted":14,"duplicate":26,"rejected":0,"rejectedReasons":{}}}
+cheat result: 6 rounds; A audit LIAR [{"round":2,"code":"FALSE_RESULT","detail":"B3 reported miss, revealed fleet says HIT"}]; B audit VERIFIED
+stamps: {"a":{"word":"LIAR","sub":"FALSE RESULT · ROUND 2","verdict":"liar","stage":"verdict"},"b":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"}}
+cheat fleet: A audit LIAR [{"round":0,"code":"COMMIT_MISMATCH","detail":"revealed fleet + salt do not hash to the commitment fixed at LOCK"},{"round":5,"code":"FALSE_RESULT","detail":"A7 reported HIT, revealed fleet says miss"}]; B audit VERIFIED
+cheat salt: A audit LIAR [{"round":0,"code":"COMMIT_MISMATCH","detail":"revealed fleet + salt do not hash to the commitment fixed at LOCK"}]; B audit VERIFIED
+match: PASS (clean VERIFIED both ways; false result, moved fleet, wrong salt each LIAR)
+
+=== spike: ggwave loopback ×10 ===
+env: ggwave ready · AudioContext 48000 Hz · Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36
+frame text: CKQ3FQ6UAROLYLAAAB7A | airtime: 2.09 s at 48000 Hz (AUDIBLE_FAST)
+mic settings: {"autoGainControl":false,"channelCount":2,"deviceId":"default","echoCancellation":false,"groupId":"0366c556af9befd0cc36937bff5c0a7a5039f3ce98327e2307c2f0a68cd5b324","latency":0.01,"noiseSuppression":false,"sampleRate":44100,"sampleSize":16,"voiceIsolation":false}
+mic log:
+  03:08:09.712 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  03:08:09.715 mic closed
+  03:08:09.730 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
+  03:08:11.822 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+WebAudio MediaStream loopback: {"a":10,"d":10}
+direct buffer: {"a":10,"d":10}
+spike log:
+  03:08:09.712 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  03:08:09.715 mic closed
+  03:08:09.730 transmit CKQ3FQ6UAROLYLAAAB7A (2.09 s)
+  03:08:11.822 mic opened: {"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"sampleRate":44100}
+  03:08:11.823 mic closed
+  03:08:11.831 WebAudio MediaStream loopback ×10 (no microphone)
+  03:08:13.740 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:15.887 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:18.043 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:20.159 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:22.264 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:24.462 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:26.602 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:28.722 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:30.869 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:32.977 [webaudio] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:33.188 direct buffer ×10
+  03:08:33.239 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:33.305 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:33.352 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:33.389 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:33.427 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:33.464 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:33.503 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:33.544 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:33.600 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+  03:08:33.661 [direct] decoded "CKQ3FQ6UAROLYLAAAB7A" → SALVO s=a1b2c3d4 r=4 · salvo C4 E2 G7 · results HIT/miss/HIT ✓
+spike: PASS (webaudio 10/10, direct 10/10; acoustic path NOT tested here)
+
+=== sonar: ggwave under the shell CSP, AudioWorklet capture, chirp round-trip ×10 ===
+LISTEN (auto): {"capture":"worklet","mic":{"autoGainControl":false,"channelCount":2,"deviceId":"default","echoCancellation":false,"groupId":"5196067b5f2e372923839e9943ab4051804f1b92d60d7e1dc446530e39e825ad","latency":0.01,"noiseSuppression":false,"sampleRate":44100,"sampleSize":16,"voiceIsolation":false},"status":"LISTENING · WORKLET · EC=OFF NS=OFF AGC=OFF","button":"STOP","sweeping":true,"auto":true,"sampleRate":1024}
+CHIRP from the handshake screen: {"before":true,"result":{"text":"CHOUZECEAD777QAACDYJKWDBQNLTSAAC527HAMLQ6OOPY","seconds":3.498666666666667,"samples":167936,"sampleRate":48000},"afterListening":true,"stats":{"chirps":1,"decodes":0,"listens":2,"chunks":1},"rate":48000}
+capture mode: worklet | sample rate: 48000
+handshake A→B by chirp: {"sent":"CG4AMUKTAD777QAACCEE7DAH7D5G3TYSNYG7J2RY4RQWC","heard":"CG4AMUKTAD777QAACCEE7DAH7D5G3TYSNYG7J2RY4RQWC","identical":true,"status":"accepted","airtimeSeconds":3.498666666666667,"ms":3570,"sampleRate":48000,"capture":"worklet"}
+handshake B→A by chirp: {"sent":"CG4AMUKTAD777QAACCPJKKLWU2TNWPNJTY33ZYCFSYSRI","heard":"CG4AMUKTAD777QAACCPJKKLWU2TNWPNJTY33ZYCFSYSRI","identical":true,"status":"accepted","airtimeSeconds":3.498666666666667,"ms":3546}
+salvo chirps: 10/10 decoded, 10 identical, airtime 2.09 s, latencies ms [2133,2248,2153,2214,2185,2164,2143,2130,2120,2114]
+B holds: SALVO s=b8065153 r=1 · salvo C4 E2 G7 | gates: {"a":{"accepted":1,"duplicate":0,"rejected":0,"rejectedReasons":{}},"b":{"accepted":2,"duplicate":9,"rejected":0,"rejectedReasons":{}}}
+channel log (tail):
+  03:08:17.761 chirp 8/10: identical · gate duplicate IDENTICAL_FRAME · 2130 ms
+  03:08:17.762 A · chirped {"text":"CK4AMUKTAFOLYAAAACIQ","seconds":2.0906666666666665,"sampleRate":48000}
+  03:08:17.764 B · chirp-played {"text":"CK4AMUKTAFOLYAAAACIQ","seconds":2.0906666666666665}
+  03:08:17.941 A ♪ chirp CK4AMUKTAFOLYAAAACIQ (2.09 s at 48000 Hz, 100352 samples)
+  03:08:19.854 B ← DUPLICATE IDENTICAL_FRAME SALVO s=b8065153 r=1 · salvo C4 E2 G7
+  03:08:19.855 B · sonar {"text":"CK4AMUKTAFOLYAAAACIQ","status":"duplicate","reason":"IDENTICAL_FRAME","capture":"worklet","loopback":true}
+  03:08:20.032 chirp 9/10: identical · gate duplicate IDENTICAL_FRAME · 2120 ms
+  03:08:20.034 A · chirped {"text":"CK4AMUKTAFOLYAAAACIQ","seconds":2.0906666666666665,"sampleRate":48000}
+  03:08:20.054 B · chirp-played {"text":"CK4AMUKTAFOLYAAAACIQ","seconds":2.0906666666666665}
+  03:08:20.204 A ♪ chirp CK4AMUKTAFOLYAAAACIQ (2.09 s at 48000 Hz, 100352 samples)
+  03:08:22.112 B ← DUPLICATE IDENTICAL_FRAME SALVO s=b8065153 r=1 · salvo C4 E2 G7
+  03:08:22.113 B · sonar {"text":"CK4AMUKTAFOLYAAAACIQ","status":"duplicate","reason":"IDENTICAL_FRAME","capture":"worklet","loopback":true}
+  03:08:22.298 chirp 10/10: identical · gate duplicate IDENTICAL_FRAME · 2114 ms
+  03:08:22.301 A · chirped {"text":"CK4AMUKTAFOLYAAAACIQ","seconds":2.0906666666666665,"sampleRate":48000}
+  03:08:22.302 B · chirp-played {"text":"CK4AMUKTAFOLYAAAACIQ","seconds":2.0906666666666665}
+  03:08:22.450 chirp: salvo ×10: 10 decoded, 10 identical · B holds "SALVO s=b8065153 r=1 · salvo C4 E2 G7" · B gate {"accepted":2,"duplicate":9,"rejected":0,"rejectedReasons":{}}
+sonar: PASS (worklet capture; handshakes by chirp both ways; salvo 10/10 identical; acoustic path NOT tested here)
+
+=== soundflag: match with SOUND = false, no sound affordance rendered ===
+match with SOUND=false: 6 rounds in 15.9 s, outcome {"a":{"result":"win","finalRound":6},"b":{"result":"loss","finalRound":6}}
+stamps: {"a":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"},"b":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"}}
+instance A: data-needs-sound=0 sonar rows=0 chirp/listen buttons=0 AudioContexts=0 ggwave=undefined
+instance A: music setting elements=0 engine enabled=false started=false nodes=0 notes=0
+instance B: data-needs-sound=0 sonar rows=0 chirp/listen buttons=0 AudioContexts=0 ggwave=undefined
+instance B: music setting elements=0 engine enabled=false started=false nodes=0 notes=0
+exchange panel with SOUND=false: SALVO · ROUND 1 · QR v2-M · CKQN55TPAECIYAAAAAXQ BRIGHTNESS UP · HOLD STEADY SCANNER IDLE SCAN FLIP WAITING FOR CONTACT… RESEND REVEAL → TYPE
+soundflag: PASS (SOUND=false: VERIFIED both ways, zero sound affordances, zero AudioContexts)
+
+=== transport: pre-game setting, carried by the handshake, one carrier per match; no wager ===
+fresh phone: {"transport":"chirp","source":"default","stored":null,"checked":"chirp","choices":["chirp","qr"],"onHome":true,"onMatchScreens":0,"join":"LISTEN","body":"chirp"}
+after choosing QR and reloading: {"transport":"qr","source":"stored","stored":"qr"}
+chirp mode: HANDSHAKE s=bb6f8206 r=0 · commit d6a95414… · by chirp | handshake {"route":"handshake","phase":"target","qr":0,"chirp":1,"scanButtons":0,"chirpButtons":2,"qrSvg":0,"choices":0,"frameText":"HANDSHAKE · ROUND 0 · CG5W7AQGAD777QAACDLKSVAU6BS275TTZ62JT6LNTWOEC","visibleText":"THE SALUTE | PHONES FLAT · THE GUEST LISTENS · CHIRP · THEN YOU LISTEN | MY COMMITMENT · d6a95414f065aff673cfb499f96d9d9c · FIXED AT LOCK | SONAR · CHIRP | OPENING MIC… | HANDSHAKE · ROUND 0 · CG5W7AQGAD777QAACDLKSVAU6BS275TTZ62JT6LNTWOEC | NOTHING HEARD YET | CHIRP | LISTEN | WAITING FOR CONTACT… | BEGIN ROUND 1 | TYPE"} | exchange {"route":"round","phase":"exchange","qr":0,"chirp":1,"scanButtons":0,"chirpButtons":2,"qrSvg":0,"choices":0,"frameText":"SALVO · ROUND 1 · CK5W7AQGAECIYAAAACIQ","visibleText":"SALVO 1 | TARGET | EXCHANGE | REVEAL | SONAR · CHIRP | LISTENING · WORKLET · EC=OFF NS=OFF AGC=OFF | SALVO · ROUND 1 · CK5W7AQGAECIYAAAACIQ | NOTHING HEARD YET | CHIRP | STOP | WAITING FOR CONTACT… | RESEND | REVEAL → | TYPE"}
+qr mode: HANDSHAKE s=bd8f0244 r=0 · commit 2e160ad4… · by qr | handshake {"route":"handshake","phase":"target","qr":1,"chirp":0,"scanButtons":2,"chirpButtons":0,"qrSvg":1,"choices":0,"frameText":"HANDSHAKE · ROUND 0 · CG6Y6ASEAD777QAQCAXBMCWUAIAVRLA5HIVLZHN5U5WUK","visibleText":"THE SALUTE | RAISE PHONES FACE TO FACE · 20 CM | MY COMMITMENT · 2e160ad4020158ac1d3a2abc9dbda76d · FIXED AT LOCK | HANDSHAKE · ROUND 0 · QR v3-M · CG6Y6ASEAD777QAQCAXBMCWUAIAVRLA5HIVLZHN5U5WUK | SCANNER IDLE | SCAN | FLIP | WAITING FOR CONTACT… | BEGIN ROUND 1 | TYPE"} | exchange {"route":"round","phase":"exchange","qr":1,"chirp":0,"scanButtons":2,"chirpButtons":0,"qrSvg":1,"choices":0,"frameText":"SALVO · ROUND 1 · CK6Y6ASEAECIYAAAACDA","visibleText":"SALVO 1 | TARGET | EXCHANGE | REVEAL | SALVO · ROUND 1 · QR v2-M · CK6Y6ASEAECIYAAAACDA | BRIGHTNESS UP · HOLD STEADY | SCANNER IDLE | SCAN | FLIP | WAITING FOR CONTACT… | RESEND | REVEAL → | TYPE"}
+adoption (qr host, chirp joiner): {"before":{"a":"qr","b":"chirp","aChecked":"qr","bChecked":"chirp"},"after":{"a":"qr","b":"qr","source":{"a":"setting","b":"handshake"}},"hostFrame":"qr","joinerFrame":"qr","presented":{"a":{"screen":"handshake","qr":1,"chirp":0,"scanButtons":1,"chirpButtons":0,"qrSvg":1},"b":{"screen":"handshake","qr":1,"chirp":0,"scanButtons":1,"chirpButtons":0,"qrSvg":1}}}
+adoption (chirp host, qr joiner): {"before":{"a":"chirp","b":"qr","aChecked":"chirp","bChecked":"qr"},"after":{"a":"chirp","b":"chirp","source":{"a":"setting","b":"handshake"}},"hostFrame":"chirp","joinerFrame":"chirp","presented":{"a":{"screen":"handshake","qr":0,"chirp":1,"scanButtons":0,"chirpButtons":2,"qrSvg":0},"b":{"screen":"handshake","qr":0,"chirp":1,"scanButtons":0,"chirpButtons":2,"qrSvg":0}}}
+chirp match: 6 rounds in 46.7 s, session 11dc2a4e
+  round 1: A B1 B2 A5 → HIT/HIT/miss sunk=0000 | B A2 E5 A4 → HIT/miss/miss sunk=0000
+  round 2: A B3 B4 C3 → HIT/HIT/miss sunk=1000 | B B2 A7 D3 → HIT/miss/miss sunk=0000
+  round 3: A D5 E5 F4 → HIT/HIT/miss sunk=1000 | B C2 B4 A6 → HIT/miss/miss sunk=0000
+  round 4: A F5 F1 G7 → HIT/HIT/miss sunk=1100 | B D2 G6 B6 → HIT/miss/miss sunk=1000
+  round 5: A G1 A7 G5 → HIT/HIT/miss sunk=1110 | B G3 C1 B5 → HIT/miss/miss sunk=1000
+  round 6: A B7 D4 G6 → HIT/miss/miss sunk=1111 | B G4 B7 C3 → HIT/miss/miss sunk=1000
+transport: {"a":"chirp","b":"chirp"}
+sonar: {"chirps":28,"resends":0,"airtimeSeconds":57.9,"decodes":{"a":14,"b":14},"chirpsSent":{"a":14,"b":14},"textFramesSeen":{"a":0,"b":0},"sonarFramesSeen":{"a":14,"b":14}}
+outcome: {"a":{"result":"win","finalRound":6},"b":{"result":"loss","finalRound":6}}
+audit: {"a":{"verdict":"VERIFIED","findings":[],"checked":43},"b":{"verdict":"VERIFIED","findings":[],"checked":43}}
+stamps: {"a":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"},"b":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"}}
+gate tallies: {"a":{"accepted":14,"duplicate":0,"rejected":0,"rejectedReasons":{}},"b":{"accepted":14,"duplicate":0,"rejected":0,"rejectedReasons":{}}}
+source scan: 20 files under app/ and dev/, "wager" in 0
+transport: PASS (default CHIRP; adoption both directions; chirp-mode match VERIFIED both ways by chirp alone, 28 chirps / 0 re-sends; no wager string)
+
+=== viewport: no match screen scrolls at 360×740 or 412×915, in QR and in chirp mode ===
+
+--- 360×740 ---
+  qr · placement                     doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · handshake idle                doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · handshake scanner open        doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · handshake TYPE open           doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · handshake contact             doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · round target, 3 picks         doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · exchange idle                 doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · exchange scanner open         doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · exchange, their salvo in      doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · exchange converged            doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  round 1 sinkings: enemy [false,false,true,false] mine [false,false,false,true] banner true wreck cells 2
+  qr · reveal after sinkings         doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · reveal, match over            doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · game over, reveal stage       doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  qr · game over, scanner open       doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  verdict: VERIFIED · NO SHIP MOVED · AUDIT: 29 checks against the revealed fleet · commitment matches · 0 findings · landed true
+  qr · game over, verdict stage      doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · placement                  doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · handshake idle             doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · handshake mic open         doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · handshake TYPE open        doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · handshake contact          doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · round target, 3 picks      doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · exchange idle              doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · exchange mic open          doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · exchange, their salvo in   doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · exchange converged         doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  round 1 sinkings: enemy [false,false,true,false] mine [false,false,false,true] banner true wreck cells 2
+  chirp · reveal after sinkings      doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · reveal, match over         doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · game over, reveal stage    doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  chirp · game over, mic open        doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+  verdict: VERIFIED · NO SHIP MOVED · AUDIT: 29 checks against the revealed fleet · commitment matches · 0 findings · landed true
+  chirp · game over, verdict stage   doc 740/740 · screens 692/692 · screen 674/674 · slack 10px · scrollTo→0
+
+--- 412×915 ---
+  qr · placement                     doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · handshake idle                doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · handshake scanner open        doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · handshake TYPE open           doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · handshake contact             doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · round target, 3 picks         doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · exchange idle                 doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · exchange scanner open         doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · exchange, their salvo in      doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · exchange converged            doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  round 1 sinkings: enemy [false,false,true,false] mine [false,false,false,true] banner true wreck cells 2
+  qr · reveal after sinkings         doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · reveal, match over            doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · game over, reveal stage       doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  qr · game over, scanner open       doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  verdict: VERIFIED · NO SHIP MOVED · AUDIT: 29 checks against the revealed fleet · commitment matches · 0 findings · landed true
+  qr · game over, verdict stage      doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · placement                  doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · handshake idle             doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · handshake mic open         doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · handshake TYPE open        doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · handshake contact          doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · round target, 3 picks      doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · exchange idle              doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · exchange mic open          doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · exchange, their salvo in   doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · exchange converged         doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  round 1 sinkings: enemy [false,false,true,false] mine [false,false,false,true] banner true wreck cells 2
+  chirp · reveal after sinkings      doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · reveal, match over         doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · game over, reveal stage    doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  chirp · game over, mic open        doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+  verdict: VERIFIED · NO SHIP MOVED · AUDIT: 29 checks against the revealed fleet · commitment matches · 0 findings · landed true
+  chirp · game over, verdict stage   doc 915/915 · screens 867/867 · screen 849/849 · slack 10px · scrollTo→0
+viewport: PASS (60 measurements, none scrolls; tightest slack 10px)
+
+=== soundtrack: the score plays, follows the screens, heats with the match, ducks to zero under the Sonar, obeys both switches ===
+before any gesture: {"enabled":true,"started":false,"scene":"theme","playing":null,"nodes":0,"sources":0,"setting":"on","stored":null,"besideTransport":true}
+menu: scene theme playing theme context running notes 76 nodes 236 gain 1 instruments arp bass hat kick snare brass max gap between scheduled notes 0.289 s
+first notes: [{"t":0.101,"i":"arp","m":59,"v":0.5,"scene":"theme","layer":0},{"t":0.101,"i":"bass","m":47,"v":0.7,"scene":"theme","layer":0},{"t":0.101,"i":"hat","m":null,"v":0.35,"scene":"theme","layer":0},{"t":0.101,"i":"kick","m":null,"v":0.8,"scene":"theme","layer":0},{"t":0.39,"i":"arp","m":62,"v":0.5,"scene":"theme","layer":0},{"t":0.39,"i":"bass","m":59,"v":0.7,"scene":"theme","layer":0}]
+placement: playing placement layer 0
+listen window open: ducked true gain 0 (typeof number) playing battle notes still scheduled 86
+chirp 3.50 s: gain samples [["at call",0],["120 ms in",0,true],["1 s in",0,true],["after",0,true]] violations 0 of 92 ticks
+after STOP: ducked false gain 1.000 playing battle
+  round 1: enemy ships sunk 1, mine 1 → layer 1 (battle)
+  round 2: enemy ships sunk 2, mine 1 → layer 1 (battle)
+  round 3: enemy ships sunk 3, mine 1 → layer 2 (battle)
+  round 4: enemy ships sunk 4, mine 1 → layer 2 (victory)
+victory: scene victory → playing theme (the theme at strength)
+defeat: scene defeat playing defeat layer 2
+after the descent: the quiet march
+MUSIC off, after a gesture and a walk to the Salute: started false playing null nodes 0 notes 0 sources on the context 1 → 1 over 2 s (scene asked: battle)
+chirp match with the score: 6 rounds in 45.8 s, 28 chirps / 0 re-sends, outcome {"a":{"result":"win","finalRound":6},"b":{"result":"loss","finalRound":6}}, stamps {"a":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"},"b":{"word":"VERIFIED","sub":"NO SHIP MOVED","verdict":"verified","stage":"verdict"}}
+instance A: scenes theme → placement → battle → victory · layers 1,2 · 32 duck changes · 900 ticks inside Sonar windows, 0 with non-zero gain · 761 notes, 2785 nodes · now victory/victory
+instance B: scenes theme → placement → battle → defeat · layers 1,2 · 32 duck changes · 904 ticks inside Sonar windows, 0 with non-zero gain · 692 notes, 2448 nodes · now defeat/defeat
+soundtrack: PASS (theme in the menu; placement → battle → victory/defeat; layers 1 and 2 on their triggers; gain exactly 0 under listen and chirp, 0 violations in 1804 Sonar ticks of a chirp match VERIFIED both ways; MUSIC off creates nothing)
+
+=== summary ===
+shell: PASS (9.4 s)
+qr-roundtrip: PASS (2.2 s)
+offline: PASS (5.6 s)
+harness: PASS (4.8 s)
+orders: PASS (4.0 s)
+match: PASS (71.1 s)
+spike: PASS (27.4 s)
+sonar: PASS (40.1 s)
+soundflag: PASS (22.5 s)
+transport: PASS (94.2 s)
+viewport: PASS (131.5 s)
+soundtrack: PASS (119.2 s)

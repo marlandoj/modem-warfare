@@ -84,6 +84,15 @@ precache is 23 files at `mw-final-v1`, and the orders gate and unit test
 now prove the removal instead of the card. T13 above stays as the
 historical record of the Wednesday build.
 
+## SOUNDTRACK (day 6, 2026-11-03)
+
+The SOUNDTRACK card (`docs/SOUNDTRACK-REPORT.md`) added the operator's
+wartime score, rock-forward after his choice between the two references:
+an original composition synthesised through WebAudio (`app/js/music.js`),
+a MUSIC setting on Home under the SOUND master, the duck to exactly zero
+gain under every Sonar window and chirp, and the soundtrack gate and unit
+test. The precache is 24 files at `mw-final-v2`. Nothing else changed.
+
 ## Trusted check
 
 Every manifest carries `verify: npm test` (unit codec tests plus the five

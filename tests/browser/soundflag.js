@@ -5,14 +5,16 @@
 //     no element marked data-needs-sound, no Sonar row, no CHIRP/LISTEN
 //     button, no SONAR/CHIRP/LISTEN/MIC/SOUND word in any screen's text;
 //   - no AudioContext is ever constructed (counted by an init script in
-//     every frame) and the shell's sound surface reports off.
+//     every frame) and the shell's sound surface reports off;
+//   - SOUNDTRACK: SOUND is the master over the score too — the MUSIC setting
+//     has left the document, the engine reports off and creates no node.
 // The same walk with the flag ON (the committed default) runs in match.js
 // and sonar.js; this file is the OFF half of "both ways".
 import path from 'node:path';
 import { startServer, launch, capture, assert, banner, OUT } from './lib.js';
 
 const OFF = "export const SOUND = false;\n";
-const SOUND_WORDS = /\b(SONAR|CHIRP|LISTEN|MIC|MICROPHONE|SOUND|AUDIO|MUTE|VOLUME|SPEAKER)\b/i;
+const SOUND_WORDS = /\b(SONAR|CHIRP|LISTEN|MIC|MICROPHONE|SOUND|AUDIO|MUTE|VOLUME|SPEAKER|MUSIC|SCORE)\b/i;
 
 export async function run() {
   banner('soundflag: match with SOUND = false, no sound affordance rendered');
@@ -71,6 +73,8 @@ export async function run() {
           acCount: w.__acCount,
           ggwaveLoaded: typeof w.ggwave_factory,
           audioEnabled: w.MW.sound,
+          musicChoices: d.querySelectorAll('[data-music-choice], #setup-music').length,
+          music: w.MW.music.state(),
         });
       }
       return out;
@@ -86,6 +90,9 @@ export async function run() {
       assert(a.acCount === 0, `no AudioContext constructed through a whole match (got ${a.acCount})`);
       assert(a.ggwaveLoaded === 'undefined', 'ggwave never loaded');
       assert(a.audioEnabled === false, 'MW.sound is false');
+      console.log(`instance ${i === 0 ? 'A' : 'B'}: music setting elements=${a.musicChoices} engine enabled=${a.music.enabled} started=${a.music.started} nodes=${a.music.stats.nodes} notes=${a.music.stats.notes}`);
+      assert(a.musicChoices === 0, 'the MUSIC setting left the document with SOUND off');
+      assert(a.music.enabled === false && a.music.started === false && a.music.stats.nodes === 0 && a.music.stats.notes === 0 && a.music.playing === null, 'with SOUND off the score engine never starts and creates no node through a whole match');
     }
     await page.screenshot({ path: path.join(OUT, 'soundflag-off-match.png') });
 

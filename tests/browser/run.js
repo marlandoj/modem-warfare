@@ -49,6 +49,7 @@ const suites = [
   ['soundflag', 'soundflag.js', 20],
   ['transport', 'transport.js', 88],
   ['viewport', 'viewport.js', 117],
+  ['soundtrack', 'soundtrack.js', 110],
 ];
 
 const lanes = Math.max(1, parseInt(process.env.MW_LANES || '4', 10) || 1);

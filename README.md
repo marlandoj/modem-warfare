@@ -27,7 +27,7 @@ but has not been tested as of this build.
 ### Install on a phone (once, while online)
 
 1. Open the play URL in the phone's browser. Wait for the badge at the bottom
-   of Home to read **OFFLINE READY ✓ 23/23 CACHED**. That is the app telling
+   of Home to read **OFFLINE READY ✓ 24/24 CACHED**. That is the app telling
    you every file it will ever need is on the phone.
 2. Add it to the home screen: Android Chrome → menu → **Add to Home screen**;
    iPhone Safari → share sheet → **Add to Home Screen**.
@@ -43,6 +43,8 @@ for on the screens that use them.
    table, speaker toward mic) or **QR** (phones held face to face, about 20
    cm). It is set before the match; the host's choice rides the handshake and
    the joining phone adopts it, so both phones always play the same carrier.
+   Beside it, **MUSIC** switches the score on or off (on by default; it
+   never plays over a chirp or an open microphone, see below).
 2. One phone taps **NEW MATCH**, the other **JOIN MATCH**. Both place a fleet
    (tap a ship to rotate, REROLL for a new layout) and tap **LOCK**. LOCK is
    the moment your fleet is sealed: the phone draws a random salt and fixes
@@ -80,8 +82,8 @@ camera or microphone is unusable.
 ## Technical notes
 
 - **No server, no account, no network after install.** The app is static
-  HTML, CSS and JavaScript with a hand-written precache service worker (23
-  files, cache `mw-final-v1`). The content-security policy allows `'self'`
+  HTML, CSS and JavaScript with a hand-written precache service worker (24
+  files, cache `mw-final-v2`). The content-security policy allows `'self'`
   only; nothing in the app can contact a network at runtime, and the
   browser-gate suite proves a cold launch with the server gone.
 - **The fleet commitment is a salted hash.** At LOCK the phone draws a
@@ -103,10 +105,22 @@ camera or microphone is unusable.
 - **The Lamp** is a QR version 2–3 at error-correction M, decoded by the
   browser's BarcodeDetector where it exists and by a bundled zxing-wasm
   elsewhere.
+- **The score** is an original wartime soundtrack, synthesised at play time
+  like every other sound here: a ceremonial naval march (brass, snare,
+  timpani, 104 bpm) fused with 1980s carrier-deck rock (pulsing arpeggios,
+  octave bass, a soaring lead). Home plays the theme, placement a quiet
+  chart-room march, the Salute and the rounds a tension ostinato that gains
+  a layer on the first hit and its lead line in the final rounds; victory
+  brings a fanfare and the theme back at strength, defeat a short brass
+  descent. It is code (`app/js/music.js`, about 34 KB, in the precache); no
+  audio file ships. It starts on the first tap, and it ducks to exactly zero
+  gain for every Sonar listen window and every chirp the phone sends, so it
+  costs the acoustic path nothing. MUSIC on Home switches it; the sound flag
+  below is its master. See `docs/SOUNDTRACK-REPORT.md`.
 - **The sound flag.** `app/js/config.js`, line 17: `export const SOUND =
   true;`. Set it to `false` and every sound affordance leaves the interface
-  at boot; the match plays by QR alone. The suite plays a whole match both
-  ways.
+  at boot, the score included; the match plays by QR alone. The suite plays
+  a whole match both ways.
 
 ## Repository layout
 
@@ -118,6 +132,7 @@ app/        the product — vanilla HTML/CSS/JS, no framework, no build step
   js/sha256.js  vendored SHA-256 for the fleet commitment
   js/audit.js   end-of-game audit: commitment + every reported result vs the reveal
   js/audio.js   WebAudio feel: lamp clack, contact bell, fire, splash, hit, horn, stamp
+  js/music.js   the score: notation, the five scenes, the synthesised instruments, the scheduler, the duck
   js/sonar.js   the Sonar engine: ggwave chirp send, AudioWorklet capture, decode → gate
   js/qr.js      QR render (qrcode-generator) and decode (BarcodeDetector → zxing-wasm)
   vendor/   every third-party file the app loads (see vendor/VENDOR.md)
@@ -127,7 +142,7 @@ tests/      node --test unit tests + Playwright browser gates
 tools/      zero-dependency static server, icon rasteriser, ggwave patch tool, gallery tool
 screenshots/  the shipped build's real screens (see docs/SHIP-REPORT.md)
 campaign/   the build week's task manifests
-docs/       the daily reports, the ship report, the removal record and their evidence
+docs/       the daily reports, the ship report, the removal record, the soundtrack report and their evidence
 ```
 
 ## Run it locally
@@ -150,12 +165,12 @@ node tools/serve.js 8080 --bind 0.0.0.0   # reachable from phones on the LAN
 ## Test it
 
 ```sh
-npm run test:unit                     # node --test, no dependencies: codec, sha256, audit, removal (string scan)
+npm run test:unit                     # node --test, no dependencies: codec, sha256, audit, removal (string scan), the score
 npm install && npx playwright install chromium
 npm run test:browser                  # shell, QR pixels, cold offline launch, harness, removal, full match + cheats,
-                                      # spike, sonar, soundflag, transport, viewport
-npm test                              # both; the trusted check in .verity.json (about 2½ minutes in 4 lanes;
-                                      # MW_LANES=1 runs the browser gates one after another, about 7 minutes)
+                                      # spike, sonar, soundflag, transport, viewport, soundtrack
+npm test                              # both; the trusted check in .verity.json (about 3 minutes in 4 lanes;
+                                      # MW_LANES=1 runs the browser gates one after another, about 9 minutes)
 node tools/gallery.js                 # after npm test: rebuilds thumbnail.png and screenshots/ from the gate evidence
 ```
 

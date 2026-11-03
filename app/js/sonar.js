@@ -82,6 +82,11 @@ export class Sonar {
     this.onText = null; // (text, meta) => void
     this.onLevel = null; // (rms) => void
     this.onStatus = null; // (message) => void
+    // SOUNDTRACK: (active) => void, fired when the Sonar becomes active (a
+    // listen window is being opened or is open, or a chirp is playing) and
+    // again when it goes idle. The score ducks to true silence on it.
+    this.onActivity = null;
+    this.active = false;
     this.stats = { chirps: 0, decodes: 0, listens: 0, chunks: 0 };
     this.lastChirp = null;
     this.lastHeard = null;
@@ -89,6 +94,14 @@ export class Sonar {
 
   status(msg) {
     if (this.onStatus) this.onStatus(msg);
+  }
+
+  /** Active = a listen window (requested or open) or a chirp in flight. Reported on every change. */
+  notify() {
+    const active = !!(this.listening || this.busy || this.opening);
+    if (active === this.active) return;
+    this.active = active;
+    if (this.onActivity) { try { this.onActivity(active); } catch { /* the score must never break the Sonar */ } }
   }
 
   /** Samples per capture chunk so that one chunk is one ggwave frame after resampling. */
@@ -159,6 +172,7 @@ export class Sonar {
     const ac = audioContext();
     const micWasOpen = this.listening && !this.loopback;
     this.busy = true;
+    this.notify(); // the score is silent before the first sample is encoded
     try {
       if (micWasOpen) this.stop();
       const wave = this.encode(text);
@@ -172,9 +186,12 @@ export class Sonar {
     } finally {
       this.busy = false;
       if (micWasOpen) {
+        // listen() marks the window open again before anything else runs, so
+        // the score stays silent from the chirp straight into the reopened mic.
         try { await this.listen(); } catch (err) { this.status(`MIC DID NOT REOPEN · ${err.message.toUpperCase().slice(0, 30)}`); }
       } else if (!this.listening) this.status('SONAR IDLE');
       else this.status(this.loopback ? `LISTENING · LOOPBACK · ${this.captureMode.toUpperCase()}` : this.micLine());
+      this.notify();
     }
   }
 
@@ -199,7 +216,8 @@ export class Sonar {
       this.stop();
     }
     this.opening = this._open(loopback);
-    try { return await this.opening; } finally { this.opening = null; }
+    this.notify(); // the window is open for the score from the moment it is asked for
+    try { return await this.opening; } finally { this.opening = null; this.notify(); }
   }
 
   async _open(loopback) {
@@ -299,6 +317,7 @@ export class Sonar {
     this.source = this.node = this.sink = this.stream = this.loopback = null;
     this.listening = false;
     this.status('SONAR IDLE');
+    this.notify();
   }
 
   /** Dev/test only: play the other window's chirp into this window's capture
