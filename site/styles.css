@@ -1,0 +1,214 @@
+/* Modem Warfare landing page. Palette sampled from the game itself:
+   deep ink navy #03101c, navy panels #06263f / #0a2f4d, signal amber
+   #ffb100 and #ff6a1f, audit green #35d07f, paper #eaf4ff. */
+
+:root {
+	--ink: #03101c;
+	--deep: #04182b;
+	--navy: #06263f;
+	--navy-2: #0a2f4d;
+	--amber: #ffb100;
+	--amber-deep: #ff6a1f;
+	--paper: #eaf4ff;
+	--soft: #9db8cc;
+	--green: #35d07f;
+	--line: rgba(157, 184, 204, .18);
+	--card: rgba(6, 26, 46, .85);
+	--shadow: 0 30px 60px -28px rgba(0, 0, 0, .65), 0 8px 20px -12px rgba(0, 0, 0, .45);
+	--ease: cubic-bezier(.32, .72, 0, 1);
+	--mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+	margin: 0;
+	font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+	font-weight: 400;
+	font-size: 18px;
+	line-height: 1.55;
+	color: var(--paper);
+	background: linear-gradient(180deg, var(--deep) 0%, var(--ink) 34rem);
+	-webkit-font-smoothing: antialiased;
+	overflow-x: hidden;
+}
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+b, strong { font-weight: 700; }
+
+/* Faint chart grid over the deep. */
+.sky {
+	position: fixed; inset: 0; z-index: -1; pointer-events: none;
+	background:
+		radial-gradient(60rem 30rem at 85% -5%, rgba(255, 177, 0, .07), transparent 60%),
+		repeating-linear-gradient(0deg, rgba(157, 184, 204, .045) 0 1px, transparent 1px 72px),
+		repeating-linear-gradient(90deg, rgba(157, 184, 204, .045) 0 1px, transparent 1px 72px);
+}
+
+/* Nav. */
+.nav-wrap { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(10px); background: rgba(3, 16, 28, .72); border-bottom: 1px solid var(--line); }
+.nav { max-width: 1240px; margin: 0 auto; padding: 0 20px; height: 64px; display: flex; align-items: center; gap: 28px; }
+.nav a { text-decoration: none; font-size: 15px; color: var(--soft); }
+.nav a:hover { color: var(--paper); }
+.nav .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--paper); margin-right: auto; font-size: 16px; }
+.nav .brand img { border-radius: 7px; }
+
+/* Double bezel: a dark hull plate in a machined tray. */
+.bezel {
+	background: linear-gradient(165deg, #0d2c47, #050f1a);
+	border: 1px solid var(--line);
+	border-radius: 2rem;
+	padding: 8px;
+	box-shadow: var(--shadow);
+}
+.bezel-core { border-radius: calc(2rem - 8px); overflow: hidden; background: var(--ink); }
+.bezel.tilt-l { transform: rotate(-1.6deg); }
+
+.eyebrow {
+	font-family: var(--mono);
+	font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+	color: var(--amber);
+}
+
+/* Pill CTA with trailing arrow chip. */
+.cta-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 28px; }
+.cta {
+	display: inline-flex; align-items: center; gap: 12px;
+	background: linear-gradient(180deg, var(--amber), #f59e00);
+	color: #231300; font-weight: 800; text-decoration: none;
+	padding: 10px 10px 10px 24px; border-radius: 999px; font-size: 17px;
+	box-shadow: 0 12px 26px -12px rgba(255, 177, 0, .55);
+	transition: transform .25s var(--ease);
+}
+.cta:active { transform: translateY(1px) scale(.98); }
+.cta-dot { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 999px; background: #231300; color: var(--amber); font-size: 18px; }
+.ghost {
+	display: inline-flex; align-items: center;
+	border: 1px solid var(--line); color: var(--paper); text-decoration: none;
+	padding: 13px 22px; border-radius: 999px; font-size: 16px; font-weight: 600;
+	background: rgba(6, 26, 46, .5);
+	transition: transform .25s var(--ease);
+}
+.ghost:active { transform: translateY(1px) scale(.98); }
+.fine { color: var(--soft); font-size: 14.5px; margin-top: 16px; }
+
+/* Hero. */
+.hero {
+	max-width: 1240px; margin: 0 auto; padding: 56px 20px 30px;
+	display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center;
+	min-height: calc(100dvh - 64px);
+}
+.hero h1 {
+	font-size: clamp(56px, 8.5vw, 108px); line-height: .94; letter-spacing: -.01em;
+	margin: 18px 0 0; font-weight: 850; text-transform: uppercase;
+}
+.pitch { font-size: clamp(19px, 2vw, 22px); color: var(--soft); max-width: 46ch; margin: 22px 0 0; }
+.pitch b { color: var(--paper); }
+.hero-stage .bezel { padding: 10px; border-radius: 2.4rem; }
+.hero-stage .bezel-core { border-radius: calc(2.4rem - 10px); }
+#stage { aspect-ratio: 9 / 16.5; max-height: 74dvh; margin: 0 auto; width: min(100%, 380px); }
+#stage iframe { width: 100%; height: 100%; border: 0; display: block; background: var(--ink); }
+.stage-bar { display: flex; align-items: center; gap: 14px; margin-top: 14px; width: min(100%, 400px); margin-inline: auto; }
+.stage-hint { font-family: var(--mono); font-size: 12.5px; color: var(--soft); flex: 1; }
+.fs-btn {
+	font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer;
+	border: 1px solid var(--line); background: var(--card); color: var(--paper);
+	border-radius: 999px; padding: 8px 16px; white-space: nowrap;
+}
+.fs-btn:active { transform: translateY(1px) scale(.98); }
+#stage.pseudo-fs { position: fixed; inset: 0; z-index: 50; width: 100%; max-height: none; aspect-ratio: auto; background: var(--ink); }
+body.pseudo-fs-on { overflow: hidden; }
+.exit-fs {
+	position: fixed; z-index: 51; bottom: 18px; left: 50%; transform: translateX(-50%);
+	font: inherit; font-weight: 700; cursor: pointer; border-radius: 999px;
+	border: 1px solid var(--line); background: var(--card); color: var(--paper); padding: 10px 20px;
+}
+
+/* How to play. */
+.how {
+	max-width: 1240px; margin: 0 auto; padding: 90px 20px;
+	display: grid; grid-template-columns: .8fr 1.2fr; gap: 56px; align-items: center;
+}
+.how-shot { margin: 0; max-width: 340px; justify-self: center; }
+.how h2, .screens h2, .build h2 { font-size: clamp(32px, 4.5vw, 48px); line-height: 1.05; margin: 14px 0 8px; font-weight: 800; }
+.steps { list-style: none; counter-reset: step; margin: 26px 0 0; padding: 0; display: grid; gap: 22px; }
+.steps li { counter-increment: step; position: relative; padding-left: 58px; color: var(--soft); max-width: 62ch; }
+.steps li b { color: var(--paper); }
+.steps li::before {
+	content: counter(step, decimal-leading-zero);
+	position: absolute; left: 0; top: 1px;
+	font-family: var(--mono); font-size: 15px; color: var(--amber);
+	border: 1px solid var(--line); border-radius: 10px; padding: 5px 8px;
+	background: rgba(6, 26, 46, .6);
+}
+
+/* Facts strip: uneven chips, not a card grid. */
+.features { max-width: 1240px; margin: 0 auto; padding: 10px 20px 30px; }
+.chips { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.chip {
+	border: 1px solid var(--line); border-radius: 1.4rem; padding: 22px;
+	background: var(--card); display: flex; flex-direction: column; gap: 6px; justify-content: center;
+}
+.chip strong { font-size: 26px; line-height: 1.1; }
+.chip span { color: var(--soft); font-size: 15px; }
+.chip.big { grid-row: span 2; background: linear-gradient(160deg, rgba(255, 177, 0, .22), rgba(6, 26, 46, .9)); }
+.chip.big strong { font-size: clamp(88px, 11vw, 140px); line-height: .9; color: var(--amber); }
+.chip.big span { font-size: 19px; color: var(--paper); font-weight: 500; }
+.chip.wide { grid-column: span 3; background: linear-gradient(100deg, rgba(53, 208, 127, .16), rgba(6, 26, 46, .9)); }
+.chip.wide strong { color: var(--green); font-family: var(--mono); letter-spacing: .06em; }
+
+/* Screenshots rail. */
+.screens { max-width: 1240px; margin: 0 auto; padding: 90px 20px 70px; }
+.screens-head p { color: var(--soft); margin: 6px 0 0; }
+.rail {
+	display: flex; gap: 26px; overflow-x: auto; padding: 34px 6px 26px;
+	scroll-snap-type: x mandatory; scrollbar-width: thin;
+}
+.rail:focus-visible { outline: 3px solid var(--amber); outline-offset: -3px; }
+.shot { margin: 0; flex: 0 0 218px; scroll-snap-align: start; }
+.shot .bezel { border-radius: 1.8rem; transition: transform .8s var(--ease); }
+.shot .bezel-core { border-radius: calc(1.8rem - 8px); }
+.shot:nth-child(odd) .bezel { transform: rotate(-1.5deg); }
+.shot:nth-child(even) .bezel { transform: rotate(1.5deg) translateY(18px); }
+.shot:hover .bezel { transform: rotate(0) translateY(-6px); }
+.shot figcaption { font-family: var(--mono); font-size: 13px; color: var(--soft); margin-top: 16px; text-align: center; letter-spacing: .08em; text-transform: uppercase; }
+
+/* The build panel. */
+.build { max-width: 1240px; margin: 0 auto; padding: 20px 20px 100px; }
+.build .bezel { border-radius: 2.4rem; }
+.build-core { padding: clamp(26px, 4vw, 48px); display: grid; grid-template-columns: 1.5fr .8fr; gap: 40px; align-items: center; background: linear-gradient(150deg, var(--navy-2), var(--navy)); }
+.build-core p { color: var(--soft); max-width: 62ch; }
+.build-side { display: grid; gap: 18px; justify-items: start; }
+.stamp {
+	font-family: var(--mono); font-size: 14px; letter-spacing: .14em;
+	color: var(--green); border: 2px solid var(--green); border-radius: 8px;
+	padding: 9px 14px; transform: rotate(-3deg); white-space: nowrap;
+}
+.build-side .fine { margin: 0; }
+
+.foot { border-top: 1px solid var(--line); padding: 28px 20px 40px; text-align: center; color: var(--soft); font-size: 15px; }
+
+/* Scroll reveal (only when JS is on; content is visible without it). */
+.js .reveal { opacity: 0; transform: translateY(40px); filter: blur(6px); transition: opacity .9s var(--ease), transform .9s var(--ease), filter .9s var(--ease); }
+.js .reveal.in { opacity: 1; transform: none; filter: none; }
+.shot.reveal.in .bezel { }
+.js .shot.reveal { transform: none; }
+.js .shot .bezel { }
+@media (prefers-reduced-motion: reduce) {
+	html { scroll-behavior: auto; }
+	.js .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+	.shot .bezel, .bezel.tilt-l { transform: none; }
+}
+
+/* Mobile collapse. */
+@media (max-width: 860px) {
+	.hero { grid-template-columns: 1fr; padding-top: 36px; min-height: 0; gap: 34px; }
+	.how { grid-template-columns: 1fr; padding: 60px 20px; gap: 40px; }
+	.how-shot { max-width: 280px; }
+	.chips { grid-template-columns: 1fr 1fr; }
+	.chip.big { grid-row: auto; grid-column: span 2; }
+	.chip.wide { grid-column: span 2; }
+	.build-core { grid-template-columns: 1fr; }
+	.nav a:not(.brand) { font-size: 14px; }
+	.nav { gap: 16px; }
+}

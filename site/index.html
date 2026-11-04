@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Modem Warfare - Radio Silence</title>
+<meta name="description" content="Modem Warfare is a two-player naval duel for phones in airplane mode. Fleets exchange fire in dial-up chirps and QR codes. No internet, no server, no way to cheat. Play it free in your browser.">
+<meta name="theme-color" content="#03101c">
+<meta property="og:title" content="Modem Warfare">
+<meta property="og:description" content="Two phones in airplane mode fight a naval war by screaming dial-up noise at each other. No internet. No server. No way to cheat.">
+<meta property="og:image" content="https://modemwarfare.zouroboros.ai/assets/og.jpg">
+<meta property="og:url" content="https://modemwarfare.zouroboros.ai/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/assets/icon-192.png">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
+<link rel="stylesheet" href="/styles.css">
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+
+<header class="nav-wrap">
+	<nav class="nav" aria-label="Page">
+		<a class="brand" href="#top"><img src="/assets/icon-192.png" alt="" width="28" height="28">Modem Warfare</a>
+		<a href="#how">How to play</a>
+		<a href="#screens">Screens</a>
+		<a href="#build">The build</a>
+	</nav>
+</header>
+
+<main id="top">
+	<section class="hero">
+		<div class="hero-copy reveal">
+			<span class="eyebrow">Radio Silence · A Hackyard Yard #6 entry</span>
+			<h1>Modem<br>Warfare</h1>
+			<p class="pitch">Two phones in airplane mode. One naval war fought in dial-up chirps and QR codes. No internet, no server, no cheating.</p>
+			<div class="cta-row">
+				<a class="cta" href="#player" id="cta-play">Play now<span class="cta-dot" aria-hidden="true">&rarr;</span></a>
+				<a class="ghost" href="#how">How it works</a>
+			</div>
+			<p class="fine">Free in your browser. Best with two phones and a friend in the same room.</p>
+		</div>
+
+		<div class="hero-stage reveal" id="player">
+			<div class="bezel">
+				<div class="bezel-core" id="stage">
+					<iframe id="game" src="/play/" title="Modem Warfare game" allow="camera; microphone; fullscreen; autoplay" allowfullscreen loading="eager"></iframe>
+				</div>
+			</div>
+			<div class="stage-bar">
+				<span class="stage-hint">Place your fleet, then salute with a QR code or a chirp.</span>
+				<button type="button" class="fs-btn" id="fs-btn" aria-pressed="false">Fullscreen</button>
+			</div>
+		</div>
+	</section>
+
+	<section class="how" id="how">
+		<figure class="how-shot reveal">
+			<div class="bezel tilt-l"><div class="bezel-core"><img src="/assets/shot-placement.webp" alt="Placement screen: a fleet of four ships being positioned on the 7 by 7 grid" width="540" height="1199" loading="lazy"></div></div>
+		</figure>
+		<div class="how-copy">
+			<span class="eyebrow reveal">How to play</span>
+			<h2 class="reveal">Hide. Salute. Fire.</h2>
+			<ol class="steps">
+				<li class="reveal"><b>Place your fleet.</b> Four ships on a 7 by 7 grid, hidden from your opponent. The moment you confirm, your layout is sealed under a salted hash, before a single shot is fired.</li>
+				<li class="reveal"><b>Salute, then trade salvos.</b> A QR handshake pairs the two phones. Each round you fire three shots, and the phones exchange shots and results by sound or by QR. Nothing ever touches a network.</li>
+				<li class="reveal"><b>The reveal audits everything.</b> When the last ship sinks, both phones open their fleets and replay every round against the sealed hashes. The match is stamped VERIFIED, or LIAR with the finding named.</li>
+			</ol>
+		</div>
+	</section>
+
+	<section class="features" aria-label="Facts">
+		<ul class="chips">
+			<li class="chip big reveal"><strong>0</strong><span>internet. No servers, no accounts, no signal at all</span></li>
+			<li class="chip reveal"><strong>2 players</strong><span>face to face, one room, two phones</span></li>
+			<li class="chip reveal"><strong>10/10</strong><span>chirps decoded at one metre, on real phones</span></li>
+			<li class="chip reveal"><strong>~12 bytes</strong><span>carry a full round of the war</span></li>
+			<li class="chip wide reveal"><strong>VERIFIED, or LIAR</strong><span>every match ends with the audit stamp. A moved ship cannot hide</span></li>
+		</ul>
+	</section>
+
+	<section class="screens" id="screens">
+		<div class="screens-head reveal">
+			<h2>Straight from the game.</h2>
+			<p>Every image here is a real capture of Modem Warfare running, nothing painted over.</p>
+		</div>
+		<div class="rail" tabindex="0" aria-label="Screenshots, scroll sideways">
+			<figure class="shot reveal"><div class="bezel"><div class="bezel-core"><img src="/assets/shot-home.webp" alt="Home screen: Modem Warfare, Radio Silence" width="540" height="1106" loading="lazy"></div></div><figcaption>The bridge</figcaption></figure>
+			<figure class="shot reveal"><div class="bezel"><div class="bezel-core"><img src="/assets/shot-placement.webp" alt="Placement: hiding the fleet on the grid" width="540" height="1199" loading="lazy"></div></div><figcaption>Hide your fleet</figcaption></figure>
+			<figure class="shot reveal"><div class="bezel"><div class="bezel-core"><img src="/assets/shot-salute.webp" alt="The salute: one phone shows its QR code, the other scans it" width="540" height="1199" loading="lazy"></div></div><figcaption>The salute</figcaption></figure>
+			<figure class="shot reveal"><div class="bezel"><div class="bezel-core"><img src="/assets/shot-chirp.webp" alt="Battle: a salvo exchanged by chirp, the phones listening to each other" width="540" height="1199" loading="lazy"></div></div><figcaption>Salvo by chirp</figcaption></figure>
+			<figure class="shot reveal"><div class="bezel"><div class="bezel-core"><img src="/assets/shot-verified.webp" alt="Game over: the match stamped VERIFIED, no ship moved" width="540" height="1199" loading="lazy"></div></div><figcaption>The stamp</figcaption></figure>
+		</div>
+	</section>
+
+	<section class="build" id="build">
+		<div class="bezel reveal">
+			<div class="bezel-core build-core">
+				<div>
+					<h2>Directed by a human. Built by the workshop.</h2>
+					<p>Modem Warfare was built for Hackyard Yard #6, “Offline”, by the Zouroboros Workshop from written briefs: seven build campaigns, 4 hours 47 minutes of build time, 66.6 million tokens, every stage test-gated before it shipped. The wartime soundtrack is an original score synthesised in code, and it ducks to silence whenever a chirp is on the air.</p>
+				</div>
+				<div class="build-side">
+					<span class="stamp" aria-hidden="true">VERIFIED · NO SHIP MOVED</span>
+					<a class="ghost" href="https://github.com/marlandoj/modem-warfare">Read the source</a>
+					<p class="fine">Open source. Ships Friday Nov 6, 2026.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+</main>
+
+<footer class="foot">
+	<p><b>Modem Warfare</b> is an original game by Marlando, built with the Zouroboros Workshop for Hackyard Yard #6.</p>
+</footer>
+
+<script src="/main.js" defer></script>
+</body>
+</html>
