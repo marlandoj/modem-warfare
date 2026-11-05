@@ -1,0 +1,76 @@
+{
+  "verdict": "do-not-launch",
+  "label": "Do Not Launch",
+  "emoji": "🔴",
+  "reason": "2 hard blocker(s) and/or critical finding(s) detected",
+  "scores": {
+    "critical": 2,
+    "high": 6,
+    "medium": 4,
+    "low": 5,
+    "info": 0,
+    "total": 17
+  },
+  "hardBlockerIds": [
+    "ai-code.if-false-security.inputs/production-ready/scripts/__tests__/fixtures.e2e.test.ts.55",
+    "ai-code.if-false-security.inputs/production-ready/scripts/__tests__/fixtures.e2e.test.ts.80"
+  ],
+  "findingsVerdict": "do-not-launch",
+  "coverageCeiling": "private-beta-only",
+  "cappedByCoverage": false,
+  "coverage": {
+    "incomplete": true,
+    "missingScanners": [
+      "gitleaks",
+      "semgrep",
+      "osv-scanner"
+    ],
+    "gaps": [
+      {
+        "kind": "domain:secrets:partial",
+        "severity": "soft",
+        "detail": "secrets ran with reduced coverage — ran without gitleaks, trufflehog"
+      },
+      {
+        "kind": "domain:authentication:partial",
+        "severity": "soft",
+        "detail": "authentication ran with reduced coverage — ran without semgrep"
+      },
+      {
+        "kind": "domain:accessibility:partial",
+        "severity": "soft",
+        "detail": "accessibility ran with reduced coverage — ran without @axe-core/cli"
+      },
+      {
+        "kind": "domain:performance:partial",
+        "severity": "soft",
+        "detail": "performance ran with reduced coverage — ran without lighthouse"
+      },
+      {
+        "kind": "domain:concurrency:partial",
+        "severity": "soft",
+        "detail": "concurrency ran with reduced coverage — static heuristics only; race conditions need runtime confirmation"
+      },
+      {
+        "kind": "domain:visual-consistency:partial",
+        "severity": "soft",
+        "detail": "visual-consistency ran with reduced coverage — static drift heuristics; perceptual checks still manual"
+      },
+      {
+        "kind": "domain:seo-aeo:partial",
+        "severity": "soft",
+        "detail": "seo-aeo ran with reduced coverage — rendered parity unverified (no lighthouse)"
+      },
+      {
+        "kind": "scanners:multiple-missing",
+        "severity": "blocking",
+        "detail": "3 core scanners unavailable (gitleaks, semgrep, osv-scanner) — external verification is largely absent; only in-process heuristics ran"
+      },
+      {
+        "kind": "manual:critical-unverified",
+        "severity": "soft",
+        "detail": "7 critical manual check(s) not signed off — pass --manual-verified after a human confirms them"
+      }
+    ]
+  }
+}

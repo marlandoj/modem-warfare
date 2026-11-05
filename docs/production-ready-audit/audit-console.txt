@@ -1,0 +1,45 @@
+$ PLAYWRIGHT_BROWSERS_PATH=/opt/zouroboros/factory-workspaces/t_0aa85385/_tools/browsers bun inputs/production-ready/scripts/audit.ts --repo . --url https://modemwarfare.zouroboros.ai --name "Modem Warfare" --purpose "two-player offline naval duel game and its landing page" --format all --triage --out docs/production-ready-audit
+(cwd: repo root; started 2026-11-05T19:32:24Z; stdout was empty, stderr follows)
+
+📋 production-ready audit 1.0.0
+   repo:  /opt/zouroboros/factory-workspaces/t_b471b49b/.mw-audit-seed
+   url:   https://modemwarfare.zouroboros.ai
+   out:   /opt/zouroboros/factory-workspaces/t_b471b49b/.mw-audit-seed/docs/production-ready-audit
+   stack: node
+
+▸ legal                🔴0 🟠0 🟡2 🔵0 (0.0s)
+▸ secrets              ✅ clean (0.1s)
+▸ authentication       🔴0 🟠0 🟡1 🔵0 (0.0s)
+▸ api-safety           🔴0 🟠2 🟡0 🔵0 (0.1s)
+▸ owasp                🔴0 🟠2 🟡0 🔵0 (0.2s)
+▸ abuse-rate           🔴0 🟠0 🟡1 🔵0 (0.0s)
+▸ frontend             ✅ clean (0.0s)
+▸ logging              🔴0 🟠4 🟡0 🔵1 (0.0s)
+▸ accessibility        ✅ clean (0.0s)
+▸ performance          ✅ clean (0.0s)
+▸ payments             ✅ clean (0.0s)
+▸ file-uploads         ✅ clean (0.0s)
+▸ database             ✅ clean (0.0s)
+▸ ai-code              🔴2 🟠5 🟡1 🔵3 (0.1s)
+▸ browser-test         ✅ clean (1.8s)
+▸ concurrency          🔴0 🟠0 🟡2 🔵0 (0.0s)
+▸ visual-consistency   🔴0 🟠0 🟡1 🔵0 (0.0s)
+▸ seo-aeo              ✅ clean (0.4s)
+
+▸ triage             kept 17 · drop 17 · downgrade 0 (0.0s)
+
+🔴  Verdict: Do Not Launch
+    2 hard blocker(s) and/or critical finding(s) detected
+
+📊  2 critical · 6 high · 4 medium · 5 low
+🔍  Coverage incomplete — capped at Private Beta Only (findings alone: Do Not Launch)
+      • secrets ran with reduced coverage — ran without gitleaks, trufflehog
+      • authentication ran with reduced coverage — ran without semgrep
+      • accessibility ran with reduced coverage — ran without @axe-core/cli
+      • performance ran with reduced coverage — ran without lighthouse
+      • concurrency ran with reduced coverage — static heuristics only; race conditions need runtime confirmation
+      • visual-consistency ran with reduced coverage — static drift heuristics; perceptual checks still manual
+📂  Reports written to /opt/zouroboros/factory-workspaces/t_b471b49b/.mw-audit-seed/docs/production-ready-audit
+📨  8 remediation prompt(s) in /opt/zouroboros/factory-workspaces/t_b471b49b/.mw-audit-seed/docs/production-ready-audit/prompts/
+
+exit code: 3

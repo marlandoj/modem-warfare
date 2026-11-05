@@ -1,0 +1,1538 @@
+{
+  "meta": {
+    "generatedAt": "2026-11-05T19:32:39.827Z",
+    "auditVersion": "1.0.0",
+    "config": {
+      "repoPath": "/tmp/mw-published-tree-t_b471b49b",
+      "url": "https://modemwarfare.zouroboros.ai",
+      "outDir": "/tmp/mw-audit-control",
+      "format": "all",
+      "appName": "Modem Warfare",
+      "appPurpose": "two-player offline naval duel game and its landing page",
+      "surfaces": {
+        "userData": false,
+        "uploads": false,
+        "admin": false,
+        "ai": false,
+        "payments": false
+      },
+      "godmode": false,
+      "manualVerified": false,
+      "techStack": [
+        "node"
+      ]
+    },
+    "durationMs": 2701
+  },
+  "verdict": "private-beta-only",
+  "verdictReason": "7 high-severity finding(s) — invite-gated launch acceptable",
+  "scores": {
+    "critical": 0,
+    "high": 7,
+    "medium": 5,
+    "low": 8,
+    "info": 0,
+    "total": 20
+  },
+  "hardBlockers": [],
+  "results": [
+    {
+      "domain": "legal",
+      "ranAt": "2026-11-05T19:32:37.167Z",
+      "durationMs": 27,
+      "toolsUsed": [
+        "production-ready:repo-grep"
+      ],
+      "toolsMissing": [],
+      "findings": [
+        {
+          "id": "legal.missing-privacy-policy",
+          "domain": "legal",
+          "severity": "medium",
+          "title": "No privacy policy page found",
+          "description": "No file or route resembling a privacy policy was detected. Apps that collect user data need a published, accessible privacy policy.",
+          "remediation": "Add `/privacy` (or similar) describing what data you collect, why, how long it's retained, third parties it's shared with, and how users can export/delete it.",
+          "source": "production-ready:repo-grep",
+          "references": [
+            "https://gdpr.eu/article-13-notice/",
+            "https://oag.ca.gov/privacy/ccpa"
+          ],
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "medium"
+          }
+        },
+        {
+          "id": "legal.missing-terms",
+          "domain": "legal",
+          "severity": "medium",
+          "title": "No terms of service found",
+          "description": "No file or route resembling Terms of Service was detected. Public-facing apps should publish ToS limiting liability and defining acceptable use.",
+          "remediation": "Add `/terms` covering acceptable use, liability disclaimers, dispute resolution, and termination conditions.",
+          "source": "production-ready:repo-grep",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "medium"
+          }
+        }
+      ],
+      "manualChecklist": [
+        {
+          "item": "List every third party that receives user data (analytics, error reporting, LLM providers, payment processors)",
+          "rationale": "Required for GDPR/CCPA disclosure and Data Processing Agreements."
+        },
+        {
+          "item": "Define data retention windows per data type",
+          "rationale": "Indefinite retention is hostile to user privacy and increases breach blast radius."
+        },
+        {
+          "item": "Verify Data Processing Agreement (DPA) signed with each sub-processor",
+          "rationale": "GDPR Article 28 requires DPAs with processors handling personal data."
+        },
+        {
+          "item": "Cookie banner / consent management is wired (if EU/UK users)",
+          "rationale": "GDPR + ePrivacy Directive require informed consent for non-essential cookies."
+        },
+        {
+          "item": "Privacy policy lists all processors + retention windows + lawful basis",
+          "rationale": "Plain-language disclosure is legally required, not optional."
+        }
+      ]
+    },
+    {
+      "domain": "secrets",
+      "ranAt": "2026-11-05T19:32:37.264Z",
+      "durationMs": 94,
+      "toolsUsed": [],
+      "toolsMissing": [
+        "gitleaks",
+        "trufflehog"
+      ],
+      "findings": [],
+      "manualChecklist": [
+        {
+          "item": "Confirm publishable/anon keys are documented as intentionally-public by the provider",
+          "rationale": "Some 'public' keys are safe to expose (Stripe publishable, Supabase anon); others are not."
+        },
+        {
+          "item": "Verify credential rotation cadence is defined and tested",
+          "rationale": "Even unleaked credentials should be rotated periodically."
+        },
+        {
+          "item": "Check provider audit logs for unexpected access",
+          "rationale": "Past leaks may have been exploited."
+        }
+      ]
+    },
+    {
+      "domain": "authentication",
+      "ranAt": "2026-11-05T19:32:37.293Z",
+      "durationMs": 28,
+      "toolsUsed": [],
+      "toolsMissing": [
+        "semgrep"
+      ],
+      "findings": [],
+      "manualChecklist": [
+        {
+          "item": "Test ownership boundaries — sign in as user A, try to access user B's resources via direct URL",
+          "rationale": "BOLA / IDOR is the #1 API vuln per OWASP API Top 10 2023."
+        },
+        {
+          "item": "Verify MFA is available (and required for admin)",
+          "rationale": "Compromised passwords are the most common breach vector."
+        },
+        {
+          "item": "Confirm session timeout + inactivity logout exists",
+          "rationale": "Long-lived sessions on shared/public devices are a leak path."
+        },
+        {
+          "item": "Check rate limit on login + password reset endpoints",
+          "rationale": "Credential stuffing & enumeration require throttling."
+        }
+      ]
+    },
+    {
+      "domain": "api-safety",
+      "ranAt": "2026-11-05T19:32:37.341Z",
+      "durationMs": 47,
+      "toolsUsed": [
+        "production-ready:repo-grep"
+      ],
+      "toolsMissing": [],
+      "findings": [],
+      "manualChecklist": [
+        {
+          "item": "Verify every state-changing endpoint requires POST/PUT/PATCH/DELETE (not GET)",
+          "rationale": "GET requests are logged in browser history, referrer headers, and CDN logs."
+        },
+        {
+          "item": "Confirm OpenAPI/Swagger spec exists and matches implementation",
+          "rationale": "Drift between docs and code hides shadow endpoints."
+        },
+        {
+          "item": "Test rate limits return 429 with a Retry-After header",
+          "rationale": "Some implementations silently drop; clients need feedback."
+        }
+      ]
+    },
+    {
+      "domain": "owasp",
+      "ranAt": "2026-11-05T19:32:37.486Z",
+      "durationMs": 142,
+      "toolsUsed": [
+        "production-ready:headers"
+      ],
+      "toolsMissing": [
+        "semgrep",
+        "osv-scanner",
+        "nuclei"
+      ],
+      "findings": [
+        {
+          "id": "owasp.header-missing.strict-transport-security",
+          "domain": "owasp",
+          "severity": "high",
+          "title": "Security header missing or malformed: strict-transport-security",
+          "description": "HSTS — forces HTTPS, prevents downgrade attacks. Header was not set.",
+          "evidence": [
+            {
+              "url": "https://modemwarfare.zouroboros.ai"
+            }
+          ],
+          "remediation": "Set `strict-transport-security` at your reverse proxy / framework. See `references/tool-reference.md` for production-grade values.",
+          "source": "production-ready:headers",
+          "references": [
+            "https://owasp.org/www-project-secure-headers/"
+          ],
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "high"
+          }
+        },
+        {
+          "id": "owasp.header-missing.content-security-policy",
+          "domain": "owasp",
+          "severity": "high",
+          "title": "Security header missing or malformed: content-security-policy",
+          "description": "CSP — defence-in-depth against XSS and data injection. Header was not set.",
+          "evidence": [
+            {
+              "url": "https://modemwarfare.zouroboros.ai"
+            }
+          ],
+          "remediation": "Set `content-security-policy` at your reverse proxy / framework. See `references/tool-reference.md` for production-grade values.",
+          "source": "production-ready:headers",
+          "references": [
+            "https://owasp.org/www-project-secure-headers/"
+          ],
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "high"
+          }
+        }
+      ],
+      "manualChecklist": [
+        {
+          "item": "Threat-model the auth boundary: what does a malicious authenticated user gain access to?",
+          "rationale": "OWASP A04 (Insecure Design) cannot be detected by scanners — needs human judgement."
+        },
+        {
+          "item": "Review every dependency added in the last 6 months for typosquatting / abandoned-maintainer risk",
+          "rationale": "Supply-chain attacks (A08) target recently-added or unmaintained packages."
+        },
+        {
+          "item": "Run a real DAST (ZAP full scan) at least once before launch and after every major release",
+          "rationale": "Static analysis cannot replicate exploit paths."
+        }
+      ]
+    },
+    {
+      "domain": "abuse-rate",
+      "ranAt": "2026-11-05T19:32:37.516Z",
+      "durationMs": 29,
+      "toolsUsed": [
+        "production-ready:abuse-grep"
+      ],
+      "toolsMissing": [],
+      "findings": [],
+      "manualChecklist": [
+        {
+          "item": "Confirm a per-tenant daily/monthly cost cap is enforced at the application layer",
+          "rationale": "Rate limits alone don't prevent a single bad actor from draining a budget within their quota."
+        },
+        {
+          "item": "Bot/CAPTCHA on signup + login + 'forgot password'",
+          "rationale": "Most abuse arrives via cheap-account creation."
+        },
+        {
+          "item": "Billing-anomaly alert wired to ops channel",
+          "rationale": "Catch runaway costs in minutes not days."
+        }
+      ]
+    },
+    {
+      "domain": "frontend",
+      "ranAt": "2026-11-05T19:32:37.529Z",
+      "durationMs": 12,
+      "toolsUsed": [
+        "production-ready:bundle-scan"
+      ],
+      "toolsMissing": [],
+      "findings": [
+        {
+          "id": "frontend.internal-url.tools/serve.js.17",
+          "domain": "frontend",
+          "severity": "low",
+          "title": "Internal URL / IP hardcoded in source",
+          "description": "Hard-coded internal hostnames or IPs end up in the production bundle and may reveal architecture details to attackers.",
+          "evidence": [
+            {
+              "file": "tools/serve.js",
+              "line": 17,
+              "snippet": "const host = bindIdx >= 0 ? args[bindIdx + 1] : '127.0.0.1';"
+            }
+          ],
+          "remediation": "Move URLs to environment-driven config. Verify the build pipeline strips dev-only paths.",
+          "source": "production-ready:internal-url-grep",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "low"
+          }
+        },
+        {
+          "id": "frontend.internal-url.tools/gallery.js.51",
+          "domain": "frontend",
+          "severity": "low",
+          "title": "Internal URL / IP hardcoded in source",
+          "description": "Hard-coded internal hostnames or IPs end up in the production bundle and may reveal architecture details to attackers.",
+          "evidence": [
+            {
+              "file": "tools/gallery.js",
+              "line": 51,
+              "snippet": "await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));"
+            }
+          ],
+          "remediation": "Move URLs to environment-driven config. Verify the build pipeline strips dev-only paths.",
+          "source": "production-ready:internal-url-grep",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "low"
+          }
+        },
+        {
+          "id": "frontend.internal-url.tools/gallery.js.52",
+          "domain": "frontend",
+          "severity": "low",
+          "title": "Internal URL / IP hardcoded in source",
+          "description": "Hard-coded internal hostnames or IPs end up in the production bundle and may reveal architecture details to attackers.",
+          "evidence": [
+            {
+              "file": "tools/gallery.js",
+              "line": 52,
+              "snippet": "const base = `http://127.0.0.1:${server.address().port}`;"
+            }
+          ],
+          "remediation": "Move URLs to environment-driven config. Verify the build pipeline strips dev-only paths.",
+          "source": "production-ready:internal-url-grep",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "low"
+          }
+        },
+        {
+          "id": "frontend.internal-url.tests/browser/lib.js.16",
+          "domain": "frontend",
+          "severity": "low",
+          "title": "Internal URL / IP hardcoded in source",
+          "description": "Hard-coded internal hostnames or IPs end up in the production bundle and may reveal architecture details to attackers.",
+          "evidence": [
+            {
+              "file": "tests/browser/lib.js",
+              "line": 16,
+              "snippet": "await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));"
+            }
+          ],
+          "remediation": "Move URLs to environment-driven config. Verify the build pipeline strips dev-only paths.",
+          "source": "production-ready:internal-url-grep",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "low"
+          }
+        },
+        {
+          "id": "frontend.internal-url.tests/browser/lib.js.18",
+          "domain": "frontend",
+          "severity": "low",
+          "title": "Internal URL / IP hardcoded in source",
+          "description": "Hard-coded internal hostnames or IPs end up in the production bundle and may reveal architecture details to attackers.",
+          "evidence": [
+            {
+              "file": "tests/browser/lib.js",
+              "line": 18,
+              "snippet": "return { server, port, base: `http://127.0.0.1:${port}`, close: () => new Promise((r) => server.close(r))"
+            }
+          ],
+          "remediation": "Move URLs to environment-driven config. Verify the build pipeline strips dev-only paths.",
+          "source": "production-ready:internal-url-grep",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "low"
+          }
+        }
+      ],
+      "manualChecklist": [
+        {
+          "item": "Open DevTools → Network tab on the production app — is any request going to a dev/staging URL?",
+          "rationale": "AI-generated code commonly leaves mixed-environment URLs after a copy-paste."
+        },
+        {
+          "item": "Check the bundle for comments / console.log statements",
+          "rationale": "Debug output may leak request/response shapes and PII."
+        }
+      ]
+    },
+    {
+      "domain": "logging",
+      "ranAt": "2026-11-05T19:32:37.561Z",
+      "durationMs": 31,
+      "toolsUsed": [
+        "production-ready:logger-grep"
+      ],
+      "toolsMissing": [],
+      "findings": [
+        {
+          "id": "logging.pii-leak.tests/browser/harness.js.17",
+          "domain": "logging",
+          "severity": "high",
+          "hardBlocker": false,
+          "title": "Sensitive field referenced in a log/print call",
+          "description": "A log statement appears to include an authorization header, token, password, or API key. Secrets in logs end up in centralized log stores, support tools, and accidentally in screenshots.",
+          "evidence": [
+            {
+              "file": "tests/browser/harness.js",
+              "line": 17,
+              "snippet": "console.log('session:', summary.session);"
+            }
+          ],
+          "remediation": "Use a redaction layer (e.g., pino redact, structlog processors). Log only field names + a hash if you need to correlate. Treat `Authorization`, `Cookie`, `password`, `token`, `secret`, `api_key` as never-loggable.",
+          "source": "production-ready:pii-log-grep",
+          "references": [
+            "https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/"
+          ],
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "high"
+          }
+        },
+        {
+          "id": "logging.console-noise",
+          "domain": "logging",
+          "severity": "low",
+          "title": "High volume of ad-hoc log statements (console.log: 140, print: 0)",
+          "description": "AI-generated code routinely leaves debug `console.log` / `print` calls in place. They produce log noise, may leak data, and cost CPU on hot paths.",
+          "remediation": "Adopt a structured logger (pino, winston, structlog, loguru). Strip / lint console.log in production builds (`no-console` ESLint rule).",
+          "source": "production-ready:log-volume",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "low"
+          }
+        },
+        {
+          "id": "logging.no-structured-logger",
+          "domain": "logging",
+          "severity": "medium",
+          "title": "No structured logger detected",
+          "description": "Unstructured logs are harder to search, redact, and rate-limit. They cost more in centralized log stores.",
+          "remediation": "Adopt pino (Node), structlog (Python), zap/slog (Go). Configure built-in PII redaction. Tag every log with request_id, user_id (hashed), tenant_id.",
+          "source": "production-ready:logger-grep",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "medium"
+          }
+        },
+        {
+          "id": "logging.no-error-tracker",
+          "domain": "logging",
+          "severity": "medium",
+          "title": "No error tracker integration detected",
+          "description": "Unobserved errors are unfixed errors. Without Sentry/Bugsnag/Datadog, you find out about prod issues from angry users.",
+          "remediation": "Wire Sentry (or equivalent) on both client and server. Set release/environment tags. Configure source-map upload.",
+          "source": "production-ready:tracker-grep",
+          "references": [
+            "https://docs.sentry.io/"
+          ],
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "medium"
+          }
+        }
+      ],
+      "manualChecklist": [
+        {
+          "item": "Verify centralized logs are searchable for at least 7 days",
+          "rationale": "Incidents are often noticed after they end; you need retention to retro."
+        },
+        {
+          "item": "Confirm uptime monitor with on-call paging (StatusCake / BetterStack / Pingdom)",
+          "rationale": "External probe catches what your internal metrics can't."
+        },
+        {
+          "item": "Per-tenant audit trail for: auth events, permission changes, admin actions, data exports",
+          "rationale": "Required for SOC 2 + GDPR + breach forensics."
+        }
+      ]
+    },
+    {
+      "domain": "accessibility",
+      "ranAt": "2026-11-05T19:32:37.572Z",
+      "durationMs": 10,
+      "toolsUsed": [],
+      "toolsMissing": [
+        "@axe-core/cli"
+      ],
+      "findings": [],
+      "manualChecklist": [
+        {
+          "item": "Keyboard-only pass: can you reach every interactive control with Tab? Operate it with Enter/Space?",
+          "rationale": "Automated tools catch ~30–40% of WCAG issues; keyboard ops can't be inferred from DOM."
+        },
+        {
+          "item": "Screen reader smoke test (VoiceOver / NVDA): does the announcement order make sense?",
+          "rationale": "Visually-ordered DOM can confuse screen readers."
+        },
+        {
+          "item": "Reduced motion preference is honored",
+          "rationale": "WCAG 2.3.3 (Animation from Interactions) and motion-disorder users."
+        }
+      ]
+    },
+    {
+      "domain": "performance",
+      "ranAt": "2026-11-05T19:32:37.576Z",
+      "durationMs": 3,
+      "toolsUsed": [],
+      "toolsMissing": [
+        "lighthouse"
+      ],
+      "findings": [],
+      "manualChecklist": [
+        {
+          "item": "Tested rollback procedure in staging within last 30 days",
+          "rationale": "An untested rollback is a hope, not a plan."
+        },
+        {
+          "item": "Backups exist AND restore has been tested in last 90 days",
+          "rationale": "Schrödinger's backup: simultaneously exists and doesn't until verified."
+        },
+        {
+          "item": "Capacity tested at ≥ 2× projected peak traffic",
+          "rationale": "Launch traffic spikes are bigger than steady state."
+        },
+        {
+          "item": "Per-route SLOs defined with error budget tracking",
+          "rationale": "Reliability targets without budgets become aspirations."
+        }
+      ]
+    },
+    {
+      "domain": "payments",
+      "ranAt": "2026-11-05T19:32:37.584Z",
+      "durationMs": 7,
+      "toolsUsed": [],
+      "toolsMissing": [],
+      "findings": [],
+      "manualChecklist": [
+        {
+          "item": "Confirm app has no money-handling surface",
+          "rationale": "If payments appear later, re-run this check."
+        }
+      ]
+    },
+    {
+      "domain": "file-uploads",
+      "ranAt": "2026-11-05T19:32:37.609Z",
+      "durationMs": 25,
+      "toolsUsed": [
+        "production-ready:upload-grep"
+      ],
+      "toolsMissing": [],
+      "findings": [
+        {
+          "id": "uploads.no-size-limit",
+          "domain": "file-uploads",
+          "severity": "high",
+          "title": "Upload handler without explicit size limit",
+          "description": "Upload code found but no `fileSize` / `maxFileSize` limit detected. Unbounded uploads exhaust disk and bandwidth.",
+          "evidence": [
+            {
+              "file": "tools/serve.js",
+              "line": 65,
+              "snippet": "fs.createReadStream(file).pipe(res);"
+            }
+          ],
+          "remediation": "Set strict per-file and per-request size limits in your upload middleware. Reject early before buffering to disk.",
+          "source": "production-ready:upload-grep",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "high"
+          }
+        }
+      ],
+      "manualChecklist": [
+        {
+          "item": "Per-user/tenant storage quota enforced",
+          "rationale": "Otherwise one user can fill your bucket and your bill."
+        },
+        {
+          "item": "Image-processing pipeline does not run untrusted ImageMagick (RCE history)",
+          "rationale": "Prefer sharp / pillow over ImageMagick if possible."
+        },
+        {
+          "item": "Antivirus or sandboxed scanning for executable / archive uploads",
+          "rationale": "Stored files become attack surface for downloaders."
+        }
+      ]
+    },
+    {
+      "domain": "database",
+      "ranAt": "2026-11-05T19:32:37.630Z",
+      "durationMs": 21,
+      "toolsUsed": [
+        "production-ready:db-grep"
+      ],
+      "toolsMissing": [],
+      "findings": [],
+      "manualChecklist": [
+        {
+          "item": "Test backup restore in a scratch environment — actually restore, don't just dump",
+          "rationale": "Backup files aren't backups; restored databases are."
+        },
+        {
+          "item": "Database admin password rotation policy + last rotation date",
+          "rationale": "Long-lived admin creds are a high-value target."
+        },
+        {
+          "item": "Audit log captures: schema changes, role grants, admin queries, data exports",
+          "rationale": "Required for SOC 2 + breach forensics."
+        },
+        {
+          "item": "Confirm migrations are idempotent and tested in CI",
+          "rationale": "AI-generated migrations frequently aren't reversible."
+        }
+      ]
+    },
+    {
+      "domain": "ai-code",
+      "ranAt": "2026-11-05T19:32:37.676Z",
+      "durationMs": 44,
+      "toolsUsed": [
+        "production-ready:ai-heuristics"
+      ],
+      "toolsMissing": [],
+      "findings": [
+        {
+          "id": "ai-code.silent-catch-js.tools/patch-ggwave.js.43",
+          "domain": "ai-code",
+          "severity": "high",
+          "title": "Empty `catch` swallows errors",
+          "description": "JS/TS catch block is empty or comment-only — errors disappear.",
+          "evidence": [
+            {
+              "file": "tools/patch-ggwave.js",
+              "line": 43,
+              "snippet": "e(name);try{Object.defineProperty(body,\"name\",{value:name})}catch(e){}return body}',"
+            }
+          ],
+          "remediation": "Log the error and either rethrow or handle it explicitly.",
+          "source": "production-ready:ai-silent-catch-js",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "high"
+          }
+        },
+        {
+          "id": "ai-code.silent-catch-js.tools/patch-ggwave.js.70",
+          "domain": "ai-code",
+          "severity": "high",
+          "title": "Empty `catch` swallows errors",
+          "description": "JS/TS catch block is empty or comment-only — errors disappear.",
+          "evidence": [
+            {
+              "file": "tools/patch-ggwave.js",
+              "line": 70,
+              "snippet": "erFunction,\"name\",{value:makeLegalFunctionName(humanName)})}catch(e){}return invokerFunction}',"
+            }
+          ],
+          "remediation": "Log the error and either rethrow or handle it explicitly.",
+          "source": "production-ready:ai-silent-catch-js",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "high"
+          }
+        },
+        {
+          "id": "ai-code.hand-rolled-crypto.tests/orders.test.js.113",
+          "domain": "ai-code",
+          "severity": "high",
+          "title": "Weak hash function (MD5/SHA1)",
+          "description": "MD5 and SHA1 are cryptographically broken. Do not use for passwords, signatures, or integrity.",
+          "evidence": [
+            {
+              "file": "tests/orders.test.js",
+              "line": 113,
+              "snippet": "const digest = crypto.createHash('md5').update(tag).digest('hex');"
+            }
+          ],
+          "remediation": "Use SHA-256+ for hashing, bcrypt/argon2 for passwords, HMAC-SHA256 for signing.",
+          "source": "production-ready:ai-hand-rolled-crypto",
+          "references": [
+            "https://owasp.org/Top10/A02_2021-Cryptographic_Failures/"
+          ],
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "high"
+          }
+        }
+      ],
+      "manualChecklist": [
+        {
+          "item": "Diff every AI-generated commit against the previous state — focus on what was REMOVED, not just added",
+          "rationale": "Agents commonly remove security checks during 'fixing' a test or unrelated bug."
+        },
+        {
+          "item": "Spot-check tests by running them in --watch + deliberately breaking the SUT — do the tests fail?",
+          "rationale": "Fake-passing tests reveal themselves when the code they 'test' actually breaks."
+        },
+        {
+          "item": "Inspect every `if NODE_ENV === 'production'` branch — was the security check actually wired in prod?",
+          "rationale": "AI often forgets to remove dev escape hatches."
+        }
+      ]
+    },
+    {
+      "domain": "browser-test",
+      "ranAt": "2026-11-05T19:32:39.485Z",
+      "durationMs": 1808,
+      "toolsUsed": [
+        "playwright"
+      ],
+      "toolsMissing": [],
+      "findings": [],
+      "manualChecklist": [
+        {
+          "item": "Sign-in, sign-out, and 'forgot password' flow on desktop AND mobile viewport",
+          "rationale": "Most common UX regression after AI-generated changes."
+        },
+        {
+          "item": "Direct-URL access to authenticated routes when logged out — confirms server-side gating",
+          "rationale": "Client-side guards are not enough.",
+          "critical": true
+        },
+        {
+          "item": "Mobile viewport check at 360×640 (iPhone SE size) — tap targets ≥ 44×44px",
+          "rationale": "WCAG 2.5.5 + mobile users are typically your largest cohort."
+        },
+        {
+          "item": "Form validation: try submitting empty, oversized, malformed, and SQL/XSS payloads",
+          "rationale": "Validation gaps surface here that grep misses."
+        },
+        {
+          "item": "Browser back/forward after sensitive actions (delete, purchase) — does state stay consistent?",
+          "rationale": "AI often forgets history.replaceState; back-button reveals stale UI."
+        },
+        {
+          "item": "Open DevTools Network tab during normal use — does any request go to localhost / staging?",
+          "rationale": "Mixed-environment URLs leak through AI copy-paste."
+        },
+        {
+          "item": "Check console for errors and warnings across 5+ representative flows",
+          "rationale": "Production-only errors (e.g., CSP violations) usually surface here first."
+        }
+      ],
+      "coverage": {
+        "status": "pass"
+      }
+    },
+    {
+      "domain": "concurrency",
+      "ranAt": "2026-11-05T19:32:39.507Z",
+      "durationMs": 21,
+      "toolsUsed": [
+        "production-ready:concurrency-heuristics"
+      ],
+      "toolsMissing": [],
+      "findings": [],
+      "manualChecklist": [
+        {
+          "item": "Double-submit every create/pay/delete action (click twice fast, and retry on a flaky network) — confirm exactly one side effect",
+          "rationale": "Idempotency and in-flight guards can only be confirmed by exercising the real flow.",
+          "critical": true
+        },
+        {
+          "item": "Open the app in two tabs, edit the same record in both, save both — confirm the second save is rejected or merged, not silently lost",
+          "rationale": "Lost-update / optimistic-lock behaviour is invisible to static analysis.",
+          "critical": true
+        },
+        {
+          "item": "Fire two requests that depend on ordering (e.g. create then immediately update) and confirm out-of-order arrival is handled",
+          "rationale": "Request ordering / race conditions surface only under real latency."
+        },
+        {
+          "item": "Trigger a provider webhook twice with the same event id — confirm the second is a no-op (dedupe by event id)",
+          "rationale": "Webhook redelivery is guaranteed by most providers; duplicate processing corrupts state."
+        },
+        {
+          "item": "Kill the process mid-write (or simulate it) and confirm no partially-written / torn state remains on restart",
+          "rationale": "Atomic-write / crash-consistency guarantees need a fault-injection test."
+        }
+      ],
+      "coverage": {
+        "status": "partial",
+        "reason": "static heuristics only; race conditions need runtime confirmation"
+      }
+    },
+    {
+      "domain": "visual-consistency",
+      "ranAt": "2026-11-05T19:32:39.513Z",
+      "durationMs": 5,
+      "toolsUsed": [
+        "production-ready:visual-heuristics"
+      ],
+      "toolsMissing": [],
+      "findings": [
+        {
+          "id": "visual.raw-hex-color-drift",
+          "domain": "visual-consistency",
+          "severity": "medium",
+          "title": "31 distinct raw hex color(s) across 4 file(s)",
+          "description": "The project defines a design-token / theme layer, but components hard-code hex colors directly. Each hard-coded value drifts from the palette and won't respond to theme or dark-mode changes.",
+          "evidence": [
+            {
+              "file": "spike/spike.css",
+              "line": 2,
+              "snippet": "body { margin: 0; padding: 12px; background: #061a2e; color: #e6f2f5; font: 15px/1.45 system-ui, sans-serif; max"
+            },
+            {
+              "file": "spike/spike.css",
+              "line": 3,
+              "snippet": "margin: 0; font-size: 22px; letter-spacing: 0.14em; color: #3dff8f; }"
+            },
+            {
+              "file": "spike/spike.css",
+              "line": 4,
+              "snippet": "in: 0 0 8px; font-size: 13px; letter-spacing: 0.2em; color: #ffb100; }"
+            },
+            {
+              "file": "spike/spike.css",
+              "line": 6,
+              "snippet": ".muted { color: #8fb0bf; }"
+            },
+            {
+              "file": "spike/spike.css",
+              "line": 10,
+              "snippet": "n; gap: 4px; font-size: 12px; letter-spacing: 0.1em; color: #8fb0bf; text-transform: uppercase; }"
+            },
+            {
+              "file": "spike/spike.css",
+              "line": 11,
+              "snippet": "font: 15px ui-monospace, Menlo, Consolas, monospace; color: #e6f2f5; background: #03101c; border: 1px solid rgba(61, 255, 143,"
+            },
+            {
+              "file": "spike/spike.css",
+              "line": 16,
+              "snippet": "; letter-spacing: 0.08em; text-transform: uppercase; color: #3dff8f; background: #0a2540; border: 2px solid #3dff8f; border-rad"
+            },
+            {
+              "file": "spike/spike.css",
+              "line": 18,
+              "snippet": "button.amber { color: #03101c; background: #ffb100; border-color: #ffd56a; }"
+            }
+          ],
+          "impact": "Inconsistent, off-palette colors and broken dark mode; every future palette change misses these call sites.",
+          "confidence": "medium",
+          "verificationStatus": "heuristic",
+          "remediationClass": "code-change",
+          "remediation": "Replace raw hex with a design token (Tailwind color class or CSS variable). If a color is genuinely new, add it to the token layer first, then reference it.",
+          "source": "production-ready:token-drift",
+          "triage": {
+            "decision": "kept",
+            "reproduce": {
+              "fpSignal": null
+            },
+            "originalSeverity": "medium"
+          }
+        }
+      ],
+      "manualChecklist": [
+        {
+          "item": "Tab through every interactive element — confirm hover, focus-visible, active, and disabled states all exist and are distinct",
+          "rationale": "AI-generated components routinely ship only the default state; missing focus rings also fail accessibility.",
+          "critical": true
+        },
+        {
+          "item": "Shrink to 320px and grow to 1440px+ — confirm no horizontal scroll, clipped text, or overlapping elements at any breakpoint",
+          "rationale": "Overflow and breakpoint gaps are perceptual and not detectable by grep."
+        },
+        {
+          "item": "Render the loading, empty, error, and success state of every data view — confirm all four are designed, not just the happy path",
+          "rationale": "Empty/error/loading states are the most commonly missing screens in AI-built UIs.",
+          "critical": true
+        },
+        {
+          "item": "Compare headings, body, and captions across 3+ screens — confirm one consistent type scale, not per-screen font sizes",
+          "rationale": "Typography drift is obvious to users but invisible to static checks."
+        },
+        {
+          "item": "Fill fields with the longest realistic content (long names, long i18n strings, big numbers) — confirm nothing truncates or breaks layout",
+          "rationale": "Localization/content expansion (German, etc.) breaks fixed-width layouts."
+        },
+        {
+          "item": "Spot-check that repeated components (buttons, cards, inputs) use one shared variant, not divergent one-off copies",
+          "rationale": "Component-variant drift accumulates silently across a codebase."
+        }
+      ],
+      "coverage": {
+        "status": "partial",
+        "reason": "static drift heuristics; perceptual checks still manual"
+      }
+    },
+    {
+      "domain": "seo-aeo",
+      "ranAt": "2026-11-05T19:32:39.822Z",
+      "durationMs": 307,
+      "toolsUsed": [
+        "curl"
+      ],
+      "toolsMissing": [
+        "lighthouse"
+      ],
+      "findings": [
+        {
+          "id": "seo-aeo.missing-jsonld",
+          "domain": "seo-aeo",
+          "severity": "low",
+          "title": "No JSON-LD structured data detected",
+          "description": "No `<script type=\"application/ld+json\">` blocks found. JSON-LD is the recommended format for Schema.org markup. It is not a ranking factor, but valid structured data that matches visible content enables rich results and helps answer engines interpret entities. Do not add schema that does not match the visible page.",
+          "evidence": [
+            {
+              "url": "https://modemwarfare.zouroboros.ai",
+              "snippet": "0 JSON-LD blocks in <head>"
+            }
+          ],
+          "remediation": "If the page represents a clear entity (Article, Product, Organization, FAQ, BreadcrumbList), add matching JSON-LD that mirrors visible content. Validate with the Rich Results Test.",
+          "references": [
+            "https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data"
+          ],
+          "source": "curl/html",
+          "confidence": "high",
+          "verificationStatus": "verified",
+          "affectedFlow": "crawl",
+          "remediationClass": "code-change"
+        },
+        {
+          "id": "seo-aeo.no-sitemap-reference",
+          "domain": "seo-aeo",
+          "severity": "low",
+          "title": "robots.txt declares no sitemap",
+          "description": "No `Sitemap:` directive in robots.txt. Sitemaps are not required, but they help crawlers discover URLs (especially new, isolated, or JS-rendered pages). For multi-page sites, declare at least one.",
+          "evidence": [
+            {
+              "url": "https://modemwarfare.zouroboros.ai/robots.txt",
+              "snippet": "no Sitemap: directive"
+            }
+          ],
+          "remediation": "Generate a sitemap.xml and reference it via `Sitemap: <absolute-url>` in robots.txt. Many frameworks auto-generate this.",
+          "references": [
+            "https://www.sitemaps.org/protocol.html"
+          ],
+          "source": "curl",
+          "confidence": "high",
+          "verificationStatus": "verified",
+          "affectedFlow": "crawl",
+          "remediationClass": "config"
+        }
+      ],
+      "manualChecklist": [
+        {
+          "item": "Decide and document AI-bot policy (training vs search vs user-fetch)",
+          "rationale": "robots.txt has no explicit AI-bot directives, meaning all AI crawlers are allowed by default (per RFC 9309, omission = allow). The owner should consciously decide whether training crawlers (GPTBot, CCBot, ClaudeBot, Google-Extended) are permitted and set directives accordingly. This is a policy decision, not a defect."
+        },
+        {
+          "item": "Verify rendered-vs-raw HTML parity (Lighthouse unavailable)",
+          "rationale": "Lighthouse is not installed, so this audit could not run a headless render. For JS-heavy sites, the raw-curl HTML may differ from what a rendered crawler sees. Manually fetch the page with JS disabled and compare — if title/canonical/content are missing without JS, the site is not reliably indexable.",
+          "critical": true
+        },
+        {
+          "item": "Verify index coverage and canonical selection in Search Console / Bing Webmaster Tools",
+          "rationale": "Automation can detect directives but cannot see actual index status, canonical selection, or crawl frequency. These are observable only in first-party console data. Check the URL Inspection tool for the audit URL.",
+          "critical": true
+        },
+        {
+          "item": "Confirm structured data (if present) matches visible page content",
+          "rationale": "Schema that does not mirror visible content is a spam signal and can trigger manual action. The Rich Results Test validates syntax; only a human can confirm semantic match against the rendered page."
+        }
+      ],
+      "coverage": {
+        "status": "partial",
+        "reason": "rendered parity unverified (no lighthouse)"
+      }
+    }
+  ],
+  "manualChecklist": [
+    {
+      "domain": "legal",
+      "item": "List every third party that receives user data (analytics, error reporting, LLM providers, payment processors)",
+      "rationale": "Required for GDPR/CCPA disclosure and Data Processing Agreements."
+    },
+    {
+      "domain": "legal",
+      "item": "Define data retention windows per data type",
+      "rationale": "Indefinite retention is hostile to user privacy and increases breach blast radius."
+    },
+    {
+      "domain": "legal",
+      "item": "Verify Data Processing Agreement (DPA) signed with each sub-processor",
+      "rationale": "GDPR Article 28 requires DPAs with processors handling personal data."
+    },
+    {
+      "domain": "legal",
+      "item": "Cookie banner / consent management is wired (if EU/UK users)",
+      "rationale": "GDPR + ePrivacy Directive require informed consent for non-essential cookies."
+    },
+    {
+      "domain": "legal",
+      "item": "Privacy policy lists all processors + retention windows + lawful basis",
+      "rationale": "Plain-language disclosure is legally required, not optional."
+    },
+    {
+      "domain": "secrets",
+      "item": "Confirm publishable/anon keys are documented as intentionally-public by the provider",
+      "rationale": "Some 'public' keys are safe to expose (Stripe publishable, Supabase anon); others are not."
+    },
+    {
+      "domain": "secrets",
+      "item": "Verify credential rotation cadence is defined and tested",
+      "rationale": "Even unleaked credentials should be rotated periodically."
+    },
+    {
+      "domain": "secrets",
+      "item": "Check provider audit logs for unexpected access",
+      "rationale": "Past leaks may have been exploited."
+    },
+    {
+      "domain": "authentication",
+      "item": "Test ownership boundaries — sign in as user A, try to access user B's resources via direct URL",
+      "rationale": "BOLA / IDOR is the #1 API vuln per OWASP API Top 10 2023."
+    },
+    {
+      "domain": "authentication",
+      "item": "Verify MFA is available (and required for admin)",
+      "rationale": "Compromised passwords are the most common breach vector."
+    },
+    {
+      "domain": "authentication",
+      "item": "Confirm session timeout + inactivity logout exists",
+      "rationale": "Long-lived sessions on shared/public devices are a leak path."
+    },
+    {
+      "domain": "authentication",
+      "item": "Check rate limit on login + password reset endpoints",
+      "rationale": "Credential stuffing & enumeration require throttling."
+    },
+    {
+      "domain": "api-safety",
+      "item": "Verify every state-changing endpoint requires POST/PUT/PATCH/DELETE (not GET)",
+      "rationale": "GET requests are logged in browser history, referrer headers, and CDN logs."
+    },
+    {
+      "domain": "api-safety",
+      "item": "Confirm OpenAPI/Swagger spec exists and matches implementation",
+      "rationale": "Drift between docs and code hides shadow endpoints."
+    },
+    {
+      "domain": "api-safety",
+      "item": "Test rate limits return 429 with a Retry-After header",
+      "rationale": "Some implementations silently drop; clients need feedback."
+    },
+    {
+      "domain": "owasp",
+      "item": "Threat-model the auth boundary: what does a malicious authenticated user gain access to?",
+      "rationale": "OWASP A04 (Insecure Design) cannot be detected by scanners — needs human judgement."
+    },
+    {
+      "domain": "owasp",
+      "item": "Review every dependency added in the last 6 months for typosquatting / abandoned-maintainer risk",
+      "rationale": "Supply-chain attacks (A08) target recently-added or unmaintained packages."
+    },
+    {
+      "domain": "owasp",
+      "item": "Run a real DAST (ZAP full scan) at least once before launch and after every major release",
+      "rationale": "Static analysis cannot replicate exploit paths."
+    },
+    {
+      "domain": "abuse-rate",
+      "item": "Confirm a per-tenant daily/monthly cost cap is enforced at the application layer",
+      "rationale": "Rate limits alone don't prevent a single bad actor from draining a budget within their quota."
+    },
+    {
+      "domain": "abuse-rate",
+      "item": "Bot/CAPTCHA on signup + login + 'forgot password'",
+      "rationale": "Most abuse arrives via cheap-account creation."
+    },
+    {
+      "domain": "abuse-rate",
+      "item": "Billing-anomaly alert wired to ops channel",
+      "rationale": "Catch runaway costs in minutes not days."
+    },
+    {
+      "domain": "frontend",
+      "item": "Open DevTools → Network tab on the production app — is any request going to a dev/staging URL?",
+      "rationale": "AI-generated code commonly leaves mixed-environment URLs after a copy-paste."
+    },
+    {
+      "domain": "frontend",
+      "item": "Check the bundle for comments / console.log statements",
+      "rationale": "Debug output may leak request/response shapes and PII."
+    },
+    {
+      "domain": "logging",
+      "item": "Verify centralized logs are searchable for at least 7 days",
+      "rationale": "Incidents are often noticed after they end; you need retention to retro."
+    },
+    {
+      "domain": "logging",
+      "item": "Confirm uptime monitor with on-call paging (StatusCake / BetterStack / Pingdom)",
+      "rationale": "External probe catches what your internal metrics can't."
+    },
+    {
+      "domain": "logging",
+      "item": "Per-tenant audit trail for: auth events, permission changes, admin actions, data exports",
+      "rationale": "Required for SOC 2 + GDPR + breach forensics."
+    },
+    {
+      "domain": "accessibility",
+      "item": "Keyboard-only pass: can you reach every interactive control with Tab? Operate it with Enter/Space?",
+      "rationale": "Automated tools catch ~30–40% of WCAG issues; keyboard ops can't be inferred from DOM."
+    },
+    {
+      "domain": "accessibility",
+      "item": "Screen reader smoke test (VoiceOver / NVDA): does the announcement order make sense?",
+      "rationale": "Visually-ordered DOM can confuse screen readers."
+    },
+    {
+      "domain": "accessibility",
+      "item": "Reduced motion preference is honored",
+      "rationale": "WCAG 2.3.3 (Animation from Interactions) and motion-disorder users."
+    },
+    {
+      "domain": "performance",
+      "item": "Tested rollback procedure in staging within last 30 days",
+      "rationale": "An untested rollback is a hope, not a plan."
+    },
+    {
+      "domain": "performance",
+      "item": "Backups exist AND restore has been tested in last 90 days",
+      "rationale": "Schrödinger's backup: simultaneously exists and doesn't until verified."
+    },
+    {
+      "domain": "performance",
+      "item": "Capacity tested at ≥ 2× projected peak traffic",
+      "rationale": "Launch traffic spikes are bigger than steady state."
+    },
+    {
+      "domain": "performance",
+      "item": "Per-route SLOs defined with error budget tracking",
+      "rationale": "Reliability targets without budgets become aspirations."
+    },
+    {
+      "domain": "payments",
+      "item": "Confirm app has no money-handling surface",
+      "rationale": "If payments appear later, re-run this check."
+    },
+    {
+      "domain": "file-uploads",
+      "item": "Per-user/tenant storage quota enforced",
+      "rationale": "Otherwise one user can fill your bucket and your bill."
+    },
+    {
+      "domain": "file-uploads",
+      "item": "Image-processing pipeline does not run untrusted ImageMagick (RCE history)",
+      "rationale": "Prefer sharp / pillow over ImageMagick if possible."
+    },
+    {
+      "domain": "file-uploads",
+      "item": "Antivirus or sandboxed scanning for executable / archive uploads",
+      "rationale": "Stored files become attack surface for downloaders."
+    },
+    {
+      "domain": "database",
+      "item": "Test backup restore in a scratch environment — actually restore, don't just dump",
+      "rationale": "Backup files aren't backups; restored databases are."
+    },
+    {
+      "domain": "database",
+      "item": "Database admin password rotation policy + last rotation date",
+      "rationale": "Long-lived admin creds are a high-value target."
+    },
+    {
+      "domain": "database",
+      "item": "Audit log captures: schema changes, role grants, admin queries, data exports",
+      "rationale": "Required for SOC 2 + breach forensics."
+    },
+    {
+      "domain": "database",
+      "item": "Confirm migrations are idempotent and tested in CI",
+      "rationale": "AI-generated migrations frequently aren't reversible."
+    },
+    {
+      "domain": "ai-code",
+      "item": "Diff every AI-generated commit against the previous state — focus on what was REMOVED, not just added",
+      "rationale": "Agents commonly remove security checks during 'fixing' a test or unrelated bug."
+    },
+    {
+      "domain": "ai-code",
+      "item": "Spot-check tests by running them in --watch + deliberately breaking the SUT — do the tests fail?",
+      "rationale": "Fake-passing tests reveal themselves when the code they 'test' actually breaks."
+    },
+    {
+      "domain": "ai-code",
+      "item": "Inspect every `if NODE_ENV === 'production'` branch — was the security check actually wired in prod?",
+      "rationale": "AI often forgets to remove dev escape hatches."
+    },
+    {
+      "domain": "browser-test",
+      "item": "Sign-in, sign-out, and 'forgot password' flow on desktop AND mobile viewport",
+      "rationale": "Most common UX regression after AI-generated changes."
+    },
+    {
+      "domain": "browser-test",
+      "item": "Direct-URL access to authenticated routes when logged out — confirms server-side gating",
+      "rationale": "Client-side guards are not enough.",
+      "critical": true
+    },
+    {
+      "domain": "browser-test",
+      "item": "Mobile viewport check at 360×640 (iPhone SE size) — tap targets ≥ 44×44px",
+      "rationale": "WCAG 2.5.5 + mobile users are typically your largest cohort."
+    },
+    {
+      "domain": "browser-test",
+      "item": "Form validation: try submitting empty, oversized, malformed, and SQL/XSS payloads",
+      "rationale": "Validation gaps surface here that grep misses."
+    },
+    {
+      "domain": "browser-test",
+      "item": "Browser back/forward after sensitive actions (delete, purchase) — does state stay consistent?",
+      "rationale": "AI often forgets history.replaceState; back-button reveals stale UI."
+    },
+    {
+      "domain": "browser-test",
+      "item": "Open DevTools Network tab during normal use — does any request go to localhost / staging?",
+      "rationale": "Mixed-environment URLs leak through AI copy-paste."
+    },
+    {
+      "domain": "browser-test",
+      "item": "Check console for errors and warnings across 5+ representative flows",
+      "rationale": "Production-only errors (e.g., CSP violations) usually surface here first."
+    },
+    {
+      "domain": "concurrency",
+      "item": "Double-submit every create/pay/delete action (click twice fast, and retry on a flaky network) — confirm exactly one side effect",
+      "rationale": "Idempotency and in-flight guards can only be confirmed by exercising the real flow.",
+      "critical": true
+    },
+    {
+      "domain": "concurrency",
+      "item": "Open the app in two tabs, edit the same record in both, save both — confirm the second save is rejected or merged, not silently lost",
+      "rationale": "Lost-update / optimistic-lock behaviour is invisible to static analysis.",
+      "critical": true
+    },
+    {
+      "domain": "concurrency",
+      "item": "Fire two requests that depend on ordering (e.g. create then immediately update) and confirm out-of-order arrival is handled",
+      "rationale": "Request ordering / race conditions surface only under real latency."
+    },
+    {
+      "domain": "concurrency",
+      "item": "Trigger a provider webhook twice with the same event id — confirm the second is a no-op (dedupe by event id)",
+      "rationale": "Webhook redelivery is guaranteed by most providers; duplicate processing corrupts state."
+    },
+    {
+      "domain": "concurrency",
+      "item": "Kill the process mid-write (or simulate it) and confirm no partially-written / torn state remains on restart",
+      "rationale": "Atomic-write / crash-consistency guarantees need a fault-injection test."
+    },
+    {
+      "domain": "visual-consistency",
+      "item": "Tab through every interactive element — confirm hover, focus-visible, active, and disabled states all exist and are distinct",
+      "rationale": "AI-generated components routinely ship only the default state; missing focus rings also fail accessibility.",
+      "critical": true
+    },
+    {
+      "domain": "visual-consistency",
+      "item": "Shrink to 320px and grow to 1440px+ — confirm no horizontal scroll, clipped text, or overlapping elements at any breakpoint",
+      "rationale": "Overflow and breakpoint gaps are perceptual and not detectable by grep."
+    },
+    {
+      "domain": "visual-consistency",
+      "item": "Render the loading, empty, error, and success state of every data view — confirm all four are designed, not just the happy path",
+      "rationale": "Empty/error/loading states are the most commonly missing screens in AI-built UIs.",
+      "critical": true
+    },
+    {
+      "domain": "visual-consistency",
+      "item": "Compare headings, body, and captions across 3+ screens — confirm one consistent type scale, not per-screen font sizes",
+      "rationale": "Typography drift is obvious to users but invisible to static checks."
+    },
+    {
+      "domain": "visual-consistency",
+      "item": "Fill fields with the longest realistic content (long names, long i18n strings, big numbers) — confirm nothing truncates or breaks layout",
+      "rationale": "Localization/content expansion (German, etc.) breaks fixed-width layouts."
+    },
+    {
+      "domain": "visual-consistency",
+      "item": "Spot-check that repeated components (buttons, cards, inputs) use one shared variant, not divergent one-off copies",
+      "rationale": "Component-variant drift accumulates silently across a codebase."
+    },
+    {
+      "domain": "seo-aeo",
+      "item": "Decide and document AI-bot policy (training vs search vs user-fetch)",
+      "rationale": "robots.txt has no explicit AI-bot directives, meaning all AI crawlers are allowed by default (per RFC 9309, omission = allow). The owner should consciously decide whether training crawlers (GPTBot, CCBot, ClaudeBot, Google-Extended) are permitted and set directives accordingly. This is a policy decision, not a defect."
+    },
+    {
+      "domain": "seo-aeo",
+      "item": "Verify rendered-vs-raw HTML parity (Lighthouse unavailable)",
+      "rationale": "Lighthouse is not installed, so this audit could not run a headless render. For JS-heavy sites, the raw-curl HTML may differ from what a rendered crawler sees. Manually fetch the page with JS disabled and compare — if title/canonical/content are missing without JS, the site is not reliably indexable.",
+      "critical": true
+    },
+    {
+      "domain": "seo-aeo",
+      "item": "Verify index coverage and canonical selection in Search Console / Bing Webmaster Tools",
+      "rationale": "Automation can detect directives but cannot see actual index status, canonical selection, or crawl frequency. These are observable only in first-party console data. Check the URL Inspection tool for the audit URL.",
+      "critical": true
+    },
+    {
+      "domain": "seo-aeo",
+      "item": "Confirm structured data (if present) matches visible page content",
+      "rationale": "Schema that does not mirror visible content is a spam signal and can trigger manual action. The Rich Results Test validates syntax; only a human can confirm semantic match against the rendered page."
+    }
+  ],
+  "tooling": {
+    "gitleaks": {
+      "available": false
+    },
+    "trufflehog": {
+      "available": false
+    },
+    "semgrep": {
+      "available": false
+    },
+    "osv-scanner": {
+      "available": false
+    },
+    "trivy": {
+      "available": false
+    },
+    "lighthouse": {
+      "available": false
+    },
+    "axe": {
+      "available": false
+    },
+    "pa11y": {
+      "available": false
+    },
+    "nuclei": {
+      "available": false
+    }
+  },
+  "coverage": {
+    "perDomain": [
+      {
+        "domain": "legal",
+        "status": "pass"
+      },
+      {
+        "domain": "secrets",
+        "status": "partial",
+        "reason": "ran without gitleaks, trufflehog"
+      },
+      {
+        "domain": "authentication",
+        "status": "partial",
+        "reason": "ran without semgrep"
+      },
+      {
+        "domain": "api-safety",
+        "status": "pass"
+      },
+      {
+        "domain": "owasp",
+        "status": "pass"
+      },
+      {
+        "domain": "abuse-rate",
+        "status": "pass"
+      },
+      {
+        "domain": "frontend",
+        "status": "pass"
+      },
+      {
+        "domain": "logging",
+        "status": "pass"
+      },
+      {
+        "domain": "accessibility",
+        "status": "partial",
+        "reason": "ran without @axe-core/cli"
+      },
+      {
+        "domain": "performance",
+        "status": "partial",
+        "reason": "ran without lighthouse"
+      },
+      {
+        "domain": "payments",
+        "status": "pass"
+      },
+      {
+        "domain": "file-uploads",
+        "status": "pass"
+      },
+      {
+        "domain": "database",
+        "status": "pass"
+      },
+      {
+        "domain": "ai-code",
+        "status": "pass"
+      },
+      {
+        "domain": "browser-test",
+        "status": "pass"
+      },
+      {
+        "domain": "concurrency",
+        "status": "partial",
+        "reason": "static heuristics only; race conditions need runtime confirmation"
+      },
+      {
+        "domain": "visual-consistency",
+        "status": "partial",
+        "reason": "static drift heuristics; perceptual checks still manual"
+      },
+      {
+        "domain": "seo-aeo",
+        "status": "partial",
+        "reason": "rendered parity unverified (no lighthouse)"
+      }
+    ],
+    "gaps": [
+      {
+        "kind": "domain:secrets:partial",
+        "severity": "soft",
+        "detail": "secrets ran with reduced coverage — ran without gitleaks, trufflehog"
+      },
+      {
+        "kind": "domain:authentication:partial",
+        "severity": "soft",
+        "detail": "authentication ran with reduced coverage — ran without semgrep"
+      },
+      {
+        "kind": "domain:accessibility:partial",
+        "severity": "soft",
+        "detail": "accessibility ran with reduced coverage — ran without @axe-core/cli"
+      },
+      {
+        "kind": "domain:performance:partial",
+        "severity": "soft",
+        "detail": "performance ran with reduced coverage — ran without lighthouse"
+      },
+      {
+        "kind": "domain:concurrency:partial",
+        "severity": "soft",
+        "detail": "concurrency ran with reduced coverage — static heuristics only; race conditions need runtime confirmation"
+      },
+      {
+        "kind": "domain:visual-consistency:partial",
+        "severity": "soft",
+        "detail": "visual-consistency ran with reduced coverage — static drift heuristics; perceptual checks still manual"
+      },
+      {
+        "kind": "domain:seo-aeo:partial",
+        "severity": "soft",
+        "detail": "seo-aeo ran with reduced coverage — rendered parity unverified (no lighthouse)"
+      },
+      {
+        "kind": "scanners:multiple-missing",
+        "severity": "blocking",
+        "detail": "3 core scanners unavailable (gitleaks, semgrep, osv-scanner) — external verification is largely absent; only in-process heuristics ran"
+      },
+      {
+        "kind": "manual:critical-unverified",
+        "severity": "soft",
+        "detail": "7 critical manual check(s) not signed off — pass --manual-verified after a human confirms them"
+      }
+    ],
+    "missingScanners": [
+      "gitleaks",
+      "semgrep",
+      "osv-scanner"
+    ],
+    "ceiling": "private-beta-only",
+    "incomplete": true
+  }
+}

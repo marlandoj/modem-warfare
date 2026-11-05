@@ -1,0 +1,45 @@
+$ PLAYWRIGHT_BROWSERS_PATH=/opt/zouroboros/factory-workspaces/t_0aa85385/_tools/browsers bun inputs/production-ready/scripts/audit.ts --repo /tmp/mw-published-tree-t_b471b49b --url https://modemwarfare.zouroboros.ai --name "Modem Warfare" --purpose "two-player offline naval duel game and its landing page" --format all --triage --out /tmp/mw-audit-control
+(repo = fresh git clone of HEAD d38d446, no inputs/ folder; stdout was empty, stderr follows)
+
+📋 production-ready audit 1.0.0
+   repo:  /tmp/mw-published-tree-t_b471b49b
+   url:   https://modemwarfare.zouroboros.ai
+   out:   /tmp/mw-audit-control
+   stack: node
+
+▸ legal                🔴0 🟠0 🟡2 🔵0 (0.0s)
+▸ secrets              ✅ clean (0.1s)
+▸ authentication       ✅ clean (0.0s)
+▸ api-safety           ✅ clean (0.0s)
+▸ owasp                🔴0 🟠2 🟡0 🔵0 (0.1s)
+▸ abuse-rate           ✅ clean (0.0s)
+▸ frontend             ✅ clean (0.0s)
+▸ logging              🔴0 🟠1 🟡2 🔵1 (0.0s)
+▸ accessibility        ✅ clean (0.0s)
+▸ performance          ✅ clean (0.0s)
+▸ payments             ✅ clean (0.0s)
+▸ file-uploads         🔴0 🟠1 🟡0 🔵0 (0.0s)
+▸ database             ✅ clean (0.0s)
+▸ ai-code              🔴0 🟠3 🟡0 🔵0 (0.0s)
+▸ browser-test         ✅ clean (1.8s)
+▸ concurrency          ✅ clean (0.0s)
+▸ visual-consistency   🔴0 🟠0 🟡1 🔵0 (0.0s)
+▸ seo-aeo              ✅ clean (0.3s)
+
+▸ triage             kept 20 · drop 0 · downgrade 0 (0.0s)
+
+🟠  Verdict: Private Beta Only
+    7 high-severity finding(s) — invite-gated launch acceptable
+
+📊  0 critical · 7 high · 5 medium · 8 low
+🔍  Coverage incomplete — capped at Private Beta Only (findings alone: Private Beta Only)
+      • secrets ran with reduced coverage — ran without gitleaks, trufflehog
+      • authentication ran with reduced coverage — ran without semgrep
+      • accessibility ran with reduced coverage — ran without @axe-core/cli
+      • performance ran with reduced coverage — ran without lighthouse
+      • concurrency ran with reduced coverage — static heuristics only; race conditions need runtime confirmation
+      • visual-consistency ran with reduced coverage — static drift heuristics; perceptual checks still manual
+📂  Reports written to /tmp/mw-audit-control
+📨  7 remediation prompt(s) in /tmp/mw-audit-control/prompts/
+
+exit code: 2

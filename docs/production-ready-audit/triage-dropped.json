@@ -1,0 +1,456 @@
+[
+  {
+    "id": "auth.admin-route-review.inputs/production-ready/scripts/checks/03-authentication.ts.76",
+    "domain": "authentication",
+    "severity": "medium",
+    "title": "Admin reference — verify auth gate",
+    "description": "Found an `admin` reference in source. Confirm the surrounding handler enforces server-side authentication AND a role check before allowing access.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/03-authentication.ts",
+        "line": 76,
+        "snippet": "/isAdmin|is_admin/,"
+      }
+    ],
+    "remediation": "Wrap the route in an `assertAdmin(req)` (or framework equivalent) at the *server* layer. Never gate admin UI client-side only.",
+    "source": "production-ready:admin-grep",
+    "references": [
+      "https://owasp.org/Top10/A01_2021-Broken_Access_Control/"
+    ],
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside regex literal (rule definition)"
+      },
+      "originalSeverity": "medium"
+    }
+  },
+  {
+    "id": "api.cors-wildcard.inputs/production-ready/scripts/checks/04-api-safety.ts.118",
+    "domain": "api-safety",
+    "severity": "high",
+    "title": "Wildcard CORS allows any origin",
+    "description": "`Access-Control-Allow-Origin: *` (combined with credentials) is a known auth bypass. Even without credentials, it enables cross-origin abuse.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/04-api-safety.ts",
+        "line": 118,
+        "snippet": "description: \"`Access-Control-Allow-Origin: *` (combined with credentials) is a known auth bypass. Even w"
+      }
+    ],
+    "remediation": "Allowlist specific origins. Reject unexpected `Origin` headers. Never combine `Access-Control-Allow-Origin: *` with `Allow-Credentials: true`.",
+    "source": "production-ready:cors-grep",
+    "references": [
+      "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS"
+    ],
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside a string property (likely doc/report copy)"
+      },
+      "originalSeverity": "high"
+    }
+  },
+  {
+    "id": "api.cors-wildcard.inputs/production-ready/scripts/checks/04-api-safety.ts.120",
+    "domain": "api-safety",
+    "severity": "high",
+    "title": "Wildcard CORS allows any origin",
+    "description": "`Access-Control-Allow-Origin: *` (combined with credentials) is a known auth bypass. Even without credentials, it enables cross-origin abuse.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/04-api-safety.ts",
+        "line": 120,
+        "snippet": "origins. Reject unexpected `Origin` headers. Never combine `Access-Control-Allow-Origin: *` with `Allow-Credentials: true`.\","
+      }
+    ],
+    "remediation": "Allowlist specific origins. Reject unexpected `Origin` headers. Never combine `Access-Control-Allow-Origin: *` with `Allow-Credentials: true`.",
+    "source": "production-ready:cors-grep",
+    "references": [
+      "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS"
+    ],
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside a string property (likely doc/report copy)"
+      },
+      "originalSeverity": "high"
+    }
+  },
+  {
+    "id": "abuse.no-body-size-limit",
+    "domain": "abuse-rate",
+    "severity": "medium",
+    "title": "Express body parser without explicit size limit",
+    "description": "`express.json()` defaults to 100kb but custom parsers may have no limit. Unbounded request bodies enable memory-exhaustion DoS.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/06-abuse-rate.ts",
+        "line": 75,
+        "snippet": "description: \"`express.json()` defaults to 100kb but custom parsers may have no limit. Un"
+      }
+    ],
+    "remediation": "Set an explicit limit: `app.use(express.json({ limit: '100kb' }))`. Increase only for routes that genuinely need it.",
+    "source": "production-ready:body-limit-grep",
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside a string property (likely doc/report copy)"
+      },
+      "originalSeverity": "medium"
+    }
+  },
+  {
+    "id": "frontend.internal-url.inputs/production-ready/scripts/checks/07-frontend.ts.66",
+    "domain": "frontend",
+    "severity": "low",
+    "title": "Internal URL / IP hardcoded in source",
+    "description": "Hard-coded internal hostnames or IPs end up in the production bundle and may reveal architecture details to attackers.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/07-frontend.ts",
+        "line": 66,
+        "snippet": "const internalUrls = grepFiles(sourceFiles, /(localhost|127\\.0\\.0\\.1|10\\.\\d+\\.\\d+\\.\\d+|192\\.168\\.\\d+\\.\\d+|internal\\"
+      }
+    ],
+    "remediation": "Move URLs to environment-driven config. Verify the build pipeline strips dev-only paths.",
+    "source": "production-ready:internal-url-grep",
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside regex literal (rule definition)"
+      },
+      "originalSeverity": "low"
+    }
+  },
+  {
+    "id": "frontend.internal-url.inputs/production-ready/scripts/checks/15-browser-test.ts.95",
+    "domain": "frontend",
+    "severity": "low",
+    "title": "Internal URL / IP hardcoded in source",
+    "description": "Hard-coded internal hostnames or IPs end up in the production bundle and may reveal architecture details to attackers.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/15-browser-test.ts",
+        "line": 95,
+        "snippet": "// Watch every request for dev/staging/localhost leaks outside the audited origin."
+      }
+    ],
+    "remediation": "Move URLs to environment-driven config. Verify the build pipeline strips dev-only paths.",
+    "source": "production-ready:internal-url-grep",
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "line is a comment"
+      },
+      "originalSeverity": "low"
+    }
+  },
+  {
+    "id": "frontend.internal-url.inputs/production-ready/scripts/checks/15-browser-test.ts.231",
+    "domain": "frontend",
+    "severity": "low",
+    "title": "Internal URL / IP hardcoded in source",
+    "description": "Hard-coded internal hostnames or IPs end up in the production bundle and may reveal architecture details to attackers.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/15-browser-test.ts",
+        "line": 231,
+        "snippet": "title: `${leakedRequests.size} request(s) to localhost/staging from production`,"
+      }
+    ],
+    "remediation": "Move URLs to environment-driven config. Verify the build pipeline strips dev-only paths.",
+    "source": "production-ready:internal-url-grep",
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside a string property (likely doc/report copy)"
+      },
+      "originalSeverity": "low"
+    }
+  },
+  {
+    "id": "frontend.internal-url.inputs/production-ready/scripts/checks/15-browser-test.ts.232",
+    "domain": "frontend",
+    "severity": "low",
+    "title": "Internal URL / IP hardcoded in source",
+    "description": "Hard-coded internal hostnames or IPs end up in the production bundle and may reveal architecture details to attackers.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/15-browser-test.ts",
+        "line": 232,
+        "snippet": "oading the page, the browser issued requests to dev/staging/localhost hosts — a mixed-environment leak that breaks in production"
+      }
+    ],
+    "remediation": "Move URLs to environment-driven config. Verify the build pipeline strips dev-only paths.",
+    "source": "production-ready:internal-url-grep",
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside regex literal (rule definition)"
+      },
+      "originalSeverity": "low"
+    }
+  },
+  {
+    "id": "logging.pii-leak.inputs/production-ready/scripts/checks/03-authentication.ts.142",
+    "domain": "logging",
+    "severity": "high",
+    "hardBlocker": false,
+    "title": "Sensitive field referenced in a log/print call",
+    "description": "A log statement appears to include an authorization header, token, password, or API key. Secrets in logs end up in centralized log stores, support tools, and accidentally in screenshots.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/03-authentication.ts",
+        "line": 142,
+        "snippet": "{ item: \"Check rate limit on login + password reset endpoints\", rationale: \"Credential stuffing & enumera"
+      }
+    ],
+    "remediation": "Use a redaction layer (e.g., pino redact, structlog processors). Log only field names + a hash if you need to correlate. Treat `Authorization`, `Cookie`, `password`, `token`, `secret`, `api_key` as never-loggable.",
+    "source": "production-ready:pii-log-grep",
+    "references": [
+      "https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/"
+    ],
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside a string property (likely doc/report copy)"
+      },
+      "originalSeverity": "high"
+    }
+  },
+  {
+    "id": "logging.pii-leak.inputs/production-ready/scripts/checks/06-abuse-rate.ts.91",
+    "domain": "logging",
+    "severity": "high",
+    "hardBlocker": false,
+    "title": "Sensitive field referenced in a log/print call",
+    "description": "A log statement appears to include an authorization header, token, password, or API key. Secrets in logs end up in centralized log stores, support tools, and accidentally in screenshots.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/06-abuse-rate.ts",
+        "line": 91,
+        "snippet": "{ item: \"Bot/CAPTCHA on signup + login + 'forgot password'\", rationale: \"Most abuse arrives via cheap-account creatio"
+      }
+    ],
+    "remediation": "Use a redaction layer (e.g., pino redact, structlog processors). Log only field names + a hash if you need to correlate. Treat `Authorization`, `Cookie`, `password`, `token`, `secret`, `api_key` as never-loggable.",
+    "source": "production-ready:pii-log-grep",
+    "references": [
+      "https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/"
+    ],
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside a string property (likely doc/report copy)"
+      },
+      "originalSeverity": "high"
+    }
+  },
+  {
+    "id": "logging.pii-leak.inputs/production-ready/scripts/checks/08-logging.ts.26",
+    "domain": "logging",
+    "severity": "high",
+    "hardBlocker": false,
+    "title": "Sensitive field referenced in a log/print call",
+    "description": "A log statement appears to include an authorization header, token, password, or API key. Secrets in logs end up in centralized log stores, support tools, and accidentally in screenshots.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/08-logging.ts",
+        "line": 26,
+        "snippet": "/log.{0,20}(authorization|api[_-]?key|password|token|secret|cookie|session)/i,"
+      }
+    ],
+    "remediation": "Use a redaction layer (e.g., pino redact, structlog processors). Log only field names + a hash if you need to correlate. Treat `Authorization`, `Cookie`, `password`, `token`, `secret`, `api_key` as never-loggable.",
+    "source": "production-ready:pii-log-grep",
+    "references": [
+      "https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/"
+    ],
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside regex literal (rule definition)"
+      },
+      "originalSeverity": "high"
+    }
+  },
+  {
+    "id": "ai-code.fake-pass-test.inputs/production-ready/scripts/checks/14-ai-code.ts.60",
+    "domain": "ai-code",
+    "severity": "medium",
+    "title": "Test that always passes",
+    "description": "`assert True` / `expect(true).toBe(true)` does not exercise the system under test.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/14-ai-code.ts",
+        "line": 60,
+        "snippet": "description: \"`assert True` / `expect(true).toBe(true)` does not exercise the system u"
+      }
+    ],
+    "remediation": "Replace with an assertion against the system's actual output. If you don't know what to assert yet, mark the test `xfail` / `it.todo`.",
+    "source": "production-ready:ai-fake-pass-test",
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside a string property (likely doc/report copy)"
+      },
+      "originalSeverity": "medium"
+    }
+  },
+  {
+    "id": "ai-code.tls-disabled.inputs/production-ready/scripts/checks/14-ai-code.ts.99",
+    "domain": "ai-code",
+    "severity": "high",
+    "title": "TLS verification disabled",
+    "description": "Disabled TLS verification = MITM-trivial. Usually added to make local dev work, left on in prod.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/14-ai-code.ts",
+        "line": 99,
+        "snippet": "attern: /(rejectUnauthorized\\s*:\\s*false|verify\\s*=\\s*False|TLS_INSECURE|InsecureSkipVerify\\s*:\\s*true)/,"
+      }
+    ],
+    "remediation": "Re-enable. If self-signed certs are needed in dev, gate strictly by NODE_ENV.",
+    "source": "production-ready:ai-tls-disabled",
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside regex literal (rule definition)"
+      },
+      "originalSeverity": "high"
+    }
+  },
+  {
+    "id": "ai-code.prompt-injection.inputs/production-ready/scripts/checks/14-ai-code.ts.110",
+    "domain": "ai-code",
+    "severity": "high",
+    "title": "Prompt-injection vector — user input concatenated into system prompt",
+    "description": "Direct concatenation of user input into a system prompt enables prompt-injection (OWASP LLM01).",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/14-ai-code.ts",
+        "line": 110,
+        "snippet": "remediation: \"Keep system + user role boundaries (use structured messages). Sanitize user in"
+      }
+    ],
+    "remediation": "Keep system + user role boundaries (use structured messages). Sanitize user input. Add output guardrails.",
+    "source": "production-ready:ai-prompt-injection",
+    "references": [
+      "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+    ],
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside a string property (likely doc/report copy)"
+      },
+      "originalSeverity": "high"
+    }
+  },
+  {
+    "id": "ai-code.type-suppression.inputs/production-ready/scripts/checks/14-ai-code.ts.116",
+    "domain": "ai-code",
+    "severity": "low",
+    "title": "Type-checker suppression",
+    "description": "`as any` / `@ts-ignore` / `# type: ignore` silences the type checker without fixing the underlying issue.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/14-ai-code.ts",
+        "line": 116,
+        "snippet": "pattern: /\\bas\\s+any\\b|@ts-ignore|@ts-expect-error|#\\s*type:\\s*ignore/,"
+      }
+    ],
+    "remediation": "Either fix the underlying type problem or add a justification comment with an issue number to track removal.",
+    "source": "production-ready:ai-type-suppression",
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside regex literal (rule definition)"
+      },
+      "originalSeverity": "low"
+    }
+  },
+  {
+    "id": "ai-code.type-suppression.inputs/production-ready/scripts/checks/14-ai-code.ts.118",
+    "domain": "ai-code",
+    "severity": "low",
+    "title": "Type-checker suppression",
+    "description": "`as any` / `@ts-ignore` / `# type: ignore` silences the type checker without fixing the underlying issue.",
+    "evidence": [
+      {
+        "file": "inputs/production-ready/scripts/checks/14-ai-code.ts",
+        "line": 118,
+        "snippet": "description: \"`as any` / `@ts-ignore` / `# type: ignore` silences the type checke"
+      }
+    ],
+    "remediation": "Either fix the underlying type problem or add a justification comment with an issue number to track removal.",
+    "source": "production-ready:ai-type-suppression",
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "match inside regex literal (rule definition)"
+      },
+      "originalSeverity": "low"
+    }
+  },
+  {
+    "id": "visual.raw-hex-color-drift",
+    "domain": "visual-consistency",
+    "severity": "medium",
+    "title": "31 distinct raw hex color(s) across 4 file(s)",
+    "description": "The project defines a design-token / theme layer, but components hard-code hex colors directly. Each hard-coded value drifts from the palette and won't respond to theme or dark-mode changes.",
+    "evidence": [
+      {
+        "file": "site/styles.css",
+        "line": 2,
+        "snippet": "deep ink navy #03101c, navy panels #06263f / #0a2f4d, signal amber"
+      },
+      {
+        "file": "site/styles.css",
+        "line": 3,
+        "snippet": "#ffb100 and #ff6a1f, audit green #35d07f, paper #eaf4ff. */"
+      },
+      {
+        "file": "site/styles.css",
+        "line": 6,
+        "snippet": "--ink: #03101c;"
+      },
+      {
+        "file": "site/styles.css",
+        "line": 7,
+        "snippet": "--deep: #04182b;"
+      },
+      {
+        "file": "site/styles.css",
+        "line": 8,
+        "snippet": "--navy: #06263f;"
+      },
+      {
+        "file": "site/styles.css",
+        "line": 9,
+        "snippet": "--navy-2: #0a2f4d;"
+      },
+      {
+        "file": "site/styles.css",
+        "line": 10,
+        "snippet": "--amber: #ffb100;"
+      },
+      {
+        "file": "site/styles.css",
+        "line": 11,
+        "snippet": "--amber-deep: #ff6a1f;"
+      }
+    ],
+    "impact": "Inconsistent, off-palette colors and broken dark mode; every future palette change misses these call sites.",
+    "confidence": "medium",
+    "verificationStatus": "heuristic",
+    "remediationClass": "code-change",
+    "remediation": "Replace raw hex with a design token (Tailwind color class or CSS variable). If a color is genuinely new, add it to the token layer first, then reference it.",
+    "source": "production-ready:token-drift",
+    "triage": {
+      "decision": "dropped",
+      "reproduce": {
+        "fpSignal": "line is inside a block comment"
+      },
+      "originalSeverity": "medium"
+    }
+  }
+]

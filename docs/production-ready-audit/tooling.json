@@ -1,0 +1,29 @@
+{
+  "gitleaks": {
+    "available": false
+  },
+  "trufflehog": {
+    "available": false
+  },
+  "semgrep": {
+    "available": false
+  },
+  "osv-scanner": {
+    "available": false
+  },
+  "trivy": {
+    "available": false
+  },
+  "lighthouse": {
+    "available": false
+  },
+  "axe": {
+    "available": false
+  },
+  "pa11y": {
+    "available": false
+  },
+  "nuclei": {
+    "available": false
+  }
+}
