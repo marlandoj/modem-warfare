@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://modemwarfare.zouroboros.ai/sitemap.xml
