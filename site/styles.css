@@ -212,3 +212,20 @@ body.pseudo-fs-on { overflow: hidden; }
 	.nav a:not(.brand) { font-size: 14px; }
 	.nav { gap: 16px; }
 }
+
+/* The demo film. */
+.watch { max-width: 1240px; margin: 0 auto; padding: 96px 20px 8px; }
+.watch-head { max-width: 720px; }
+.watch-head h2 { font-size: clamp(32px, 4.5vw, 52px); line-height: 1.05; margin: 10px 0 14px; letter-spacing: -.01em; }
+.watch-head p { color: var(--soft); margin: 0; }
+.watch-frame {
+	margin-top: 28px;
+	background: linear-gradient(165deg, #0d2c47, #050f1a);
+	border: 1px solid var(--line);
+	border-radius: 1.4rem;
+	padding: 10px;
+	box-shadow: var(--shadow);
+}
+.watch-frame video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: .9rem; background: #000; }
+.watch-note { margin-top: 14px; }
+@media (max-width: 640px) { .watch { padding-top: 64px; } }
